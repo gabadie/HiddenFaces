@@ -14,35 +14,56 @@ class DataManagement(xmlrpc.XMLRPC):
 
 	def xmlrpc_new_chunk(self, title, owner, content, append_enabled):
 
-		chunk = DataChunk.objects.get(title=title)
-
-		if chunk == None:
+		chunk = None
+		
+		try:
+			chunk = DataChunk.objects.get(title=title)
+		except mongoengine.DoesNotExist as e:
 			chunk = DataChunk(title=title,owner=owner,content=content,append_enabled=append_enabled).save()
 
 
 	def xmlrpc_write_chunk(self, title, owner, content):
-		chunk = DataChunk.objects.get(title=title)
 
-		if chunk != None and chunk.owner == owner:
-			chunk.content = content
+		chunk = None
+
+		try:
+			chunk = DataChunk.objects.get(title=title)
+		except mongoengine.DoesNotExist as e:
+			return
+
+		if chunk.owner == owner:
+				chunk.content = content
 
 	def xmlrpc_read_chunk(self, title, owner):
 
-		chunk = DataChunk.objects.get(title=title)
+		chunk = None
 
-		if chunk == None or chunk.owner == owner:
+		try:
+			chunk = DataChunk.objects.get(title=title)
 			return chunk
+		except mongoengine.DoesNotExist as e:
+			return None
 
 	def xmlrpc_append_content(self, title, content):
 
-		chunk = DataChunk.objects.get(title=title)
+		chunk = None
+
+		try:
+			chunk = DataChunk.objects.get(title=title)
+		except mongoengine.DoesNotExist as e:
+			return
 
 		if chunk.append_enabled:
 			chunk.content.append(content)
 
 	def xmlrpc_delete_chunk(self, title, owner):
 
-		chunk = DataChunk.objects.get(title=title)
+		chunk = None
+
+		try:
+			chunk = DataChunk.objects.get(title=title)
+		except mongoengine.DoesNotExist as e:
+			return
 
 		if chunk.owner == owner:
 			chunk.delete()
