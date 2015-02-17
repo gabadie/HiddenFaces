@@ -12,14 +12,18 @@ class DataChunk(mongoengine.Document):
 
 class DataManagement(xmlrpc.XMLRPC):
 
-    def xmlrpc_write_chunk(self, title, owner, content, append_enabled):
+	def xmlrpc_new_chunk(self, title, owner, content, append_enabled):
+		
+		chunk = DataChunk.objects.get(title=title)
+
+		if chunk == None:
+			chunk = DataChunk(title=title,owner=owner,content=content,append_enabled=append_enabled).save()
+
+    def xmlrpc_write_chunk(self, title, owner, content):
 
     	chunk = DataChunk.objects.get(title=title)
 
-    	if chunk == None:
-        	chunk = DataChunk(title=title,owner=owner,content=content,append_enabled=append_enabled).save()
-
-        elif chunk.owner == owner:
+        if chunk != None and chunk.owner == owner:
         	chunk.content = content
 
     def xmlrpc_read_chunk(self,title,owner):
