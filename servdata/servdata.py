@@ -2,11 +2,48 @@
 # -*- coding: utf-8 -*-
 
 import mongoengine
+from twisted.web import xmlrpc, server
 
 class DataChunk(mongoengine.Document):
 	title = mongoengine.StringField(required=True, unique=True)
 	owner = mongoengine.StringField(required=True, unique=True)
 	content = mongoengine.ListField(mongoengine.StringField)
+	append_enabled = mongoengine.BooleanField(default=False)
+
+class DataManagement(xmlrpc.XMLRPC):
+
+    def xmlrpc_write_chunk(self, title, owner, content, append_enabled):
+
+    	chunk = DataChunk.objects.get(title=title)
+
+    	if chunk == None:
+        	chunk = DataChunk(title=title,owner=owner,content=content,append_enabled=append_enabled).save()
+
+        elif chunk.owner == owner:
+        	chunk.content = content
+
+    def xmlrpc_read_chunk(self,title,owner):
+
+    	chunk = DataChunk.objects.get(title=title)
+
+    	if chunk == None or chunk.owner == owner:
+        	return chunk
+
+    def xmlrpc_append_content(self, title, content):
+
+        chunk = DataChunk.objects.get(title=title)
+
+        if chunk.append_enabled:
+        	chunk.content.append(content)
+
+    def xmlrpc_delete_chunk(self, title, owner):
+
+        chunk = DataChunk.objects.get(title=title)
+
+        if chunk.owner == owner:
+        	chunk.delete()
+
+
 
 if __name__ == "__main__":
     db = mongoengine.connect('test_db')

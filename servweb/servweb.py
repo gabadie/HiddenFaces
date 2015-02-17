@@ -14,22 +14,27 @@ def hello():
 
 # ------------------------------------------------------------------------------ DATA CHUNK
 
-REST_FORMAT='/api/<task_id>/<user_id>'
+REST_FORMAT='/api/<file_id>/<user_id>'
 
 @app.route(REST_FORMAT, methods=['GET'])
-def get_data_chunk(task_id, user_id):
-    return jsonify({'result': True})
+def get_data_chunk(file_id, user_id):
+    awnser = {
+        'file_id': file_id,
+        'file_content': ['this is', ' some content']
+    }
+
+    return jsonify(awnser)
 
 @app.route(REST_FORMAT, methods=['POST'])
-def write_data_chunk(task_id, user_id):
+def write_data_chunk(file_id, user_id):
     return jsonify({'result': True})
 
 @app.route(REST_FORMAT, methods=['PUT'])
-def append_data_chunk(task_id, user_id):
+def append_data_chunk(file_id, user_id):
     return jsonify({'result': True})
 
 @app.route(REST_FORMAT, methods=['DELETE'])
-def delete_data_chunk(task_id, user_id):
+def delete_data_chunk(file_id, user_id):
     return jsonify({'result': True})
 
 
