@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 
 app = Flask(__name__)
 app.debug = True
@@ -14,28 +14,36 @@ def hello():
 
 # ------------------------------------------------------------------------------ DATA CHUNK
 
-REST_FORMAT='/api/<file_id>/<user_id>'
+@app.route('/api/', methods=['POST'])
+def get_data_chunk():
+    request_params = request.get_json()
 
-@app.route(REST_FORMAT, methods=['GET'])
-def get_data_chunk(file_id, user_id):
     awnser = {
-        'file_id': file_id,
-        'file_content': ['this is', ' some content']
+        'request_params': request_params,
+        'status': 'ok'
     }
 
+    if request_params['operation'] == 'create':
+        pass
+
+    elif request_params['operation'] == 'write':
+        pass
+
+    elif request_params['operation'] == 'append':
+        pass
+
+    elif request_params['operation'] == 'get':
+        awnser['chunk_content'] = ['this is ', 'my chunk']
+        pass
+
+    elif request_params['operation'] == 'delete':
+        pass
+
+    else:
+        awnser['error'] = 'unknown operation'
+        awnser['status'] = 'failed'
+
     return jsonify(awnser)
-
-@app.route(REST_FORMAT, methods=['POST'])
-def write_data_chunk(file_id, user_id):
-    return jsonify({'result': True})
-
-@app.route(REST_FORMAT, methods=['PUT'])
-def append_data_chunk(file_id, user_id):
-    return jsonify({'result': True})
-
-@app.route(REST_FORMAT, methods=['DELETE'])
-def delete_data_chunk(file_id, user_id):
-    return jsonify({'result': True})
 
 
 # ------------------------------------------------------------------------------ MAIN
