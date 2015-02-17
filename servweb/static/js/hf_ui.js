@@ -14,7 +14,6 @@ hf_ui.hello = function()
     @return: page html
 */
 hf_ui.load_template = function(viewPath, params, domElement) {
-    console.log(templatesCaches.size);
     if (templatesCaches.has(viewPath)) {
         var source = templatesCaches.get(viewPath);
         var template = Handlebars.compile(source);

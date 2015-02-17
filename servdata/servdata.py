@@ -12,43 +12,67 @@ class DataChunk(mongoengine.Document):
 
 class DataManagement(xmlrpc.XMLRPC):
 
-    def xmlrpc_write_chunk(self, title, owner, content, append_enabled):
+	def xmlrpc_new_chunk(self, title, owner, content, append_enabled):
 
-    	chunk = DataChunk.objects.get(title=title)
+		chunk = None
+		
+		try:
+			chunk = DataChunk.objects.get(title=title)
+		except mongoengine.DoesNotExist as e:
+			chunk = DataChunk(title=title,owner=owner,content=content,append_enabled=append_enabled).save()
 
-    	if chunk == None:
-        	chunk = DataChunk(title=title,owner=owner,content=content,append_enabled=append_enabled).save()
 
-        elif chunk.owner == owner:
-        	chunk.content = content
+	def xmlrpc_write_chunk(self, title, owner, content):
 
-    def xmlrpc_read_chunk(self,title,owner):
+		chunk = None
 
-    	chunk = DataChunk.objects.get(title=title)
+		try:
+			chunk = DataChunk.objects.get(title=title)
+		except mongoengine.DoesNotExist as e:
+			return
 
-    	if chunk == None or chunk.owner == owner:
-        	return chunk
+		if chunk.owner == owner:
+				chunk.content = content
 
-    def xmlrpc_append_content(self, title, content):
+	def xmlrpc_read_chunk(self, title, owner):
 
-        chunk = DataChunk.objects.get(title=title)
+		chunk = None
 
-        if chunk.append_enabled:
-        	chunk.content.append(content)
+		try:
+			chunk = DataChunk.objects.get(title=title)
+			return chunk
+		except mongoengine.DoesNotExist as e:
+			return None
 
-    def xmlrpc_delete_chunk(self, title, owner):
+	def xmlrpc_append_content(self, title, content):
 
-        chunk = DataChunk.objects.get(title=title)
+		chunk = None
 
-        if chunk.owner == owner:
-        	chunk.delete()
+		try:
+			chunk = DataChunk.objects.get(title=title)
+		except mongoengine.DoesNotExist as e:
+			return
 
+		if chunk.append_enabled:
+			chunk.content.append(content)
+
+	def xmlrpc_delete_chunk(self, title, owner):
+
+		chunk = None
+
+		try:
+			chunk = DataChunk.objects.get(title=title)
+		except mongoengine.DoesNotExist as e:
+			return
+
+		if chunk.owner == owner:
+			chunk.delete()
 
 
 if __name__ == "__main__":
-    db = mongoengine.connect('test_db')
-    db.drop_database('test_db')
+	db = mongoengine.connect('test_db')
+	db.drop_database('test_db')
 
-    user = DataChunk(title="cc",owner="cc").save()
+	user = DataChunk(title="cc",owner="cc").save()
 
-    print DataChunk.objects.to_json()
+	print DataChunk.objects.to_json()
