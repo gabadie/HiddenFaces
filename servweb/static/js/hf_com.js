@@ -20,7 +20,7 @@ hf_com.new_request = function() {
  * @param <access_as>: the accessing user's id
  * @param <decryption_key>: the data chunk's decryption key
  * @param <callback>: the callback once the chunk is recived
- *      function my_callback(status={HTML responses (200==OK)}, chunk_content)
+ *      function my_callback(status={HTML responses (200==OK)}, [chunk_content])
  */
 hf_com.get_data_chunk = function(chunk_name, access_as, decryption_key, callback)
 {
@@ -30,7 +30,9 @@ hf_com.get_data_chunk = function(chunk_name, access_as, decryption_key, callback
     {
         if (request.readyState == 4)
         {
-            callback(request.status, request.responseText);
+            json = JSON.parse(request.responseText)
+
+            callback(request.status, json['file_content']);
         }
     }
 
@@ -44,7 +46,7 @@ hf_com.get_data_chunk = function(chunk_name, access_as, decryption_key, callback
  * @param <encryption_key>: the data chunk's encryption key
  * @param <chunk_content>: the data chunk's content to write
  * @param <callback>: the callback once the chunk is recived
- *      function my_callback(status={HTML responses (200==OK)}, message)
+ *      function my_callback(status={HTML responses (200==OK)}, json_message)
  */
 hf_com.write_data_chunk = function(chunk_name, access_as, encryption_key, chunk_content, callback)
 {
@@ -54,7 +56,7 @@ hf_com.write_data_chunk = function(chunk_name, access_as, encryption_key, chunk_
     {
         if (request.readyState == 4)
         {
-            callback(request.status, request.responseText);
+            callback(request.status, JSON.parse(request.responseText));
         }
     }
 
@@ -69,7 +71,7 @@ hf_com.write_data_chunk = function(chunk_name, access_as, encryption_key, chunk_
  * @param <encryption_key>: the data chunk's encryption key
  * @param <chunk_content>: the data chunk's content to append
  * @param <callback>: the callback once the chunk is recived
- *      function my_callback(status={HTML responses (200==OK)}, message)
+ *      function my_callback(status={HTML responses (200==OK)}, json_message)
  */
 hf_com.append_data_chunk = function(chunk_name, access_as, encryption_key, chunk_content, callback)
 {
@@ -79,7 +81,7 @@ hf_com.append_data_chunk = function(chunk_name, access_as, encryption_key, chunk
     {
         if (request.readyState == 4)
         {
-            callback(request.status, request.responseText);
+            callback(request.status, JSON.parse(request.responseText));
         }
     }
 
@@ -93,7 +95,7 @@ hf_com.append_data_chunk = function(chunk_name, access_as, encryption_key, chunk
  * @param <access_as>: the accessing user's id
  * @param <encryption_key>: the data chunk's encryption key
  * @param <callback>: the callback once the chunk is recived
- *      function my_callback(status={HTML responses (200==OK)}, message)
+ *      function my_callback(status={HTML responses (200==OK)}, json_message)
  */
 hf_com.delete_data_chunk = function(chunk_name, access_as, encryption_key, callback)
 {
@@ -103,7 +105,7 @@ hf_com.delete_data_chunk = function(chunk_name, access_as, encryption_key, callb
     {
         if (request.readyState == 4)
         {
-            callback(request.status, request.responseText);
+            callback(request.status, JSON.parse(request.responseText));
         }
     }
 
