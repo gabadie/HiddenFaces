@@ -17,7 +17,7 @@ hf_com.new_request = function() {
 
 /*
  * @param <request_params>: unpacked json parameters
- * @param <callback>: the callback once the chunk is recived
+ * @param <callback>: the callback once the chunk is received
  *      function my_callback(status={HTML responses (200==OK)}, json response)
  */
 hf_com.json_request = function(request_params, callback) {
@@ -43,7 +43,7 @@ hf_com.json_request = function(request_params, callback) {
  * @param <encryption_key>: the data chunk's encryption key
  * @param <chunk_content>: the data chunk's content to write
  * @param <public_append>: can the other user append
- * @param <callback>: the callback once the chunk is recived
+ * @param <callback>: the callback once the chunk is received
  *      function my_callback(json_message)
  */
 hf_com.create_data_chunk = function(chunk_name, access_as, encryption_key, chunk_content, public_append, callback)
@@ -72,7 +72,7 @@ hf_com.create_data_chunk = function(chunk_name, access_as, encryption_key, chunk
  * @param <access_as>: the accessing user's id
  * @param <encryption_key>: the data chunk's encryption key
  * @param <chunk_content>: the data chunk's content to write
- * @param <callback>: the callback once the chunk is recived
+ * @param <callback>: the callback once the chunk is received
  *      function my_callback(json_message)
  */
 hf_com.write_data_chunk = function(chunk_name, access_as, encryption_key, chunk_content, callback)
@@ -99,7 +99,7 @@ hf_com.write_data_chunk = function(chunk_name, access_as, encryption_key, chunk_
  * @param <chunk_name>: the data chunk's name
  * @param <encryption_key>: the data chunk's encryption key
  * @param <chunk_content>: the data chunk's content to append
- * @param <callback>: the callback once the chunk is recived
+ * @param <callback>: the callback once the chunk is received
  *      function my_callback(json_message)
  */
 hf_com.append_data_chunk = function(chunk_name, encryption_key, chunk_content, callback)
@@ -124,7 +124,7 @@ hf_com.append_data_chunk = function(chunk_name, encryption_key, chunk_content, c
 /*
  * @param <chunk_name>: the data chunk's name
  * @param <decryption_key>: the data chunk's decryption key
- * @param <callback>: the callback once the chunk is recived
+ * @param <callback>: the callback once the chunk is received
  *      function my_callback(json_message) (ex: json_message['chunk_content'])
  */
 hf_com.get_data_chunk = function(chunk_name, decryption_key, callback)
@@ -148,7 +148,7 @@ hf_com.get_data_chunk = function(chunk_name, decryption_key, callback)
 /*
  * @param <chunk_name>: the data chunk's name
  * @param <access_as>: the accessing user's id
- * @param <callback>: the callback once the chunk is recived
+ * @param <callback>: the callback once the chunk is received
  *      function my_callback(json_message)
  */
 hf_com.delete_data_chunk = function(chunk_name, access_as, callback)
