@@ -9,9 +9,9 @@ var test_utils = {};
 test_utils.run = function(testFunction, testName)
 {
     test_utils.testId += 1;
-    test_utils.domOutput.innerHTML += '<div id="testId' + test_utils.testId + '"></div>';
+    test_utils.domOutput.innerHTML += '<div class="test_suite" id="testId' + test_utils.testId + '"></div>';
     test_utils.testCount = 0;
-    test_utils.testFailed = 0;
+    test_utils.testFailed = [];
     test_utils.testName = testName;
     test_utils.refresh();
 
@@ -52,7 +52,7 @@ test_utils.success = function(name)
 test_utils.failure = function(name)
 {
     test_utils.testCount += 1;
-    test_utils.testFailed += 1;
+    test_utils.testFailed[test_utils.testFailed.length] = name;
     test_utils.refresh();
 }
 
@@ -63,17 +63,32 @@ test_utils.refresh = function()
 {
     var domElem = document.getElementById('testId' + test_utils.testId);
     domElem.innerHTML = (
+        '<div>' +
         test_utils.testName +
         ' (success:' +
-        (test_utils.testCount - test_utils.testFailed) +
+        (test_utils.testCount - test_utils.testFailed.length) +
         ', failures:' +
-        test_utils.testFailed +
-        ')'
+        test_utils.testFailed.length +
+        ')</div>'
     );
 
-    if (test_utils.testFailed != 0)
+    if (test_utils.testFailed.length == 0)
     {
-        domElem.className = 'failed';
+        return;
+    }
+
+    if (test_utils.testFailed.length == 1)
+    {
+        domElem.className += ' failed';
+    }
+
+    for (var i = 0; i < test_utils.testFailed.length; i++)
+    {
+        domElem.innerHTML += (
+            '<div class="test_name">' +
+            test_utils.testFailed[i] +
+            '</div>'
+        );
     }
 }
 
