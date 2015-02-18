@@ -1,6 +1,6 @@
 
 var hf_ui = {};
-var templatesCaches = new Map();
+hf_ui.templatesCaches = new Map();
 
 hf_ui.hello = function()
 {
@@ -14,8 +14,8 @@ hf_ui.hello = function()
     @return: page html
 */
 hf_ui.load_template = function(viewPath, params, domElement) {
-    if (templatesCaches.has(viewPath)) {
-        var source = templatesCaches.get(viewPath);
+    if (hf_ui.templatesCaches.has(viewPath)) {
+        var source = hf_ui.templatesCaches.get(viewPath);
         var template = Handlebars.compile(source);
         var content = template(params);
         domElement.innerHTML = content;
@@ -36,16 +36,21 @@ hf_ui.load = function(viewPath, params, domElement) {
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 ) {
             if(xmlhttp.status == 200){
-                var source = xmlhttp.responseText;
-                var template = Handlebars.compile(source);
-                var content    = template(params);
-                domElement.innerHTML = content;
-                templatesCaches.set(viewPath, source);
+                var response = JSON.parse(xmlhttp.responseText);
+                var status = response['status'];
+                if (status == 'ok') {
+                    var source = response['page_content'];
+                    var template = Handlebars.compile(source);
+                    var content    = template(params);
+                    domElement.innerHTML = content;
+                    hf_ui.templatesCaches.set(viewPath, source);
+                }
             }
         }
     }
 
-    xmlhttp.open("GET", viewPath, !hf_com.synchronized_request);
-    xmlhttp.send();
+    xmlhttp.open("POST", "/template/", !hf_com.synchronized_request);
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+    xmlhttp.send(JSON.stringify(viewPath));
 }
 
