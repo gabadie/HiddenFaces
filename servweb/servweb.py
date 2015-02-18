@@ -1,9 +1,10 @@
 
 from flask import Flask, render_template, jsonify, request
+import xmlrpclib
 
 app = Flask(__name__)
 app.debug = True
-
+server = xmlrpclib.Server('http://localhost:7080/',allowNone=True)
 
 # ------------------------------------------------------------------------------ INDEX
 
@@ -28,20 +29,20 @@ def get_data_chunk():
     }
 
     if request_params['operation'] == 'create':
-        pass
+        server.new_chunk(request_params['chunk_name'], request_params['user_hash'], request_params['chunk_content'], request_params['public_append'])
 
     elif request_params['operation'] == 'write':
-        pass
+        server.write_chunk(request_params['chunk_name'], request_params['user_hash'], request_params['chunk_content'])
 
     elif request_params['operation'] == 'append':
-        pass
+        server.append_content(request_params['chunk_name'], request_params['chunk_content'])
 
     elif request_params['operation'] == 'get':
-        awnser['chunk_content'] = ['this is ', 'my chunk']
-        pass
+        chunk = server.read_chunk(request_params['chunk_name'])
+        awnser['chunk_content'] = chunk['content']
 
     elif request_params['operation'] == 'delete':
-        pass
+        server.delete_chunk(request_params['chunk_name'], request_params['user_hash'])
 
     else:
         awnser['error'] = 'unknown operation'

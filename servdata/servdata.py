@@ -41,7 +41,7 @@ class DataManager(xmlrpc.XMLRPC):
 
 		try:
 			chunk = DataChunk.objects.get(title=title)
-			return chunk
+			return chunk.to_json()
 		except mongoengine.DoesNotExist as e:
 			return None
 
@@ -72,9 +72,12 @@ class DataManager(xmlrpc.XMLRPC):
 
 
 if __name__ == "__main__":
-	db = mongoengine.connect('test_db')
-	db.drop_database('test_db')
+	from twisted.internet import reactor
 
-	user = DataChunk(title="cc",owner="cc").save()
+	db_name = 'test_db'
+	db = mongoengine.connect(db_name)
+	db.drop_database(db_name)
 
-	print DataChunk.objects.to_json()
+	data_manager = DataManager(allowNone=True)
+	reactor.listenTCP(7080, server.Site(data_manager))
+	reactor.run()
