@@ -1,33 +1,21 @@
 
 # ----------------------------------------------- Files
 PYTEST_FILES:=$(shell cat pytest.txt)
-HTML_DOMAIN:=localhost:5000
 
 # ----------------------------------------------- Common
 THIS:=$(MAKEFILE_LIST)
 GIT_DIR:=$(dir $(realpath $(THIS)))
 DEV_NULL=/dev/null
 IDLE_CMD=@echo "" > $(DEV_NULL)
-UNAME_S=
-FIREFOX=firefox
-
-$(info $(GIT_DIR))
 
 # ----------------------------------------------- Windows specifics
 ifeq ($(OS),Windows_NT)
 	DEV_NULL=NUL
-else
-	UNAME_S:=$(shell uname -s)
-endif
-
-# ----------------------------------------------- Mac OS specifics
-ifeq ($(UNAME_S),Darwin)
-	FIREFOX=/Applications/Firefox.app/Contents/MacOS/firefox
 endif
 
 # ----------------------------------------------- Main entry
 .PHONY: all
-all: python
+all: python html
 	$(IDLE_CMD)
 
 # ----------------------------------------------- Python tests
@@ -42,4 +30,4 @@ $(PYTEST_FILES): %.py:
 # ----------------------------------------------- HTML tests
 .PHONY: html
 html:
-	$(FIREFOX) --profile $(GIT_DIR)test.firefox-profile --new-tab http://$(HTML_DOMAIN)/test.html
+	@python $(GIT_DIR)test.py
