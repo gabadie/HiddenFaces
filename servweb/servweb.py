@@ -1,6 +1,7 @@
 
 from flask import Flask, render_template, jsonify, request
 import xmlrpclib
+import os.path
 
 app = Flask(__name__)
 app.debug = True
@@ -16,6 +17,26 @@ def index_page():
 def test_page():
     return render_template('index.html', test=True)
 
+@app.route("/template/",methods=['POST'])
+def read_page():
+    request_params = request.get_json()
+
+    awnser = {
+        'status' : 'ok'
+    }
+
+    page_path = request_params['page_request']
+
+    try:
+        with open(page_path) as myFile:
+            page_content = myFile.read().replace("\n","")
+
+        awnser['page_content'] = page_content
+    except:
+        awnser['status'] = 'failded'
+        awnser['error'] = '404'
+
+    return jsonify(awnser)
 
 # ------------------------------------------------------------------------------ DATA CHUNK
 
