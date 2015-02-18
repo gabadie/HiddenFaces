@@ -4,16 +4,25 @@
     width: 100%;
     padding: 10px 0;
     border-bottom: 2px solid #333;
+    font-size: 12px !important;
+    font-family: Consolas, Lucida Console, monospace !important;
 }
 
-#test_output div
+#test_output .test_suite
 {
     margin: 5px 10px;
     padding: 3px 20px;
     background: #22DD22;
 }
 
-#test_output div.failed
+#test_output .test_suite.failed
 {
     background: #DD2222;
+    font-weight: bolder;
+}
+
+#test_output .test_suite .test_name
+{
+    padding: 0px 20px;
+    font-size: 10px;
 }

@@ -1,6 +1,9 @@
 
 var hf_com = {};
 
+// Configures if we wants synchronized requests. It is set to true when testing.
+hf_com.synchronized_request = false;
+
 hf_com.new_request = function() {
     var request;
 
@@ -19,6 +22,8 @@ hf_com.new_request = function() {
  * @param <request_params>: unpacked json parameters
  * @param <callback>: the callback once the chunk is received
  *      function my_callback(status={HTML responses (200==OK)}, json response)
+ *
+ * @returns <json_message> if synchronized
  */
 hf_com.json_request = function(request_params, callback) {
     var request = hf_com.new_request();
@@ -32,9 +37,22 @@ hf_com.json_request = function(request_params, callback) {
         }
     };
 
-    request.open("POST", "/api/", true);
+    request.open("POST", "/api/", !hf_com.synchronized_request);
     request.setRequestHeader("Content-Type", "application/json");
     request.send(JSON.stringify(request_params));
+
+    if (!hf_com.synchronized_request)
+    {
+        return;
+    }
+
+    /*
+     * If we are using synchronized request, we return the json response if any
+     */
+    assert(request.readyState == 4);
+    assert(request.status == 200);
+
+    return JSON.parse(request.responseText);
 }
 
 /*
@@ -45,6 +63,8 @@ hf_com.json_request = function(request_params, callback) {
  * @param <public_append>: can the other user append
  * @param <callback>: the callback once the chunk is received
  *      function my_callback(json_message)
+ *
+ * @returns <json_message> if synchronized
  */
 hf_com.create_data_chunk = function(chunk_name, access_as, encryption_key, chunk_content, public_append, callback)
 {
@@ -56,14 +76,17 @@ hf_com.create_data_chunk = function(chunk_name, access_as, encryption_key, chunk
         'public_append': public_append
     };
 
-    hf_com.json_request(params, function(status, json) {
+    return hf_com.json_request(params, function(status, json) {
         if (status != 200)
         {
             alert(status);
             return;
         }
 
-        callback(json);
+        if (callback != null)
+        {
+            callback(json);
+        }
     });
 }
 
@@ -74,6 +97,8 @@ hf_com.create_data_chunk = function(chunk_name, access_as, encryption_key, chunk
  * @param <chunk_content>: the data chunk's content to write
  * @param <callback>: the callback once the chunk is received
  *      function my_callback(json_message)
+ *
+ * @returns <json_message> if synchronized
  */
 hf_com.write_data_chunk = function(chunk_name, access_as, encryption_key, chunk_content, callback)
 {
@@ -84,14 +109,17 @@ hf_com.write_data_chunk = function(chunk_name, access_as, encryption_key, chunk_
         'chunk_content': chunk_content
     };
 
-    hf_com.json_request(params, function(status, json) {
+    return hf_com.json_request(params, function(status, json) {
         if (status != 200)
         {
             alert(status);
             return;
         }
 
-        callback(json);
+        if (callback != null)
+        {
+            callback(json);
+        }
     });
 }
 
@@ -101,6 +129,8 @@ hf_com.write_data_chunk = function(chunk_name, access_as, encryption_key, chunk_
  * @param <chunk_content>: the data chunk's content to append
  * @param <callback>: the callback once the chunk is received
  *      function my_callback(json_message)
+ *
+ * @returns <json_message> if synchronized
  */
 hf_com.append_data_chunk = function(chunk_name, encryption_key, chunk_content, callback)
 {
@@ -110,14 +140,17 @@ hf_com.append_data_chunk = function(chunk_name, encryption_key, chunk_content, c
         'chunk_content': chunk_content
     };
 
-    hf_com.json_request(params, function(status, json) {
+    return hf_com.json_request(params, function(status, json) {
         if (status != 200)
         {
             alert(status);
             return;
         }
 
-        callback(json);
+        if (callback != null)
+        {
+            callback(json);
+        }
     });
 }
 
@@ -126,6 +159,8 @@ hf_com.append_data_chunk = function(chunk_name, encryption_key, chunk_content, c
  * @param <decryption_key>: the data chunk's decryption key
  * @param <callback>: the callback once the chunk is received
  *      function my_callback(json_message) (ex: json_message['chunk_content'])
+ *
+ * @returns <json_message> if synchronized
  */
 hf_com.get_data_chunk = function(chunk_name, decryption_key, callback)
 {
@@ -134,14 +169,17 @@ hf_com.get_data_chunk = function(chunk_name, decryption_key, callback)
         'chunk_name': chunk_name
     };
 
-    hf_com.json_request(params, function(status, json) {
+    return hf_com.json_request(params, function(status, json) {
         if (status != 200)
         {
             alert(status);
             return;
         }
 
-        callback(json);
+        if (callback != null)
+        {
+            callback(json);
+        }
     });
 }
 
@@ -150,6 +188,8 @@ hf_com.get_data_chunk = function(chunk_name, decryption_key, callback)
  * @param <access_as>: the accessing user's id
  * @param <callback>: the callback once the chunk is received
  *      function my_callback(json_message)
+ *
+ * @returns <json_message> if synchronized
  */
 hf_com.delete_data_chunk = function(chunk_name, access_as, callback)
 {
@@ -159,13 +199,16 @@ hf_com.delete_data_chunk = function(chunk_name, access_as, callback)
         'chunk_name': chunk_name
     };
 
-    hf_com.json_request(params, function(status, json) {
+    return hf_com.json_request(params, function(status, json) {
         if (status != 200)
         {
             alert(status);
             return;
         }
 
-        callback(json);
+        if (callback != null)
+        {
+            callback(json);
+        }
     });
 }

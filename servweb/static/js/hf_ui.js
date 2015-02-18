@@ -45,7 +45,7 @@ hf_ui.load = function(viewPath, params, domElement) {
         }
     }
 
-    xmlhttp.open("GET", viewPath, true);
+    xmlhttp.open("GET", viewPath, !hf_com.synchronized_request);
     xmlhttp.send();
 }
 

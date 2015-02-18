@@ -3,7 +3,10 @@ var test_hf_com = {};
 
 test_hf_com.test1 = function()
 {
-    test_utils.assert(true, 'test 1 OK');
+    test_utils.assert(false, 'test 1');
+    test_utils.assert(false, 'test 2');
+    test_utils.assert(true, 'test 3');
+    test_utils.assert(false, 'test 4');
 }
 
 test_hf_com.test_create_data_chunk = function()
