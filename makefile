@@ -1,6 +1,8 @@
 
 # ----------------------------------------------- Files
-PYTEST_FILES:=$(shell cat pytest.txt)
+PYTEST_FILES:=
+SHTEST_FILES:=\
+	servdata/test_servdata.sh
 
 # ----------------------------------------------- Common
 THIS:=$(MAKEFILE_LIST)
@@ -15,7 +17,7 @@ endif
 
 # ----------------------------------------------- Main entry
 .PHONY: all
-all: python html
+all: python shell html
 	$(IDLE_CMD)
 
 # ----------------------------------------------- Python tests
@@ -26,6 +28,15 @@ python: $(PYTEST_FILES)
 .PHONY: $(PYTEST_FILES)
 $(PYTEST_FILES): %.py:
 	py.test -q $@
+
+# ----------------------------------------------- Shell tests
+.PHONY: shell
+shell: $(SHTEST_FILES)
+	$(IDLE_CMD)
+
+.PHONY: $(SHTEST_FILES)
+$(SHTEST_FILES): %.sh:
+	cd $(dir $@); sh $(notdir $@)
 
 # ----------------------------------------------- HTML tests
 .PHONY: html
