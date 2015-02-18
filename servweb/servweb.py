@@ -39,8 +39,11 @@ def get_data_chunk():
         server.append_content(request_params['chunk_name'], request_params['chunk_content'])
 
     elif request_params['operation'] == 'get':
-        chunk = json.loads(server.read_chunk(request_params['chunk_name']))
-        awnser['chunk_content'] = chunk["content"]
+        try:
+            chunk = json.loads(server.read_chunk(request_params['chunk_name']))
+            awnser['chunk_content'] = chunk["content"]
+        except:
+            awnser['status'] = 'failed'
 
     elif request_params['operation'] == 'delete':
         server.delete_chunk(request_params['chunk_name'], request_params['user_hash'])

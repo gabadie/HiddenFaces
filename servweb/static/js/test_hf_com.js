@@ -56,6 +56,17 @@ test_hf_com.test_data_chunk_operations = function()
     hf_com.get_data_chunk("post1", "", function(json_message){
         test_utils.assert(json_message["chunk_content"].length == 2, "test get content post1");
     });
+
+    //delete data chunks
+    hf_com.delete_data_chunk("post1","user2",null);
+    hf_com.get_data_chunk("post1", "", function(json_message){
+        test_utils.assert(json_message["status"] == "ok", "test delete post1");
+    });
+
+    hf_com.delete_data_chunk("post2","user1",null);
+    hf_com.get_data_chunk("post2", "", function(json_message){
+        test_utils.assert(json_message["status"] == "failed", "test delete post2");
+    });
 } 
 
 test_hf_com.main = function()
