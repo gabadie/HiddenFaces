@@ -19,8 +19,26 @@
     <script src="static/js/hf_control.js"></script>
     <script src="static/lib/handlebars-v3.0.0.js"> </script>
 
+    {% if test %}
+    <!-- Testing -->
+    <link rel="stylesheet" href="static/css/test.css" type="text/css">
+    <script src="static/js/test_utils.js"></script>
+    <script src="static/js/test_hf_com.js"></script>
+    <script src="static/js/test_hf.js"></script>
+    {% endif %}
+
+    {% if test %}
+    <title>HiddenFaces Testing</title>
+    <body onload="test_hf.onload();">
+        <div id="test_output">
+        </div>
+
+    {% else %}
     <title>HiddenFaces</title>
     <body onload="hf_control.onload();">
+
+    {% endif %}
+
         Hello World.
     </body>
 </html>

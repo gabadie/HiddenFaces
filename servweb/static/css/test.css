@@ -1,0 +1,19 @@
+
+#test_output
+{
+    width: 100%;
+    padding: 10px 0;
+    border-bottom: 2px solid #333;
+}
+
+#test_output div
+{
+    margin: 5px 10px;
+    padding: 3px 20px;
+    background: #22DD22;
+}
+
+#test_output div.failed
+{
+    background: #DD2222;
+}

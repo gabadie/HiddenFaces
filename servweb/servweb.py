@@ -8,8 +8,12 @@ app.debug = True
 # ------------------------------------------------------------------------------ INDEX
 
 @app.route("/")
-def hello():
+def index_page():
     return render_template('index.html')
+
+@app.route("/test.html")
+def test_page():
+    return render_template('index.html', test=True)
 
 
 # ------------------------------------------------------------------------------ DATA CHUNK
