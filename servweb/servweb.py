@@ -4,7 +4,7 @@ import xmlrpclib
 
 app = Flask(__name__)
 app.debug = True
-server = xmlrpclib.Server('http://localhost:7080/',allowNone=True)
+server = xmlrpclib.Server('http://localhost:7080/')
 
 # ------------------------------------------------------------------------------ INDEX
 
