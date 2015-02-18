@@ -1,6 +1,9 @@
 
 var hf_com = {};
 
+// Configures if we wants synchronized requests. It is set to true when testing.
+hf_com.synchronized_request = false;
+
 hf_com.new_request = function() {
     var request;
 
@@ -32,7 +35,7 @@ hf_com.json_request = function(request_params, callback) {
         }
     };
 
-    request.open("POST", "/api/", true);
+    request.open("POST", "/api/", !hf_com.synchronized_request);
     request.setRequestHeader("Content-Type", "application/json");
     request.send(JSON.stringify(request_params));
 }
