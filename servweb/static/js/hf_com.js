@@ -74,11 +74,21 @@ hf_com.create_data_chunk = function(chunk_name, access_as, encryption_key, chunk
     assert(typeof public_append == "boolean", "wrong type for public_append in create datachunk request")
     assert(typeof encryption_key == "string", "wrong type for encryption_key in create datachunk request")
 
+    var encrypted_chunk_content = chunk_content.slice();
+
+    for (var i = 0; i < chunk_content.length; i++)
+    {
+        encrypted_chunk_content[i] = hf_com.encrypt(
+            encryption_key,
+            chunk_content[i]
+        );
+    }
+
     var params = {
         'operation': 'create',
         'user_hash': access_as,
         'chunk_name': chunk_name,
-        'chunk_content': chunk_content,
+        'chunk_content': encrypted_chunk_content,
         'public_append': public_append
     };
 
@@ -113,11 +123,21 @@ hf_com.write_data_chunk = function(chunk_name, access_as, encryption_key, chunk_
     assert(chunk_content instanceof Array, "wrong type for chunk_content in write datachunk request")
     assert(typeof encryption_key == "string", "wrong type for encryption_key in write datachunk request")
 
+    var encrypted_chunk_content = chunk_content.slice();
+
+    for (var i = 0; i < chunk_content.length; i++)
+    {
+        encrypted_chunk_content[i] = hf_com.encrypt(
+            encryption_key,
+            chunk_content[i]
+        );
+    }
+
     var params = {
         'operation': 'write',
         'user_hash': access_as,
         'chunk_name': chunk_name,
-        'chunk_content': chunk_content
+        'chunk_content': encrypted_chunk_content
     };
 
     return hf_com.json_request(params, function(status, json) {
@@ -152,7 +172,7 @@ hf_com.append_data_chunk = function(chunk_name, encryption_key, chunk_content, c
     var params = {
         'operation': 'append',
         'chunk_name': chunk_name,
-        'chunk_content': chunk_content
+        'chunk_content': hf_com.encrypt(encryption_key, chunk_content)
     };
 
     return hf_com.json_request(params, function(status, json) {
@@ -196,6 +216,14 @@ hf_com.get_data_chunk = function(chunk_name, decryption_key, callback)
 
         if (callback != null)
         {
+            for (var i = 0; i < json["chunk_content"].length; i++)
+            {
+                json["chunk_content"][i] = hf_com.decrypt(
+                    decryption_key,
+                    json["chunk_content"][i]
+                );
+            }
+
             callback(json);
         }
     });
@@ -232,4 +260,42 @@ hf_com.delete_data_chunk = function(chunk_name, access_as, callback)
             callback(json);
         }
     });
+}
+
+/*
+ * @param <encryption_key>: the data's encryption key
+ * @param <data>: the data to encrypt.
+ *
+ * @returns the encrypted data
+ */
+hf_com.encrypt = function(encryption_key, data)
+{
+    assert(typeof encryption_key == "string", "wrong type for encryption_key")
+    assert(typeof data == "string", "wrong type for data")
+
+    if (encryption_key == '')
+    {
+        return data;
+    }
+
+    assert(false, "TODO: issues #12 and #13");
+}
+
+/*
+ * @param <decryption_key>: the data's decryption key
+ * @param <encrypted_data>: the data to decrypt.
+ *
+ * @returns the decrypted data
+ */
+hf_com.decrypt = function(decryption_key, encrypted_data)
+{
+    assert(typeof decryption_key == "string", "wrong type for encryption_key")
+    assert(typeof encrypted_data == "string", "wrong type for encrypted_data")
+
+    if (decryption_key == '')
+    {
+        return decryption_key;
+    }
+
+    assert(false, "TODO: issues #12 and #13");
 }
