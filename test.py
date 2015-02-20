@@ -44,6 +44,9 @@ def popen_firefox(profile, url):
     if os.uname()[0] == 'Darwin':
         cmd[0] = '/Applications/Firefox.app/Contents/MacOS/firefox'
 
+    if os.path.isdir(profile):
+        shutil.rmtree(profile)
+
     return popen(cmd)
 
 def popen_serv(server_type):
