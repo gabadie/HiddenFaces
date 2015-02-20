@@ -11,5 +11,6 @@ test_hf.onload = function()
 
     // list of tests
     test_hf_com.main();
+    test_hf_service.main();
     test_hf_ui.main();
 }
