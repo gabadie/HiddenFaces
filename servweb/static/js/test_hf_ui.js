@@ -1,6 +1,7 @@
 var test_hf_ui = {};
 var viewPath = {'page_request': 'static/view/test_view_template.html'};
 var viewPath2 = {'page_request': 'static/view/test_view_template2.html'};
+
 // Test function load, send a post ajax
 test_hf_ui.testLoad = function() {
     var context = {title: "My New Post", body: "This is my first post!"};
@@ -24,8 +25,8 @@ test_hf_ui.test_load_template2 = function() {
 test_hf_ui.main = function() {
 
     //test load
-    test_hf_ui.testLoad();
+    test_utils.run(test_hf_ui.testLoad, 'test_hf_ui.testLoad');
 
-    test_hf_ui.test_load_template();
-    test_hf_ui.test_load_template2();
+    test_utils.run(test_hf_ui.test_load_template, 'test_hf_ui.test_load_template');
+    test_utils.run(test_hf_ui.test_load_template2, 'test_hf_ui.test_load_template2');
 }
