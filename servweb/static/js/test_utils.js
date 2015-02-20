@@ -15,6 +15,9 @@ test_utils.run = function(testFunction, testName)
     test_utils.testName = testName;
     test_utils.refresh();
 
+    // run the test function on a clean database
+    test_utils.drop_database();
+
     testFunction();
 }
 
@@ -90,6 +93,26 @@ test_utils.refresh = function()
             '</div>'
         );
     }
+}
+
+/*
+ * Drops the database
+ */
+test_utils.drop_database = function()
+{
+    var params = {
+        'operation': 'testing:drop_database'
+    };
+
+    hf_com.json_request(params, function(status, json) {
+        if (status != 200)
+        {
+            test_utils.assert(false, "test_hf_com.drop_database() failed (status == " + status + ")");
+            return;
+        }
+
+        test_utils.assert(json["status"] == "ok", "test_hf_com.drop_database() failed");
+    });
 }
 
 /*

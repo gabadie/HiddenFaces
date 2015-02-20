@@ -1,13 +1,14 @@
 
 var test_hf_com = {};
 
+
 test_hf_com.test_create_data_chunk = function()
 {
 	hf_com.create_data_chunk("private_user1", "user1", "", [], false, function(json_message){
 		//alert(JSON.stringify(json_message["status"]));
         test_utils.assert(json_message["status"] == "ok", json_message);
     });
-} 
+}
 
 test_hf_com.test_data_chunk_operations = function()
 {
@@ -37,7 +38,7 @@ test_hf_com.test_data_chunk_operations = function()
     hf_com.append_data_chunk("private_user1", "", "user2: amazing <3", function(json_message){
         test_utils.assert(json_message["status"] == "ok", "test append to private_user1");
     });
-    
+
     //read data chunks
     hf_com.get_data_chunk("private_user1", "", function(json_message){
         test_utils.assert(json_message["chunk_content"].length == 0, "test get content private_user1");
@@ -59,7 +60,7 @@ test_hf_com.test_data_chunk_operations = function()
     hf_com.get_data_chunk("post2", "", function(json_message){
         test_utils.assert(json_message["status"] == "failed", "test delete post2");
     });
-} 
+}
 
 test_hf_com.main = function()
 {

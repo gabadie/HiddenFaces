@@ -69,6 +69,9 @@ def get_data_chunk():
     elif request_params['operation'] == 'delete':
         server.delete_chunk(request_params['chunk_name'], request_params['user_hash'])
 
+    elif request_params['operation'] == 'testing:drop_database':
+        server.testing_drop_database()
+
     else:
         awnser['error'] = 'unknown operation'
         awnser['status'] = 'failed'
