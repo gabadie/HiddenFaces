@@ -22,7 +22,7 @@ def test_page():
 def read_page():
     request_params = request.get_json()
 
-    awnser = {
+    answer = {
         'status' : 'ok'
     }
 
@@ -32,12 +32,12 @@ def read_page():
         with open(page_path) as myFile:
             page_content = myFile.read().replace("\n","")
 
-        awnser['page_content'] = page_content
+        answer['page_content'] = page_content
     except:
-        awnser['status'] = 'failded'
-        awnser['error'] = '404'
+        answer['status'] = 'failded'
+        answer['error'] = '404'
 
-    return jsonify(awnser)
+    return jsonify(answer)
 
 # ------------------------------------------------------------------------------ DATA CHUNK
 
@@ -45,7 +45,7 @@ def read_page():
 def get_data_chunk():
     request_params = request.get_json()
 
-    awnser = {
+    answer = {
         'request_params': request_params,
         'status': 'ok'
     }
@@ -62,9 +62,9 @@ def get_data_chunk():
     elif request_params['operation'] == 'get':
         try:
             chunk = json.loads(server.read_chunk(request_params['chunk_name']))
-            awnser['chunk_content'] = chunk["content"]
+            answer['chunk_content'] = chunk["content"]
         except:
-            awnser['status'] = 'failed'
+            answer['status'] = 'failed'
 
     elif request_params['operation'] == 'delete':
         server.delete_chunk(request_params['chunk_name'], request_params['user_hash'])
@@ -73,10 +73,10 @@ def get_data_chunk():
         server.testing_drop_database()
 
     else:
-        awnser['error'] = 'unknown operation'
-        awnser['status'] = 'failed'
+        answer['error'] = 'unknown operation'
+        answer['status'] = 'failed'
 
-    return jsonify(awnser)
+    return jsonify(answer)
 
 
 # ------------------------------------------------------------------------------ MAIN
