@@ -8,10 +8,8 @@ db_name = 'test_db'
 
 def test_chunk_creation():
 
-	db = mongoengine.connect(db_name)
-	db.drop_database(db_name)
-
-	serverRPC = DataManager()
+	serverRPC = DataManager(db_name)
+	serverRPC.db.drop_database(db_name)
 
 	#users
 	serverRPC.xmlrpc_new_chunk("private_user1","user1",[],False)
