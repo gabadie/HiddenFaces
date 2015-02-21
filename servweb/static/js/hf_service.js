@@ -208,7 +208,60 @@ hf_service.get_user_public_chunk = function(user_hash, callback)
 
         hf_service.users_public_chunks[user_hash] = public_chunk;
 
-        callback(public_chunk);
+        if (callback)
+        {
+            callback(public_chunk);
+        }
+    });
+}
+
+/*
+ * Logins user
+ *
+ * @param <user_profile>: the user profile
+ * @param <callback>: the function once
+ *      function my_callback(user_hash)
+ *
+ *      @param <user_hash>: is the user's hash if success login or null otherwise.
+ */
+hf_service.login_user = function(user_login_profile, callback)
+{
+    assert(!hf_service.is_connected());
+
+    var private_chunk_name =
+            hf_service.user_private_chunk_name(user_login_profile);
+    var private_chunk_key =
+            hf_service.user_private_chunk_key(user_login_profile);
+
+    hf_service.reset_cache();
+
+    // Try to get the user's private chunk
+    hf_com.get_data_chunk(private_chunk_name, private_chunk_key, function(json_message){
+        try
+        {
+            // parse private chunk
+            private_chunk = JSON.parse(json_message['chunk_content']);
+
+            // ensure this is a private chunk
+            assert(private_chunk['meta']['type'] == '/user/private_chunk');
+        }
+        catch(err)
+        {
+            // an exception appened, the connection has failed
+            callback(null);
+
+            return;
+        }
+
+        // gets the user's public chunk to cache right away
+        hf_service.get_user_public_chunk(private_chunk['meta']['user_hash'], function(public_chunk){
+            hf_service.user_private_chunk = private_chunk;
+            assert(hf_service.is_connected());
+            assert(private_chunk['meta']['user_hash'] == public_chunk['meta']['user_hash']);
+
+            // we succesfully cached the user's public chunk
+            callback(private_chunk['meta']['user_hash']);
+        });
     });
 }
 

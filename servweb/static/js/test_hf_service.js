@@ -15,11 +15,6 @@ test_hf_service.john_smith_profile = function(id)
     }
 }
 
-test_hf_service.is_connected = function()
-{
-    test_utils.assert(!hf_service.is_connected(), 'no-one should be signed up at the begining');
-}
-
 test_hf_service.create_account = function()
 {
     var user_profile0 = test_hf_service.john_smith_profile();
@@ -50,6 +45,25 @@ test_hf_service.get_user_public_chunk = function()
     });
 
     test_utils.assert_success(2);
+}
+
+test_hf_service.login_user = function()
+{
+    var user_profile0 = test_hf_service.john_smith_profile();
+    var user_hash0 = hf_service.create_user(user_profile0);
+
+    test_utils.assert(!hf_service.is_connected(), 'no-one should be signed in after sign up');
+
+    hf_service.login_user(user_profile0, function(user_connection_hash){
+        test_utils.assert(user_connection_hash == user_hash0, 'unmatching user\'s hash');
+        test_utils.assert(hf_service.is_connected(), 'should be connected after login in');
+
+        hf_service.disconnect();
+
+        test_utils.assert(!hf_service.is_connected(), 'should be disconneted');
+    });
+
+    test_utils.assert_success(4);
 }
 
 test_hf_service.push_notification = function()
@@ -91,8 +105,8 @@ test_hf_service.push_notification = function()
 
 test_hf_service.main = function()
 {
-    test_utils.run(test_hf_service.is_connected, 'test_hf_service.is_connected');
     test_utils.run(test_hf_service.create_account, 'test_hf_service.create_account');
     test_utils.run(test_hf_service.get_user_public_chunk, 'test_hf_service.get_user_public_chunk');
+    test_utils.run(test_hf_service.login_user, 'test_hf_service.login_user');
     test_utils.run(test_hf_service.push_notification, 'test_hf_service.push_notification');
 }
