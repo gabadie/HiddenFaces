@@ -132,6 +132,7 @@ hf_service.create_user = function(user_profile)
     assert(protected_chunk_name != user_hash);
     assert(private_chunk_name != protected_chunk_name);
 
+    // Generates the user's private chunk's content
     var private_chunk = {
         '__meta': {
             'type':         '/user/private_chunk',
@@ -158,6 +159,7 @@ hf_service.create_user = function(user_profile)
         'circles': []
     };
 
+    // Generates the user's private chunk's content
     var public_chunk = {
         '__meta': {
             'type':         '/user/public_chunk',
@@ -179,6 +181,7 @@ hf_service.create_user = function(user_profile)
         }
     };
 
+    // Creates the user's private chunk
     hf_com.create_data_chunk(
         private_chunk_name,
         chunks_owner,
@@ -188,6 +191,7 @@ hf_service.create_user = function(user_profile)
         null
     );
 
+    // Creates the user's public chunk
     hf_com.create_data_chunk(
         user_hash,
         chunks_owner,
@@ -197,6 +201,7 @@ hf_service.create_user = function(user_profile)
         null
     );
 
+    // Creates the user's protected chunk
     hf_com.create_data_chunk(
         protected_chunk_name,
         chunks_owner,
@@ -221,6 +226,7 @@ hf_service.get_user_public_chunk = function(user_hash, callback)
 {
     assert(hf.is_hash(user_hash));
 
+    // checks if <user_hash>'s public chunk is already cached
     if (user_hash in hf_service.users_public_chunks)
     {
         callback(hf_service.users_public_chunks[user_hash]);
@@ -228,6 +234,7 @@ hf_service.get_user_public_chunk = function(user_hash, callback)
         return;
     }
 
+    // fetches the <user_hash>'s public chunk
     hf_com.get_data_chunk(user_hash, '', function(json_message){
         assert(json_message['chunk_content'].length == 1);
 
@@ -311,6 +318,7 @@ hf_service.save_user_chunks = function()
 
     var user_chunks_owner = hf_service.user_chunks_owner();
 
+    // saves user's private chunk
     hf_com.write_data_chunk(
         hf_service.user_private_chunk['__meta']['chunk_name'],
         user_chunks_owner,
@@ -319,6 +327,7 @@ hf_service.save_user_chunks = function()
         null
     );
 
+    // saves user's public chunk
     hf_com.write_data_chunk(
         hf_service.user_hash(),
         user_chunks_owner,
@@ -358,7 +367,9 @@ hf_service.push_notification = function(user_hash, notification_json, callback)
     assert(notification_json['__meta']['type'] in hf_service.notification_automation);
     assert(hf.is_hash(notification_json['__meta']['author_user_hash']));
 
+    // Gets <user_hash>'s public chunk to find <user_hash>'s protected file
     hf_service.get_user_public_chunk(user_hash, function(public_chunk){
+        // appends the notification to the end of <user_hash>'s protected file
         hf_com.append_data_chunk(
             public_chunk['system']['protected_chunk']['name'],
             public_chunk['system']['protected_chunk']['public_key'],
