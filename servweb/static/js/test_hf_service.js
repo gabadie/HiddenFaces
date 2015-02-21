@@ -52,9 +52,47 @@ test_hf_service.get_user_public_chunk = function()
     test_utils.assert_success(2);
 }
 
+test_hf_service.push_notification = function()
+{
+    var user_profile0 = test_hf_service.john_smith_profile();
+    var user_hash0 = hf_service.create_user(user_profile0);
+    var notification = {
+        '__meta': {
+            'type': '/notification/message',
+            'author_user_hash': hf.hash('other_user')
+        },
+        'content': 'Hi John! How are you?'
+    };
+
+    hf_service.get_user_public_chunk(user_hash0, function(user_public_chunk){
+        hf_com.get_data_chunk(
+            user_public_chunk['system']['protected_chunk']['name'],
+            '',
+            function(json_message){
+                test_utils.assert(json_message['chunk_content'].length == 0);
+            }
+        );
+
+        hf_service.push_notification(user_hash0, notification, function(){
+            test_utils.success('notification push with success')
+        });
+
+        hf_com.get_data_chunk(
+            user_public_chunk['system']['protected_chunk']['name'],
+            '',
+            function(json_message){
+                test_utils.assert(json_message['chunk_content'].length == 1);
+            }
+        );
+    });
+
+    test_utils.assert_success(3);
+}
+
 test_hf_service.main = function()
 {
     test_utils.run(test_hf_service.is_connected, 'test_hf_service.is_connected');
     test_utils.run(test_hf_service.create_account, 'test_hf_service.create_account');
     test_utils.run(test_hf_service.get_user_public_chunk, 'test_hf_service.get_user_public_chunk');
+    test_utils.run(test_hf_service.push_notification, 'test_hf_service.push_notification');
 }
