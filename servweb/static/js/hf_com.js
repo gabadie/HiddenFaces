@@ -294,7 +294,7 @@ hf_com.decrypt = function(decryption_key, encrypted_data)
 
     if (decryption_key == '')
     {
-        return decryption_key;
+        return encrypted_data;
     }
 
     assert(false, "TODO: issues #12 and #13");

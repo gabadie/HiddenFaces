@@ -4,16 +4,37 @@ var test_hf_com = {};
 
 test_hf_com.test_create_data_chunk = function()
 {
-	hf_com.create_data_chunk("private_user1", "user1", "", [], false, function(json_message){
-		//alert(JSON.stringify(json_message["status"]));
-        test_utils.assert(json_message["status"] == "ok", json_message);
+    var user = hf.hash('user');
+    var chunk_name = hf.hash('chunk_name');
+    var chunk_content = ['hello ', 'world!', 'my name is'];
+
+    hf_com.create_data_chunk(chunk_name, user, "", chunk_content, false, function(json_message){
+        test_utils.assert(json_message["status"] == "ok", "test creating chunk");
     });
+
+    hf_com.get_data_chunk(chunk_name, "", function(json_message){
+        test_utils.assert(json_message["status"] == "ok", "test getting chunk");
+        test_utils.assert(
+            json_message["chunk_content"].length == chunk_content.length,
+            "unmatching chunk_content length"
+        );
+
+        for (var i = 0; i < chunk_content.length; i++)
+        {
+            test_utils.assert(
+                json_message["chunk_content"][i] == chunk_content[i],
+                "chunk_content[" + i + "] corrupted"
+            );
+        }
+    });
+
+    test_utils.assert_success(3 + chunk_content.length);
 }
 
 test_hf_com.test_data_chunk_operations = function()
 {
-	//create users
-	hf_com.create_data_chunk("private_user1", "user1", "", [], false, function(json_message){
+    //create users
+    hf_com.create_data_chunk("private_user1", "user1", "", [], false, function(json_message){
         test_utils.assert(json_message["status"] == "ok", "test adding private_user1");
     });
     hf_com.create_data_chunk("private_user2","user2", "", [], false, function(json_message){
