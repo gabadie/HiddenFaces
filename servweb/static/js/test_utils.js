@@ -39,6 +39,24 @@ test_utils.assert = function(cond, name)
 }
 
 /*
+ * Asserts success.
+ * @param <successCount>: the expected number of success
+ */
+test_utils.assert_success = function(successCount)
+{
+    var name = successCount + ' success expected';
+
+    if (test_utils.testCount == successCount)
+    {
+        test_utils.success(name);
+    }
+    else
+    {
+        test_utils.failure(name);
+    }
+}
+
+/*
  * Commits a success in the currently running test suite
  * @param <name>: the succes name
  */
@@ -107,11 +125,12 @@ test_utils.drop_database = function()
     hf_com.json_request(params, function(status, json) {
         if (status != 200)
         {
-            test_utils.assert(false, "test_hf_com.drop_database() failed (status == " + status + ")");
-            return;
+            test_utils.failure("test_hf_com.drop_database() failed (status == " + status + ")");
         }
-
-        test_utils.assert(json["status"] == "ok", "test_hf_com.drop_database() failed");
+        else if (json["status"] != "ok")
+        {
+            test_utils.failure("test_hf_com.drop_database() failed");
+        }
     });
 }
 
