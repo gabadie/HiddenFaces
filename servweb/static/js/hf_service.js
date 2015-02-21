@@ -103,7 +103,7 @@ hf_service.create_user = function(user_profile)
     assert(private_chunk_name != protected_chunk_name);
 
     var private_chunk = {
-        'meta': {
+        '__meta': {
             'type':         '/user/private_chunk',
             'user_hash':    user_hash,
             'chunk_name':   private_chunk_name
@@ -128,7 +128,7 @@ hf_service.create_user = function(user_profile)
     };
 
     var public_chunk = {
-        'meta': {
+        '__meta': {
             'type':         '/user/public_chunk',
             'user_hash':    user_hash,
             'chunk_name':   user_hash
@@ -202,9 +202,9 @@ hf_service.get_user_public_chunk = function(user_hash, callback)
 
         var public_chunk = JSON.parse(json_message['chunk_content'][0]);
 
-        assert(public_chunk['meta']['type'] == '/user/public_chunk');
-        assert(public_chunk['meta']['user_hash'] == user_hash);
-        assert(public_chunk['meta']['chunk_name'] == user_hash);
+        assert(public_chunk['__meta']['type'] == '/user/public_chunk');
+        assert(public_chunk['__meta']['user_hash'] == user_hash);
+        assert(public_chunk['__meta']['chunk_name'] == user_hash);
 
         hf_service.users_public_chunks[user_hash] = public_chunk;
 
@@ -243,7 +243,7 @@ hf_service.login_user = function(user_login_profile, callback)
             private_chunk = JSON.parse(json_message['chunk_content']);
 
             // ensure this is a private chunk
-            assert(private_chunk['meta']['type'] == '/user/private_chunk');
+            assert(private_chunk['__meta']['type'] == '/user/private_chunk');
         }
         catch(err)
         {
@@ -254,13 +254,13 @@ hf_service.login_user = function(user_login_profile, callback)
         }
 
         // gets the user's public chunk to cache right away
-        hf_service.get_user_public_chunk(private_chunk['meta']['user_hash'], function(public_chunk){
+        hf_service.get_user_public_chunk(private_chunk['__meta']['user_hash'], function(public_chunk){
             hf_service.user_private_chunk = private_chunk;
             assert(hf_service.is_connected());
-            assert(private_chunk['meta']['user_hash'] == public_chunk['meta']['user_hash']);
+            assert(private_chunk['__meta']['user_hash'] == public_chunk['__meta']['user_hash']);
 
             // we succesfully cached the user's public chunk
-            callback(private_chunk['meta']['user_hash']);
+            callback(private_chunk['__meta']['user_hash']);
         });
     });
 }

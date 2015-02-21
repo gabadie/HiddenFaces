@@ -31,7 +31,7 @@ test_hf_service.get_user_public_chunk = function()
 
     hf_service.get_user_public_chunk(user_hash0, function(user_public_chunk){
         test_utils.assert(
-            user_public_chunk['meta']['user_hash'] == user_hash0,
+            user_public_chunk['__meta']['user_hash'] == user_hash0,
             'hf_service.get_user_public_chunk() has failed with cache'
         );
     });
@@ -39,7 +39,7 @@ test_hf_service.get_user_public_chunk = function()
     hf_service.reset_cache();
     hf_service.get_user_public_chunk(user_hash0, function(user_public_chunk){
         test_utils.assert(
-            user_public_chunk['meta']['user_hash'] == user_hash0,
+            user_public_chunk['__meta']['user_hash'] == user_hash0,
             'hf_service.get_user_public_chunk() has failed without cache'
         );
     });
