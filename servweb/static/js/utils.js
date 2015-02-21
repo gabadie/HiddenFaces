@@ -1,17 +1,20 @@
 
 function assert(condition, message)
 {
-    console.assert(condition, message);
-
-    if (!condition)
+    if (condition)
     {
-        message = message || "Assertion failed";
-
-        if (typeof Error !== "undefined")
-        {
-            throw new Error(message);
-        }
-
-        throw message; // Fallback
+        return;
     }
+
+    message = message || "Assertion failed";
+
+    console.assert(condition, message);
+    alert(message);
+
+    if (typeof Error !== "undefined")
+    {
+        throw new Error(message);
+    }
+
+    throw message; // Fallback
 }
