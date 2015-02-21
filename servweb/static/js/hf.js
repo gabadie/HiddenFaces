@@ -49,7 +49,7 @@ hf.hash = function(data)
 {
     assert(typeof data == 'string');
 
-    var bitArray = sjcl.hash.sha256.hash("message");
+    var bitArray = sjcl.hash.sha256.hash(data);
     var hash = sjcl.codec.hex.fromBits(bitArray);
 
     assert(hf.is_hash(hash));
