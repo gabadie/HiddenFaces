@@ -46,6 +46,36 @@ hf_service.disconnect = function()
 }
 
 /*
+ * Gets user's hash
+ */
+hf_service.user_hash = function()
+{
+    assert(hf_service.is_connected());
+
+    return hf_service.user_private_chunk['__meta']['user_hash'];
+}
+
+/*
+ * Gets user's chunks owner id
+ */
+hf_service.user_chunks_owner = function()
+{
+    assert(hf_service.is_connected());
+
+    return hf_service.user_private_chunk['system']['chunks_owner'];
+}
+
+/*
+ * Gets user's public chunk
+ */
+hf_service.user_public_chunk = function()
+{
+    assert(hf_service.is_connected());
+
+    return hf_service.users_public_chunks[hf_service.user_hash()];
+}
+
+/*
  * Gets the private chunk's name and key from the user's email and
  * password.
  *
@@ -106,7 +136,8 @@ hf_service.create_user = function(user_profile)
         '__meta': {
             'type':         '/user/private_chunk',
             'user_hash':    user_hash,
-            'chunk_name':   private_chunk_name
+            'chunk_name':   private_chunk_name,
+            'key':          private_chunk_key
         },
         'profile': {
             'name':         user_profile['name'],
@@ -248,7 +279,10 @@ hf_service.login_user = function(user_login_profile, callback)
         catch(err)
         {
             // an exception appened, the connection has failed
-            callback(null);
+            if (callback)
+            {
+                callback(null);
+            }
 
             return;
         }
@@ -260,9 +294,38 @@ hf_service.login_user = function(user_login_profile, callback)
             assert(private_chunk['__meta']['user_hash'] == public_chunk['__meta']['user_hash']);
 
             // we succesfully cached the user's public chunk
-            callback(private_chunk['__meta']['user_hash']);
+            if (callback)
+            {
+                callback(private_chunk['__meta']['user_hash']);
+            }
         });
     });
+}
+
+/*
+ * Saves user's public and private chunks
+ */
+hf_service.save_user_chunks = function()
+{
+    assert(hf_service.is_connected());
+
+    var user_chunks_owner = hf_service.user_chunks_owner();
+
+    hf_com.write_data_chunk(
+        hf_service.user_private_chunk['__meta']['chunk_name'],
+        user_chunks_owner,
+        hf_service.user_private_chunk['__meta']['key'],
+        [JSON.stringify(hf_service.user_private_chunk)],
+        null
+    );
+
+    hf_com.write_data_chunk(
+        hf_service.user_hash(),
+        user_chunks_owner,
+        '',
+        [JSON.stringify(hf_service.user_public_chunk())],
+        null
+    );
 }
 
 

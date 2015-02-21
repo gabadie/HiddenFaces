@@ -57,13 +57,53 @@ test_hf_service.login_user = function()
     hf_service.login_user(user_profile0, function(user_connection_hash){
         test_utils.assert(user_connection_hash == user_hash0, 'unmatching user\'s hash');
         test_utils.assert(hf_service.is_connected(), 'should be connected after login in');
-
-        hf_service.disconnect();
-
-        test_utils.assert(!hf_service.is_connected(), 'should be disconneted');
     });
 
-    test_utils.assert_success(4);
+    // for testing purposes, we should be connected after
+    test_utils.assert(hf_service.is_connected(), 'should be connected after');
+
+    hf_service.disconnect();
+
+    test_utils.assert(!hf_service.is_connected(), 'should be disconneted');
+
+    test_utils.assert_success(5);
+}
+
+test_hf_service.save_user_chunks = function()
+{
+    var new_birth_date = '1999-12-25';
+    var user_profile0 = test_hf_service.john_smith_profile();
+    var user_hash0 = hf_service.create_user(user_profile0);
+
+    hf_service.login_user(user_profile0);
+    hf_service.user_private_chunk['profile']['birth_date'] = new_birth_date;
+    hf_service.user_public_chunk()['profile']['birth_date'] = new_birth_date;
+    hf_service.disconnect();
+
+    hf_service.login_user(user_profile0);
+    test_utils.assert(
+        hf_service.user_private_chunk['profile']['birth_date'] == user_profile0['birth_date'],
+        'birth date should not be modified in the private chunk'
+    );
+    test_utils.assert(
+        hf_service.user_public_chunk()['profile']['birth_date'] == '',
+        'birth date should not be available in the public chunk'
+    );
+    hf_service.user_private_chunk['profile']['birth_date'] = new_birth_date;
+    hf_service.user_public_chunk()['profile']['birth_date'] = new_birth_date;
+    hf_service.save_user_chunks();
+    hf_service.disconnect();
+
+    hf_service.login_user(user_profile0);
+    test_utils.assert(
+        hf_service.user_private_chunk['profile']['birth_date'] == new_birth_date,
+        'birth date should be modified in the private chunk'
+    );
+    test_utils.assert(
+        hf_service.user_public_chunk()['profile']['birth_date'] == new_birth_date,
+        'birth date should be modified in the public chunk'
+    );
+    //hf_service.disconnect();
 }
 
 test_hf_service.push_notification = function()
@@ -108,5 +148,6 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.create_account, 'test_hf_service.create_account');
     test_utils.run(test_hf_service.get_user_public_chunk, 'test_hf_service.get_user_public_chunk');
     test_utils.run(test_hf_service.login_user, 'test_hf_service.login_user');
+    test_utils.run(test_hf_service.save_user_chunks, 'test_hf_service.save_user_chunks');
     test_utils.run(test_hf_service.push_notification, 'test_hf_service.push_notification');
 }
