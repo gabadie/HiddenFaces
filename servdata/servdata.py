@@ -9,11 +9,189 @@ import json
 sys.path.append("servdata/log/")
 import log
 
+
+# ------------------------------------------------------------------- DATA CHUNK
+
 class DataChunk(mongoengine.Document):
 	title = mongoengine.StringField(required=True, unique=True)
 	owner = mongoengine.StringField(required=True)
 	content = mongoengine.ListField(mongoengine.StringField())
 	append_enabled = mongoengine.BooleanField(default=False)
+
+
+# ----------------------------------------------------- DATA OPERATION MECHANISM
+
+class DataOperation(object):
+	def validate(self, json_operation):
+		""" Call validating the json_operation
+		"""
+		raise NotImplementedError
+
+	def process(self, json_operation, transaction):
+		""" Call processing the json_operation
+		"""
+		raise NotImplementedError
+
+	def success(self, json_operation):
+		""" Method called once all the transaction's operations has successed
+		"""
+		raise NotImplementedError
+
+	def failure(self, json_operation, raison):
+		""" Method called if at least one operation has failed
+		"""
+		raise NotImplementedError
+
+
+""" Maps containing all data chunk's operations
+"""
+DATA_CHUNK_OPERATIONS = {}
+
+""" Data chunk's operation decorator
+"""
+def data_chunk_op(interface_name):
+	assert isinstance(interface_name, str)
+	assert interface_name not in DATA_CHUNK_OPERATIONS
+
+	def callback(class_def):
+		assert issubclass(class_def, DataOperation)
+
+		interface = class_def()
+
+		DATA_CHUNK_OPERATIONS[interface_name] = interface
+
+		return class_def
+
+	return callback
+
+
+class DataTransaction(object):
+	""" Data chunk transaction
+	"""
+	class DataException(Exception):
+		""" Data chunk exception
+		"""
+		def __init__(self, operation_id, error_msg):
+			Exception.__init__(self, error_msg)
+			self.operation_id = operation_id
+
+	def __init__(self, json_operations):
+		self.data_chunk_cache = {}
+		self.json_operations = json_operations
+		self.current_operation_id = None
+		self.status = 'ok'
+
+	def get_data_chunk(self, chunk_name):
+		""" Access database
+		"""
+		data_chunk = None
+
+		if chunk_name in self.data_chunk_cache:
+			data_chunk = self.data_chunk_cache
+
+		else:
+			try:
+				data_chunk = DataChunk.objects.get(title=chunk_name)
+
+			except:
+				self.failure('unknown data chunk `{}`'.format(chunk_name))
+
+			self.data_chunk_cache[chunk_name] = data_chunk
+
+		assert DataChunk != None
+
+		return data_chunk
+
+	def failure(self, error_msg):
+		""" Fails the current database. Should be called only in
+		DataOperation.process()
+		"""
+		assert self.current_operation_id != None
+		assert self.current_operation_id >= 0
+		assert self.current_operation_id < len(self.json_operations)
+		assert self.status == 'ok'
+
+		self.status = 'failed'
+
+		raise DataTransaction.DataException(
+			operation_id=self.current_operation_id,
+			error_msg=error_msg
+		)
+
+	def commit(self):
+		""" Commits the transaction into the database
+		"""
+		assert self.status == 'ok'
+
+		for data_chunk in self.data_chunk_cache.values():
+			data_chunk.save()
+
+	@staticmethod
+	def process(json_operations):
+		""" json_operation = [
+			{
+				'__operation': '/create_data_chunk'
+			}
+		]
+		"""
+		try:
+			assert isinstance(json_operations, list)
+
+			for json_operation in json_operations:
+				assert isinstance(json_operation, dict)
+				assert '__operation' in json_operation, 'missing __operation'
+				assert json_operation['__operation'] in DATA_CHUNK_OPERATIONS, 'unknown operation `{}`'.format(json_operation['__operation'])
+
+				operation = DATA_CHUNK_OPERATIONS[json_operation['__operation']]
+				operation.validate(json_operation)
+
+		except Exception as exception:
+			#TODO: log invalid json_operation
+
+			return False
+
+		transaction = DataTransaction(json_operations)
+
+		try:
+			transaction.current_operation_id = 0
+
+			for json_operation in json_operations:
+				operation = DATA_CHUNK_OPERATIONS[json_operation['__operation']]
+				operation.process(json_operation, transaction)
+
+				transaction.current_operation_id += 1
+
+		except DataTransaction.DataException as exception:
+			i = 0
+
+			for json_operation in json_operations:
+				operation = DATA_CHUNK_OPERATIONS[json_operation['__operation']]
+
+				if i == exception.operation_id:
+					operation.failure(json_operation, str(exception))
+
+				else:
+					operation.failure(json_operation, 'an other operation has failed')
+
+				i += 1
+
+			return False
+
+		for json_operation in json_operations:
+			operation = DATA_CHUNK_OPERATIONS[json_operation['__operation']]
+			operation.success(json_operation)
+
+		transaction.commit()
+
+		return True
+
+
+# -------------------------------------------------------------- DATA OPERATIONS
+
+
+
+
+# ---------------------------------------------------------------- RPC INTERFACE
 
 class DataManager(xmlrpc.XMLRPC):
 	""" RPC interface used by the web server
@@ -121,6 +299,8 @@ class DataManager(xmlrpc.XMLRPC):
 		else:
 			self.logger.error("chunk deletion : user {} doesn't have the right to delete chunk".format(owner))
 
+
+# ------------------------------------------------------------- MAIN ENTRY POINT
 
 if __name__ == "__main__":
 	from twisted.internet import reactor
