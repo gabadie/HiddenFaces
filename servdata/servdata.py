@@ -29,7 +29,7 @@ class DataManager(xmlrpc.XMLRPC):
 		self.db_name = db_name
 		self.testing_profile = testing_profile
 
-		self.logger = log.get_logger("servdata/log/test.log")
+		self.logger = log.get_logger("servdata/log/serverDataLogs.log",self.testing_profile)
 
 		if self.testing_profile:
 			self.db.drop_database(self.db_name)
@@ -100,6 +100,8 @@ class DataManager(xmlrpc.XMLRPC):
 			self.logger.info("appending content to chunk : content appended to chunk, new content={},{}".format(chunk.content,content))
 			chunk.content.append(content)
 			chunk.save()
+		else:
+			self.logger.error("appending content to chunk : content cannot be appended to the chunk")
 
 	def xmlrpc_delete_chunk(self, title, owner):
 
@@ -116,6 +118,8 @@ class DataManager(xmlrpc.XMLRPC):
 		if chunk.owner == owner:
 			self.logger.info("chunk deletion : chunk deleted, right owner={}".format(owner))
 			chunk.delete()
+		else:
+			self.logger.error("chunk deletion : user {} doesn't have the right to delete chunk".format(owner))
 
 
 if __name__ == "__main__":
