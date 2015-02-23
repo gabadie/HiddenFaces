@@ -1,0 +1,121 @@
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <h2 style="color:white">Inscription</h2>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6 col-md-push-4">
+      <form name="Inscription">
+        <div class="row">
+          <div class="col-md-2">
+            <p> Sexe</p>
+          </div>
+          <div class= "col-md-3 col-md-push-2">
+            <p>
+              <input type="radio" name="man" value="homme" checked>Homme
+            </p>
+          </div>
+          <div class="col-md-3 col-md-push-5">
+            <p>
+              <input type="radio" name="woman" value="femme">Femme
+            </p>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-1">
+            <p>Prénom</p>
+          </div>
+          <div class="col-md-3 col-md-push-1">
+            <p>
+              <input type="text" placeholder="First name" class="form-control input-md" name="firstName"/>
+            </p>
+          </div>
+          <div class="col-md-1 col-md-push-4">
+            <p>Nom </p>
+          </div>
+          <div class="col-md-3 col-md-push-5">
+            <p>
+              <input type="text" placeholder="Last name" class="form-control input-md" name="lastName"/>
+            </p>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-4">
+            <p>Adresse électronique</p>
+          </div>
+          <div class="col-md-4 col-md-push-2">
+            <p>
+              <input type="text" placeholder="Email" class="form-control input-md" name="MailAdress"/>
+            </p>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-4" >
+            <p>Confirmer l'adresse électronique</p>
+          </div>
+          <div class="col-md-4 col-md-push-2">
+            <p>
+              <input type="text" placeholder="Confirm email"class="form-control input-md" name="MailAdressConfirmation"/>
+            </p>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-4">
+            <p>Mot de passe</p>
+          </div>
+          <div class="col-md-4 col-md-push-2">
+            <p>
+              <input type="password" placeholder="New password" class="form-control input-md" name="Password"\>
+            </p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4">
+            <p>Date de naissance</p>
+          </div>
+          <div class="form-inline">
+            <div class="form-group">
+              <div class="col-md-1 col-md-push-4">
+                 <input type="text" id="txt_day" name="txt_day" class="form-control input-md" style="width:70px"  placeholder="day" required maxlength="2" data-validation-required-message="Day is required" >
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="col-md-1 col-md-push-5">
+
+                <input type="text" id="txt_month" name="txt_month" class="form-control input-md" style="width:70px"  placeholder="month" required maxlength="2" data-validation-required-message="Month is required" >
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="col-md-1 col-md-push-6">
+                <input type="text" id="txt_year" name="txt_year" class="form-control input-md" style="width:80px"  placeholder="year" required maxlength="4" data-validation-required-message="Year is required" >
+              </div>
+              </div>
+            </div>
+            <p class="help-block"></p>
+            </div>
+            </div>
+            </div>
+              <div class="row">
+                <div class="col-md-2 col-md-push-10">
+                  <p>
+                    <input type="button" class="btn btn-default" style="background-color:lightgrey"  name="inscriptionButton" value="Inscription"/>
+                  </p>
+                </div>
+                <div class="col-md-2 col-md-push-6 ">
+                  <p>
+                    <input type="button" name="ReturnButton" value="Retour" class="btn btn-default" style="background-color:lightgrey" onclick="hf_control.show_login_form()"/>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
