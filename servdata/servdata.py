@@ -64,7 +64,7 @@ class DataManager(xmlrpc.XMLRPC):
 
 		try:
 			chunk = DataChunk.objects.get(title=title)
-			return chunk.to_json()
+			return chunk.content
 		except mongoengine.DoesNotExist as e:
 			return None
 
