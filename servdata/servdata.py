@@ -6,7 +6,6 @@ from twisted.web import xmlrpc, server
 import sys
 import json
 
-sys.path.append("servdata/log/")
 import log
 
 
@@ -207,7 +206,7 @@ class DataManager(xmlrpc.XMLRPC):
 		self.db_name = db_name
 		self.testing_profile = testing_profile
 
-		self.logger = log.get_logger("servdata/log/serverDataLogs.log",self.testing_profile)
+		self.logger = log.get_logger("serverDataLogs.log",self.testing_profile)
 
 		if self.testing_profile:
 			self.db.drop_database(self.db_name)
