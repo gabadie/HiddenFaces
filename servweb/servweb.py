@@ -3,9 +3,12 @@ from flask import Flask, render_template, jsonify, request
 import xmlrpclib
 import os.path
 import json
+import socket
+import time
 
 app = Flask(__name__)
 app.debug = True
+
 server = xmlrpclib.Server('http://localhost:7080/')
 
 # ------------------------------------------------------------------------------ INDEX
@@ -82,4 +85,15 @@ def get_data_chunk():
 # ------------------------------------------------------------------------------ MAIN
 
 if __name__ == "__main__":
+
+    connected = False
+    #verification RPC connexion
+    while not connected:
+        try:
+            server.read_chunk("")
+            connected = True
+        except socket.error as e:
+            print e
+            time.sleep(1)
+
     app.run()
