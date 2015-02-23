@@ -50,40 +50,41 @@ def test_chunk_creation():
 
 @data_chunk_op('/testing/type_checkin')
 class OpTestTypeChecking(DataOperation):
-	def validate(self, json_operation):
-		pass #assert isinstance(json_operation, dict)
+	def __init__(self, json_operation):
+		pass
 
-	def process(self, json_operation, transaction):
-		assert isinstance(json_operation, dict)
+	def process(self, transaction):
 		assert isinstance(transaction, DataTransaction)
 
-	def success(self, json_operation):
-		assert isinstance(json_operation, dict)
+	def success(self):
+		pass
 
-	def failure(self, json_operation, reason):
-		assert isinstance(json_operation, dict)
+	def failure(self, reason):
+		pass
 		assert isinstance(reason, str)
 
 @data_chunk_op('/testing/order')
 class OpTestOrder(DataOperation):
 	current_id = 0
 
-	def validate(self, json_operation):
-		assert OpTestOrder.current_id == json_operation['validate']
+	def __init__(self, json_operation):
+		self.json_operation = json_operation
+
+		assert OpTestOrder.current_id == self.json_operation['validate']
 		OpTestOrder.current_id += 1
 
-	def process(self, json_operation, transaction):
-		assert OpTestOrder.current_id == json_operation['process']
+	def process(self, transaction):
+		assert OpTestOrder.current_id == self.json_operation['process']
 		OpTestOrder.current_id += 1
 
-	def success(self, json_operation):
-		assert OpTestOrder.current_id == json_operation['success']
-		assert json_operation['failure'] == None
+	def success(self):
+		assert OpTestOrder.current_id == self.json_operation['success']
+		assert self.json_operation['failure'] == None
 		OpTestOrder.current_id += 1
 
-	def failure(self, json_operation, reason):
-		assert OpTestOrder.current_id == json_operation['failure']
-		assert json_operation['success'] == None
+	def failure(self, reason):
+		assert OpTestOrder.current_id == self.json_operation['failure']
+		assert self.json_operation['success'] == None
 		OpTestOrder.current_id += 1
 
 	@staticmethod
@@ -92,46 +93,46 @@ class OpTestOrder(DataOperation):
 
 @data_chunk_op('/testing/validation_failure')
 class OpTestValidationFailure(DataOperation):
-	def validate(self, json_operation):
+	def __init__(self, json_operation):
 		assert False
 
-	def process(self, json_operation, transaction):
+	def process(self, transaction):
 		pass
 
-	def success(self, json_operation):
+	def success(self):
 		pass
 
-	def failure(self, json_operation, reason):
+	def failure(self, reason):
 		pass
 
 @data_chunk_op('/testing/process_failure')
 class OpTestProcessFailure(DataOperation):
 	ERROR_MSH='hello world'
 
-	def validate(self, json_operation):
+	def __init__(self, json_operation):
 		pass
 
-	def process(self, json_operation, transaction):
+	def process(self, transaction):
 		transaction.failure(OpTestProcessFailure.ERROR_MSH)
 
-	def success(self, json_operation):
+	def success(self):
 		pass
 
-	def failure(self, json_operation, reason):
+	def failure(self, reason):
 		assert reason == OpTestProcessFailure.ERROR_MSH
 
 @data_chunk_op('/testing/foreign_failure')
 class OpTestForeignFailure(DataOperation):
-	def validate(self, json_operation):
+	def __init__(self, json_operation):
 		pass
 
-	def process(self, json_operation, transaction):
+	def process(self, transaction):
 		pass
 
-	def success(self, json_operation):
+	def success(self):
 		pass
 
-	def failure(self, json_operation, reason):
+	def failure(self, reason):
 		assert reason == 'an other operation has failed'
 
 

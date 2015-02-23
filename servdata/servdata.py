@@ -21,22 +21,23 @@ class DataChunk(mongoengine.Document):
 # ----------------------------------------------------- DATA OPERATION MECHANISM
 
 class DataOperation(object):
-	def validate(self, json_operation):
-		""" Call validating the json_operation
+	def __init__(self, json_operation):
+		""" The constructor of the inheriting object should be reimplemented to
+		validate <json_operation>, without calling this one.
 		"""
 		raise NotImplementedError
 
-	def process(self, json_operation, transaction):
+	def process(self, transaction):
 		""" Call processing the json_operation
 		"""
 		raise NotImplementedError
 
-	def success(self, json_operation):
+	def success(self):
 		""" Method called once all the transaction's operations has successed
 		"""
 		raise NotImplementedError
 
-	def failure(self, json_operation, raison):
+	def failure(self, raison):
 		""" Method called if at least one operation has failed
 		"""
 		raise NotImplementedError
@@ -55,9 +56,7 @@ def data_chunk_op(interface_name):
 	def callback(class_def):
 		assert issubclass(class_def, DataOperation)
 
-		interface = class_def()
-
-		DATA_CHUNK_OPERATIONS[interface_name] = interface
+		DATA_CHUNK_OPERATIONS[interface_name] = class_def
 
 		return class_def
 
@@ -133,6 +132,8 @@ class DataTransaction(object):
 			}
 		]
 		"""
+		operations = list()
+
 		try:
 			assert isinstance(json_operations, list)
 
@@ -141,8 +142,10 @@ class DataTransaction(object):
 				assert '__operation' in json_operation, 'missing __operation'
 				assert json_operation['__operation'] in DATA_CHUNK_OPERATIONS, 'unknown operation `{}`'.format(json_operation['__operation'])
 
-				operation = DATA_CHUNK_OPERATIONS[json_operation['__operation']]
-				operation.validate(json_operation)
+				operation_class = DATA_CHUNK_OPERATIONS[json_operation['__operation']]
+				operation = operation_class(json_operation)
+
+				operations.append(operation)
 
 		except Exception as exception:
 			#TODO: log invalid json_operation
@@ -154,31 +157,27 @@ class DataTransaction(object):
 		try:
 			transaction.current_operation_id = 0
 
-			for json_operation in json_operations:
-				operation = DATA_CHUNK_OPERATIONS[json_operation['__operation']]
-				operation.process(json_operation, transaction)
+			for operation in operations:
+				operation.process(transaction)
 
 				transaction.current_operation_id += 1
 
 		except DataTransaction.DataException as exception:
 			i = 0
 
-			for json_operation in json_operations:
-				operation = DATA_CHUNK_OPERATIONS[json_operation['__operation']]
-
+			for operation in operations:
 				if i == exception.operation_id:
-					operation.failure(json_operation, str(exception))
+					operation.failure(str(exception))
 
 				else:
-					operation.failure(json_operation, 'an other operation has failed')
+					operation.failure('an other operation has failed')
 
 				i += 1
 
 			return False
 
-		for json_operation in json_operations:
-			operation = DATA_CHUNK_OPERATIONS[json_operation['__operation']]
-			operation.success(json_operation)
+		for operation in operations:
+			operation.success()
 
 		transaction.commit()
 
