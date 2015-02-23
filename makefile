@@ -17,7 +17,11 @@ endif
 
 # ----------------------------------------------- Main entry
 .PHONY: all
-all: python shell html
+all: no_html html
+	$(IDLE_CMD)
+
+.PHONY: no_html
+no_html: python shell
 	$(IDLE_CMD)
 
 # ----------------------------------------------- Python tests
