@@ -4,6 +4,7 @@
 import mongoengine
 from twisted.web import xmlrpc, server
 import sys
+import json
 
 sys.path.append("servdata/log/")
 import log
@@ -45,13 +46,13 @@ class DataManager(xmlrpc.XMLRPC):
 	def xmlrpc_new_chunk(self, title, owner, content, append_enabled):
 
 		chunk = None
-		self.logger.info("new chunk creation : title={}, owner={}, content={}, append_enabled={}".format(title,owner,content,append_enabled))
+		self.logger.info("chunk creation : title={}, owner={}, content={}, append_enabled={}".format(title,owner,content,append_enabled))
 		try:
 			chunk = DataChunk.objects.get(title=title)
-			self.logger.info("chunk {} already existing".format(title))
+			self.logger.info("chunk creation : chunk {} already existing".format(title))
 		except mongoengine.DoesNotExist as e:
 			chunk = DataChunk(title=title,owner=owner,content=content,append_enabled=append_enabled).save()
-			self.logger.info("new chunk created")
+			self.logger.info("chunk creation : new chunk created")
 
 
 	def xmlrpc_write_chunk(self, title, user, content):
@@ -60,13 +61,13 @@ class DataManager(xmlrpc.XMLRPC):
 		self.logger.info("chunk modification : title={}".format(title))
 		try:
 			chunk = DataChunk.objects.get(title=title)
-			self.logger.info("chunk found")
+			self.logger.info("chunk modification : chunk found")
 		except mongoengine.DoesNotExist as e:
-			self.logger.error("chunk not found : error message={}".format(e))
+			self.logger.error("chunk modification : chunk not found, error message={}".format(e))
 			return
 
 		if chunk.owner == user:
-			self.logger.info("chunk modified : right owner={}".format(user))
+			self.logger.info("chunk modification : chunk modified, right owner={}".format(user))
 			chunk.content = content
 			chunk.save()
 
@@ -77,10 +78,10 @@ class DataManager(xmlrpc.XMLRPC):
 
 		try:
 			chunk = DataChunk.objects.get(title=title)
-			self.logger.info("chunk found : content={}".format(chunk.content))
-			return chunk.content
+			self.logger.info("getting chunk : chunk found, content={}".format(chunk.content))
+			return json.dumps(chunk.content)
 		except mongoengine.DoesNotExist as e:
-			self.logger.error("chunk not found : error message={}".format(e))
+			self.logger.error("getting chunk : chunk not found, error message={}".format(e))
 			return None
 
 	def xmlrpc_append_content(self, title, content):
@@ -90,13 +91,13 @@ class DataManager(xmlrpc.XMLRPC):
 
 		try:
 			chunk = DataChunk.objects.get(title=title)
-			self.logger.info("chunk found : current content={}".format(chunk.content))
+			self.logger.info("appending content to chunk : chunk found, current content={}".format(chunk.content))
 		except mongoengine.DoesNotExist as e:
-			self.logger.error("chunk not found : error message={}".format(e))
+			self.logger.error("appending content to chunk : chunk not found, error message={}".format(e))
 			return
 
 		if chunk.append_enabled:
-			self.logger.info("content appended to chunk: new content={},{}".format(chunk.content,content))
+			self.logger.info("appending content to chunk : content appended to chunk, new content={},{}".format(chunk.content,content))
 			chunk.content.append(content)
 			chunk.save()
 
@@ -107,13 +108,13 @@ class DataManager(xmlrpc.XMLRPC):
 
 		try:
 			chunk = DataChunk.objects.get(title=title)
-			self.logger.info("chunk found")
+			self.logger.info("chunk deletion : chunk found")
 		except mongoengine.DoesNotExist as e:
-			self.logger.error("chunk not found : error message={}".format(e))
+			self.logger.error("chunk deletion : chunk not found, error message={}".format(e))
 			return
 
 		if chunk.owner == owner:
-			self.logger.info("chunk deleted : right owner={}".format(owner))
+			self.logger.info("chunk deletion : chunk deleted, right owner={}".format(owner))
 			chunk.delete()
 
 

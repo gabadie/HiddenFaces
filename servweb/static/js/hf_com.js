@@ -216,12 +216,14 @@ hf_com.get_data_chunk = function(chunk_name, decryption_key, callback)
 
         if (callback != null)
         {
-            for (var i = 0; i < json["chunk_content"].length; i++)
-            {
-                json["chunk_content"][i] = hf_com.decrypt(
-                    decryption_key,
-                    json["chunk_content"][i]
-                );
+            if(typeof json["chunk_content"] != "undefined"){
+                for (var i = 0; i < json["chunk_content"].length; i++)
+                {
+                    json["chunk_content"][i] = hf_com.decrypt(
+                        decryption_key,
+                        json["chunk_content"][i]
+                    );
+                }
             }
 
             callback(json);

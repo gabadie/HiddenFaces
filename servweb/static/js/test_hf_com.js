@@ -18,7 +18,6 @@ test_hf_com.test_create_data_chunk = function()
             json_message["chunk_content"].length == chunk_content.length,
             "unmatching chunk_content length"
         );
-
         for (var i = 0; i < chunk_content.length; i++)
         {
             test_utils.assert(

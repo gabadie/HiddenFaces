@@ -61,8 +61,8 @@ def get_data_chunk():
 
     elif request_params['operation'] == 'get':
         try:
-            chunk = json.loads(server.read_chunk(request_params['chunk_name']))
-            answer['chunk_content'] = chunk["content"]
+            content = json.loads(server.read_chunk(request_params['chunk_name']))
+            answer['chunk_content'] = content
         except:
             answer['status'] = 'failed'
 
