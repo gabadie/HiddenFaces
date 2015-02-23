@@ -222,7 +222,7 @@ class DataManager(xmlrpc.XMLRPC):
 	def xmlrpc_new_chunk(self, title, owner, content, append_enabled):
 
 		chunk = None
-		self.logger.info("chunk creation : title={}, owner={}, content={}, append_enabled={}".format(title,owner,content,append_enabled))
+		self.logger.info("chunk creation : title={}".format(title))
 		try:
 			chunk = DataChunk.objects.get(title=title)
 			self.logger.info("chunk creation : chunk {} already existing".format(title))
@@ -254,7 +254,7 @@ class DataManager(xmlrpc.XMLRPC):
 
 		try:
 			chunk = DataChunk.objects.get(title=title)
-			self.logger.info("getting chunk : chunk found, content={}".format(chunk.content))
+			self.logger.info("getting chunk : chunk found")
 			return json.dumps(chunk.content)
 		except mongoengine.DoesNotExist as e:
 			self.logger.error("getting chunk : chunk not found, error message={}".format(e))
@@ -263,17 +263,17 @@ class DataManager(xmlrpc.XMLRPC):
 	def xmlrpc_append_content(self, title, content):
 
 		chunk = None
-		self.logger.info("appending content to chunk : title={}, content={}".format(title,content))
+		self.logger.info("appending content to chunk : title={}".format(title))
 
 		try:
 			chunk = DataChunk.objects.get(title=title)
-			self.logger.info("appending content to chunk : chunk found, current content={}".format(chunk.content))
+			self.logger.info("appending content to chunk : chunk found")
 		except mongoengine.DoesNotExist as e:
 			self.logger.error("appending content to chunk : chunk not found, error message={}".format(e))
 			return
 
 		if chunk.append_enabled:
-			self.logger.info("appending content to chunk : content appended to chunk, new content={},{}".format(chunk.content,content))
+			self.logger.info("appending content to chunk : content appended to chunk")
 			chunk.content.append(content)
 			chunk.save()
 		else:

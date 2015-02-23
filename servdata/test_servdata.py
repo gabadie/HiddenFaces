@@ -38,8 +38,8 @@ def test_chunk_creation():
 	serverRPC.xmlrpc_delete_chunk('post1',"user2")
 	serverRPC.xmlrpc_delete_chunk('post2',"user1")
 
-	content_post_user1 = serverRPC.xmlrpc_read_chunk('post1')
-	content_private_user2 = serverRPC.xmlrpc_read_chunk('private_user2')
+	content_post_user1 = json.loads(serverRPC.xmlrpc_read_chunk('post1'))
+	content_private_user2 = json.loads(serverRPC.xmlrpc_read_chunk('private_user2'))
 
 	assert len(DataChunk.objects) == 3
 	assert len(content_post_user1) == 2

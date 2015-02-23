@@ -52,7 +52,7 @@ def popen_serv(server_type):
     assert server_type in ['web', 'data']
 
     p = popen(['python', 'serv{t}/serv{t}.py'.format(t=server_type), '--testing'])
-    time.sleep(1)
+    time.sleep(5)
     return p
 
 def pclose(p):
