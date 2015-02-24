@@ -281,19 +281,31 @@ hf_com.encrypt = function(encryption_key, data)
 
     if(hf_com.is_AES_key(encryption_key)) {
         return hf_com.encrypt_AES(encryption_key, data);
-    } else {
+    } else if (hf_com.is_RSA(encryption_key)){
         return hf_com.encrypt_RSA(encryption_key, data);
+    } else {
+        assert(false, "your key to encrypt is false");
     }
 }
 
 /*
 * @param <encryption_key>: the key for encrypting
 *
-* @return: true if it's key for aes encrypting, false if RSA
+* @return: true if it's key for aes encrypting, false if other
 */
-hf_com.is_AES_key = function(encryption_key) {
-    var splitted_key = encryption_key.split("\n")[0];
+hf_com.is_AES_key = function(key) {
+    var splitted_key = key.split("\n")[0];
     return (splitted_key.trim().toUpperCase() === "AES".toUpperCase());
+}
+
+/*
+* @param <encryption_key>: the key for encrypting
+*
+* @return: true if it's key for RSA encrypting, false if other
+*/
+hf_com.is_RSA_key = function(key) {
+    var splitted_key = key.split("\n")[0];
+    return (splitted_key.trim().toUpperCase() === "RSA-1024-Public".toUpperCase());
 }
 
 /*
@@ -349,10 +361,12 @@ hf_com.decrypt = function(decryption_key, encrypted_data)
         return encrypted_data;
     }
 
-    if(hf_com.is_AES_key(encryption_key)) {
-        return hf_com.decrypt_AES(encryption_key, data);
+    if(hf_com.is_AES_key(decryption_key)) {
+        return hf_com.decrypt_AES(decryption_key, encrypted_data);
+    } else if (hf_com.is_RSA_key(decryption_key)){
+        return hf_com.decrypt_RSA(decryption_key, encrypted_data);
     } else {
-        return hf_com.decrypt_RSA(encryption_key, data);
+        assert(false, "your key to decrypt is false");
     }
 }
 
