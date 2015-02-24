@@ -95,7 +95,7 @@ class DataTransaction(object):
 		data_chunk = None
 
 		if title in self.data_chunk_cache:
-			data_chunk = self.data_chunk_cache
+			data_chunk = self.data_chunk_cache[title]
 
 		else:
 			try:
@@ -107,6 +107,7 @@ class DataTransaction(object):
 			self.data_chunk_cache[title] = data_chunk
 
 		assert data_chunk != None
+		assert isinstance(data_chunk, DataChunk)
 
 		return data_chunk
 
@@ -259,6 +260,36 @@ class CreateDataChunk(DataOperation):
 			self.title,
 			self.owner,
 			self.append_enabled
+		)
+
+@data_chunk_op('/write_data_chunk')
+class WriteDataChunk(DataOperation):
+	""" json_operation = {
+		'title': 			'name',
+		'content': 			['hello', 'world'],
+		'user': 			'my_user'
+	}
+	"""
+
+	def __init__(self, json_operation):
+		self.title = validate(json_operation, 'title', str)
+		self.content = validate_content(json_operation)
+		self.user = validate(json_operation, 'user', str)
+
+	def process(self, transaction):
+		chunk = transaction.get_data_chunk(
+			title=self.title
+		)
+
+		if self.user != chunk.owner:
+			transaction.failure('permission denied')
+
+		chunk.content = self.content
+
+	def log_summary(self):
+		return "write_data_chunk(title={}, user={})".format(
+			self.title,
+			self.user
 		)
 
 # ---------------------------------------------------------------- RPC INTERFACE
