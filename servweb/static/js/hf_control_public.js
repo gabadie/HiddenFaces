@@ -73,6 +73,7 @@ hf_control.signed_out.login = function(domElem)
             hf_control.view('/');
             return;
         }
-        alert('loged in as: ' + user_hash); // TODO
+
+        hf_control.signed_in.view('/');
     });
 }

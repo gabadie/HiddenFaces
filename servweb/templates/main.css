@@ -37,3 +37,46 @@ body
 {
     width: 100%;
 }
+
+
+/* -------------------------------------------------------------- Page layout */
+
+#pageLayoutTop
+{
+    background: {{theme.color.reversed_background}};
+    color: {{theme.color.reversed_text}};
+}
+
+#pageLayoutTop a
+{
+    padding: 8px 20px;
+    display: inline-block;
+    font-weight: bolder;
+    color: {{theme.color.reversed_text}};
+}
+
+#pageLayoutTop a:hover
+{
+    background: #000000;
+}
+
+#pageLayoutWidth
+{
+    margin: 0 auto;
+    width: 1000px;
+}
+
+#pageLayoutLeftColumn
+{
+    height: 400px;
+    width: 200px;
+    border-right: 1px solid {{theme.color.reversed_background}};
+}
+
+#pageLayoutBottom
+{
+    padding: 40px 0 200px 0;
+    width: 100%;
+    text-align: center;
+    border-top: 1px solid {{theme.color.reversed_background}};
+}

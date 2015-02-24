@@ -8,13 +8,22 @@ hf_ui.templatesCaches = new Map();
     @param <domElement>: element dom of html page root
     @return: page html
 */
-hf_ui.apply_template = function(template_name, params, domElement)
+hf_ui.apply_template = function(template_name, params, domElement, callback)
 {
+    assert(typeof template_name == 'string');
+
+    callback = callback || null;
+
     if (hf_ui.templatesCaches.has(template_name))
     {
         var template = hf_ui.templatesCaches.get(template_name);
 
         domElement.innerHTML = template(params);
+
+        if (callback)
+        {
+            callback();
+        }
 
         return;
     }
@@ -43,6 +52,11 @@ hf_ui.apply_template = function(template_name, params, domElement)
                 hf_ui.templatesCaches.set(template_name, template);
 
                 domElement.innerHTML = template(params);
+
+                if (callback)
+                {
+                    callback();
+                }
             }
         }
     }
