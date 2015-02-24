@@ -35,10 +35,20 @@ class DataOperation(object):
 	def success(self):
 		""" Method called once all the transaction's operations has successed
 		"""
-		raise NotImplementedError
+		if self.logger:
+			self.logger.info('{} successed'.format(self.log_summary()))
 
 	def failure(self, raison):
 		""" Method called if at least one operation has failed
+		"""
+		if self.logger:
+			self.logger.info('{} failed ({})'.format(
+				self.log_summary(),
+				raison
+			))
+
+	def log_summary(self):
+		""" Method called if the default failure and success callbacks
 		"""
 		raise NotImplementedError
 
@@ -79,25 +89,44 @@ class DataTransaction(object):
 		self.current_operation_id = None
 		self.status = 'ok'
 
-	def get_data_chunk(self, chunk_name):
+	def get_data_chunk(self, title):
 		""" Access database
 		"""
 		data_chunk = None
 
-		if chunk_name in self.data_chunk_cache:
+		if title in self.data_chunk_cache:
 			data_chunk = self.data_chunk_cache
 
 		else:
 			try:
-				data_chunk = DataChunk.objects.get(title=chunk_name)
+				data_chunk = DataChunk.objects.get(title=title)
 
 			except:
-				self.failure('unknown data chunk `{}`'.format(chunk_name))
+				self.failure('unknown data chunk `{}`'.format(title))
 
-			self.data_chunk_cache[chunk_name] = data_chunk
+			self.data_chunk_cache[title] = data_chunk
 
-		assert DataChunk != None
+		assert data_chunk != None
 
+		return data_chunk
+
+	def create_data_chunk(self, title, content, owner, append_enabled):
+		""" Access database
+		"""
+		try:
+			data_chunk = DataChunk.objects.get(title=title)
+			self.failure('data chunk `{}` already exists'.format(title))
+
+		except:
+			pass
+
+		data_chunk = DataChunk(
+			title=title,
+			owner=owner,
+			content=content,
+			append_enabled=append_enabled
+		)
+		self.data_chunk_cache[title] = data_chunk
 		return data_chunk
 
 	def failure(self, error_msg):
@@ -122,10 +151,11 @@ class DataTransaction(object):
 		assert self.status == 'ok'
 
 		for data_chunk in self.data_chunk_cache.values():
+			print data_chunk.to_json()
 			data_chunk.save()
 
 	@staticmethod
-	def process(json_operations):
+	def process(json_operations, logger=None):
 		""" json_operation = [
 			{
 				'__operation': '/create_data_chunk'
@@ -144,6 +174,7 @@ class DataTransaction(object):
 
 				operation_class = DATA_CHUNK_OPERATIONS[json_operation['__operation']]
 				operation = operation_class(json_operation)
+				operation.logger = logger
 
 				operations.append(operation)
 
@@ -186,8 +217,49 @@ class DataTransaction(object):
 
 # -------------------------------------------------------------- DATA OPERATIONS
 
+def validate(json_operation, key, value_type):
+	assert key in json_operation
+	assert isinstance(json_operation[key], value_type)
+	return json_operation[key]
 
+def validate_content(json_operation):
+	assert 'content' in json_operation
+	assert isinstance(json_operation['content'], list)
+	for s in json_operation['content']:
+		assert isinstance(s, str)
 
+	return json_operation['content']
+
+@data_chunk_op('/create_data_chunk')
+class CreateDataChunk(DataOperation):
+	""" json_operation = {
+		'title': 			'name',
+		'content': 			['hello', 'world'],
+		'owner': 			'my_user',
+		'append_enabled': 	False
+	}
+	"""
+
+	def __init__(self, json_operation):
+		self.title = validate(json_operation, 'title', str)
+		self.content = validate_content(json_operation)
+		self.owner = validate(json_operation, 'owner', str)
+		self.append_enabled = validate(json_operation, 'append_enabled', bool)
+
+	def process(self, transaction):
+		transaction.create_data_chunk(
+			title=self.title,
+			content=self.content,
+			owner=self.owner,
+			append_enabled=self.append_enabled
+		)
+
+	def log_summary(self):
+		return "create_data_chunk(title={}, owner={}, append_enabled={})".format(
+			self.title,
+			self.owner,
+			self.append_enabled
+		)
 
 # ---------------------------------------------------------------- RPC INTERFACE
 

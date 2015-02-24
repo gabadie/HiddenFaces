@@ -237,5 +237,27 @@ def test_transaction_process_failure():
 	assert OpTestOrder.current_id == 5
 
 
+# ------------------------------------------------- TEST TRANSACTIONS OPERATIONS
+
+def test_create_data_chunk():
+	json_operations = [
+		{
+			'__operation': 		'/create_data_chunk',
+			'title': 			'my_chunk',
+			'content': 			['hello', 'world'],
+			'owner': 			'my_user',
+			'append_enabled': 	False
+		}
+	]
+
+	serverRPC = DataManager(db_name)
+	serverRPC.db.drop_database(db_name)
+
+	assert len(DataChunk.objects) == 0
+	assert DataTransaction.process(json_operations) == True
+	assert len(DataChunk.objects) == 1
+	assert len(json.loads(serverRPC.xmlrpc_read_chunk('my_chunk'))) == len(json_operations[0]['content'])
+
+
 if __name__ == '__main__':
 	test_chunk_creation()
