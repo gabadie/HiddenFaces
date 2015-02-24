@@ -118,6 +118,7 @@ test_hf_service.push_notification = function()
         'content': 'Hi John! How are you?'
     };
 
+    hf_service.login_user(user_profile0);
     hf_service.get_user_public_chunk(user_hash0, function(user_public_chunk){
         hf_com.get_data_chunk(
             user_public_chunk['system']['protected_chunk']['name'],
