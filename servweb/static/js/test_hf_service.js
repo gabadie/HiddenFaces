@@ -15,6 +15,20 @@ test_hf_service.john_smith_profile = function(id)
     }
 }
 
+test_hf_service.myprofile = function(id) 
+{
+    id = id || 0;
+
+    return {
+        'name':         'hidden ' + id,
+        'sirname':      'faces',
+        'sex':          'm',
+        'email':        'hiddenFaces' + id + '@example.com',
+        'password':     'CIA'  + id,
+        'birth_date':   '1992-09-10'
+    }   
+}
+
 test_hf_service.user_example_post = function(user_hash)
 {
     return {
@@ -121,6 +135,7 @@ test_hf_service.push_notification = function()
 {
     var user_profile0 = test_hf_service.john_smith_profile();
     var user_hash0 = hf_service.create_user(user_profile0);
+
     var notification = {
         '__meta': {
             'type': '/notification/message',
@@ -152,6 +167,21 @@ test_hf_service.push_notification = function()
     });
 
     test_utils.assert_success(3);
+}
+
+test_hf_service.contact_request = function() {
+
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+
+    var user_hash0 = hf_service.create_user(user_profile0);
+    var user_hash1 = hf_service.create_user(user_profile1);
+
+    hf_service.login_user(user_profile0);
+
+    hf_service.send_contact_request(user_hash1, "hello, could you add me as friend, DDD", function() {
+        test_utils.success("sent contact request successful");
+    });
 }
 
 test_hf_service.post_message = function()
@@ -237,4 +267,5 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.post_message, 'test_hf_service.post_message');
     test_utils.run(test_hf_service.create_thread, 'test_hf_service.create_thread');
     test_utils.run(test_hf_service.append_post_to_threads, 'test_hf_service.append_post_to_threads');
+    test_utils.run(test_hf_service.contact_request, "test_hf_service.contact_request");
 }
