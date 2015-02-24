@@ -28,7 +28,7 @@ def read_page():
     answer = {
         'status' : 'ok'
     }
-
+    print request_params
     page_path = request_params['page_request']
 
     try:

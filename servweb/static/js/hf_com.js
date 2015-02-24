@@ -31,7 +31,7 @@ hf_com.json_request = function(request_params, callback) {
     request.onreadystatechange = function() {
         if (request.readyState == 4)
         {
-            json = JSON.parse(request.responseText)
+            json = JSON.parse(request.responseText);
 
             callback(request.status, json);
         }
