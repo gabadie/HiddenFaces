@@ -56,8 +56,8 @@ hf_service.user_public_chunk = function()
  */
 hf_service.user_private_chunk_name = function(user_login_profile)
 {
-    assert(typeof user_login_profile['email'] == "string");
-    assert(typeof user_login_profile['password'] == "string");
+    assert(typeof user_login_profile['email'] == "string", "email is not string");
+    assert(typeof user_login_profile['password'] == "string", "password is not string");
 
     var salt = 'CYh6ON6zP0DPMLkJuzrV';
 
@@ -237,7 +237,7 @@ hf_service.get_user_public_chunk = function(user_hash, callback)
  */
 hf_service.login_user = function(user_login_profile, callback)
 {
-    assert(!hf_service.is_connected());
+    assert(!hf_service.is_connected(), "user not connect in login user");
 
     var private_chunk_name =
             hf_service.user_private_chunk_name(user_login_profile);

@@ -10,7 +10,8 @@
  * }
  */
 hf_service.notification_automation = {
-    '/notification/message': null
+    '/notification/message': null,
+    '/notification/contact_request': null
 };
 
 /*
@@ -55,4 +56,27 @@ hf_service.push_notification = function(user_hash, notification_json, callback)
             }
         )
     });
+}
+
+/*
+ * Send a request to friend
+ *  
+ * @params <user_has>: user's hash
+ * @params <message>: message to send to 2nd user
+ * @params <callback>: function to callback
+ */
+hf_service.send_contact_request = function(user_hash, message, callback) 
+{
+    assert(hf_service.is_connected(), "user not connected in hf_service.send_contact_request");
+    var my_hash = hf_service.user_hash();
+
+    var notification = {
+        '__meta': {
+            'type': '/notification/contact_request',
+            'author_user_hash': my_hash
+        },
+        'content': message
+    };
+
+    hf_service.push_notification(user_hash, notification, callback);
 }
