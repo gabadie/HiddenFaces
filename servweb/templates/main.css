@@ -1,0 +1,38 @@
+
+body
+{
+    background: {{theme.color.background}};
+    color: {{theme.color.text}};
+}
+
+
+/* ---------------------------------------------------------------- Connexion */
+
+.central_panel
+{
+    width: 400px;
+    margin: 15% auto 0 auto;
+    padding: 10px 30px;
+    border-radius: 5px;
+    background: {{theme.color.reversed_background}};
+    color: {{theme.color.reversed_text}};
+}
+
+.central_panel .title
+{
+    padding: 5px 0 0 0;
+    font-size: 24px;
+    font-weight: bolder;
+}
+
+.central_panel .content
+{
+    padding: 5px 30px 15px 30px;
+}
+
+/* ---------------------------------------------------------------- Connexion */
+
+.login_panel input, .login_panel button
+{
+    width: 100%;
+}

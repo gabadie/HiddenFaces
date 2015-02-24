@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, Response
 import xmlrpclib
 import os.path
 import json
@@ -11,6 +11,7 @@ app.debug = True
 
 server = xmlrpclib.Server('http://localhost:7090/')
 
+
 # ------------------------------------------------------------------------------ INDEX
 
 @app.route("/")
@@ -20,6 +21,17 @@ def index_page():
 @app.route("/test.html")
 def test_page():
     return render_template('index.html', test=True)
+
+@app.route("/static/css/main.css")
+def css_main():
+    theme = {}
+    with open(os.path.dirname(os.path.abspath(__file__)) + '/theme.json') as f:
+        theme = json.loads(f.read())
+
+    return Response(
+        render_template('main.css', theme=theme),
+        mimetype='text/css'
+    )
 
 
 # ------------------------------------------------------------------------------ TEMPLATE

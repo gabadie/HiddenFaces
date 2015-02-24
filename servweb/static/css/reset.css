@@ -1,0 +1,45 @@
+/* 
+	Cascading Style Sheet (CSS) Document : 
+	all rights reserved to Guillaume Abadie 
+*/
+
+	/* default */
+	
+			html, body, div, ul, ol, li, dl, dt, dd, h1, h2, h3, h4, h5, h6, pre, form, p, blockquote, fieldset, input, tr, td, table { 
+				margin: 0; 
+				padding: 0;
+				cursor:default;
+			}
+			
+			fieldset,img { 
+				border: none; 
+			}
+			
+			table { 
+				border-collapse: collapse; 
+				border-spacing: 0; 
+			}
+			
+			body {
+				margin: 0px;
+				padding: 0px;
+				cursor:default;
+			}
+
+			a, label {
+				text-decoration:none;
+				color: #222222;
+				cursor:default;
+				overflow: hidden;
+				border: none ;
+				cursor: pointer ;
+			}
+
+			a:hover, label:hover {
+				color: #000000 ;
+				text-decoration:underline;
+			}
+
+			a:active, label:active {
+				color: #666666 ;
+			}
