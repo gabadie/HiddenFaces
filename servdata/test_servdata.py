@@ -145,6 +145,11 @@ def test_transaction_sanity():
 
 	assert DataTransaction.process(json_operations) == True
 
+
+def test_empty_transaction():
+	assert DataTransaction.process([]) == False
+
+
 def test_transaction_order():
 	json_operations = [
 		{

@@ -237,6 +237,10 @@ class DataTransaction(object):
 		try:
 			assert isinstance(json_operations, list)
 
+			if len(json_operations) == 0:
+				logger.info('transaction doesn\'t have any operations')
+				return False
+
 			for json_operation in json_operations:
 				assert isinstance(json_operation, dict)
 				assert '__operation' in json_operation, 'missing __operation'
@@ -249,7 +253,8 @@ class DataTransaction(object):
 				operations.append(operation)
 
 		except Exception as exception:
-			#TODO: log invalid json_operation
+			if logger:
+				logger.info('failed to parse transaction\'s json operations')
 
 			return False
 
@@ -456,6 +461,31 @@ class DataManager(xmlrpc.XMLRPC):
 		self.db.drop_database(self.db_name)
 		self.logger.info("drop database")
 
+	def xmlrpc_read_chunk(self, title):
+		""" Reads a data chunk from database
+		"""
+		self.logger.info("getting chunk : title={}".format(title))
+
+		try:
+			chunk = DataChunk.objects.get(title=title)
+			self.logger.info("getting chunk : chunk found")
+			return json.dumps(chunk.content)
+		except mongoengine.DoesNotExist as e:
+			self.logger.error("getting chunk : chunk not found, error message={}".format(e))
+			return None
+
+	def xmlrpc_data_chunk_transaction(self, json_operations):
+		""" Processes a data chunk transactions on the database
+		"""
+		process_result = DataTransaction.process(json_operations, self.logger)
+
+		assert process_result in [True, False]
+
+		return process_result
+
+
+	# --------------------------------------------------- BACKWARD COMPATIBILITY
+
 	def xmlrpc_new_chunk(self, title, owner, content, append_enabled):
 
 		chunk = None
@@ -483,19 +513,6 @@ class DataManager(xmlrpc.XMLRPC):
 			self.logger.info("chunk modification : chunk modified, right owner={}".format(user))
 			chunk.content = content
 			chunk.save()
-
-	def xmlrpc_read_chunk(self, title):
-
-		chunk = None
-		self.logger.info("getting chunk : title={}".format(title))
-
-		try:
-			chunk = DataChunk.objects.get(title=title)
-			self.logger.info("getting chunk : chunk found")
-			return json.dumps(chunk.content)
-		except mongoengine.DoesNotExist as e:
-			self.logger.error("getting chunk : chunk not found, error message={}".format(e))
-			return None
 
 	def xmlrpc_append_content(self, title, content):
 
