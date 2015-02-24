@@ -62,18 +62,28 @@ hf_com.Transaction = function()
 {
     // operations to send
     this.json_operations = [];
+    this.post_operations = [];
     this.commited = false;
 
     /*
      * Appends a json operation to the transaction
+     *
+     * @param <json_operation>: JSON operation syntax to send to the data server
+     *      throught the web server
+     * @param <receive_callback>: callback to be called once received but before
+     *      send back to the user.
      */
-    this.append_operation = function(json_operation)
+    this.append_operation = function(json_operation, receive_callback)
     {
         assert('__operation' in json_operation);
 
+        receive_callback = receive_callback || null;
+
         this.json_operations[this.json_operations.length] = json_operation;
+        this.post_operations[this.post_operations.length] = receive_callback;
 
         assert(this.json_operations.length > 0);
+        assert(this.json_operations.length == this.post_operations.length);
 
         return this;
     }
@@ -97,11 +107,28 @@ hf_com.Transaction = function()
 
         this.commited = true;
 
+        var transaction = this;
+
         return hf_com.json_request(params, function(status, json) {
             if (status != 200)
             {
                 alert(status);
                 return;
+            }
+
+            assert(transaction.json_operations.length == transaction.post_operations.length);
+
+            if (json['status'] == 'ok')
+            {
+                for (var i = 0; i < transaction.post_operations.length; i++)
+                {
+                    if (transaction.post_operations[i] == null)
+                    {
+                        continue;
+                    }
+
+                    transaction.post_operations[i](json, i);
+                }
             }
 
             if (callback != null)
@@ -134,6 +161,44 @@ hf_com.Transaction = function()
             'owner':            owner,
             'append_enabled':   public_append
         })
+    }
+
+    /*
+     * @param <chunk_name>: the data chunk's name
+     * @param <decryption_key>: the data chunk's decryption key
+     *
+     *  function commit_callback(json_message)
+     *  {
+     *      json_message['chunk'][<chunk_name>]
+     *  }
+     */
+    this.get_data_chunk = function(chunk_name, decryption_key)
+    {
+        assert(typeof chunk_name == "string");
+        assert(typeof decryption_key == "string");
+
+        return this.append_operation(
+            {
+                '__operation':      '/get_data_chunk',
+                'title':            chunk_name
+            },
+            function(json, operation_id){
+                if (!('chunk' in json))
+                {
+                    json['chunk'] = {};
+                }
+
+                var encrypted_chunk_content = json['operations_return'][operation_id];
+                var chunk_content = [];
+
+                for (var i = 0; i < encrypted_chunk_content.length; i++)
+                {
+                    chunk_content[i] = hf_com.decrypt(decryption_key, encrypted_chunk_content[i]);
+                }
+
+                json['chunk'][chunk_name] = chunk_content;
+            }
+        )
     }
 
     /*
@@ -384,7 +449,7 @@ hf_com.encrypt_RSA = function(encryption_key, data) {
 /*
 * @param <encryption_key>: data's encryption key
 *
-* @return: key for crypting 
+* @return: key for crypting
 */
 hf_com.get_key = function(encryption_key) {
     var splitted_key = encryption_key.split("\n");

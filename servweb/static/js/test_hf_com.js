@@ -95,6 +95,21 @@ test_hf_com.test_data_chunk_deletions = function()
     test_utils.assert_success(4 + 2);
 }
 
+test_hf_com.transaction_get_data_chunk = function()
+{
+    var t = new hf_com.Transaction();
+    t.create_data_chunk('chunk0', 'user', '', ['hello'], false);
+    t.create_data_chunk('chunk1', 'user', '', ['foo', 'bar'], false);
+    t.get_data_chunk('chunk0', '');
+    t.get_data_chunk('chunk1', '');
+    t.commit(function(json){
+        test_utils.assert(json['chunk']['chunk0'].length == 1, "hf_com.Transaction.get_data_chunk('chunk0', '') failed");
+        test_utils.assert(json['chunk']['chunk1'].length == 2, "hf_com.Transaction.get_data_chunk('chunk1', '') failed");
+    });
+
+    test_utils.assert_success(2);
+}
+
 test_hf_com.test_encrypt = function() {
     var key = "AES \n mypassword";
     var data = "data to encrypt";
@@ -146,6 +161,7 @@ test_hf_com.main = function()
     test_utils.run(test_hf_com.test_create_data_chunk, 'test_hf_com.test_create_data_chunk');
     test_utils.run(test_hf_com.test_data_chunk_modifications, 'test_hf_com.test_data_chunk_operations');
     test_utils.run(test_hf_com.test_data_chunk_deletions, 'test_hf_com.test_data_chunk_deletions');
+    test_utils.run(test_hf_com.transaction_get_data_chunk, 'test_hf_com.transaction_get_data_chunk');
 
     // Test for encrypt AES
     test_utils.run(test_hf_com.test_encrypt, "test_hf_com.test_encrypt");
