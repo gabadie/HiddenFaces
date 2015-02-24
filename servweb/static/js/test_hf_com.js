@@ -108,8 +108,8 @@ test_hf_com.test_decrypt = function() {
     var key = "AES \n mypassword";
     var data = "data to encrypt";
 
-    var encrypted_data = sjcl.encrypt(key, data);
-    var decrypted_data = sjcl.decrypt(key, encrypted_data);
+    var encrypted_data = sjcl.encrypt(hf_com.get_key(key), data);
+    var decrypted_data = hf_com.decrypt(key, encrypted_data);
     test_utils.assert(data === decrypted_data, "test decrypt data with AES method");
 }
 
@@ -118,6 +118,11 @@ test_hf_com.test_decrypt_empty_key = function() {
     var data = "data to encrypt";
     var decrypted_data = hf_com.decrypt(key,data);
     test_utils.assert(data === decrypted_data, "test encrypt data AES with empty key");
+}
+
+test_hf_com.test_is_RSA_key = function() {
+    var key = "RSA-1024-Public \n -----BEGIN PUBLIC KEY----- \nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDlOJu6TyygqxfWT7eLtGDwajtN\nFOb9I5XRb6khyfD1Yt3YiCgQWMNW649887VGJiGr/L5i2osbl8C9+WJTeucF+S76\nxFxdU6jE0NQ+Z+zEdhUTooNRaY5nZiu5PgDB0ED/ZKBUSLKL7eibMxZtMlUDHjm4gwQco1KRMDSmXSMkDwIDAQAB\n-----END PUBLIC KEY-----";
+    test_utils.assert(hf_com.is_RSA_key(key) === true, "is RSA key test");
 }
 
 test_hf_com.main = function()
@@ -130,4 +135,6 @@ test_hf_com.main = function()
     test_utils.run(test_hf_com.test_encrypt_empty_key, "test_hf_com.test_encrypt_empty_key");
     test_utils.run(test_hf_com.test_decrypt, "test_hf_com.test_decrypt");
     test_utils.run(test_hf_com.test_decrypt_empty_key, "test_hf_com.test_decrypt_empty_key");
+
+    test_utils.run(test_hf_com.test_is_RSA_key, "test_hf_com.test_is_RSA_key");
 }
