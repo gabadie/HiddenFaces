@@ -53,7 +53,11 @@ def get_data_chunk():
         'status': 'ok'
     }
 
-    if request_params['operation'] == 'create':
+    if request_params['operation'] == 'transaction':
+        if not server.data_chunk_transaction(request_params['operations']):
+            answer['status'] = 'failed'
+
+    elif request_params['operation'] == 'create':
         server.new_chunk(request_params['chunk_name'], request_params['user_hash'], request_params['chunk_content'], request_params['public_append'])
 
     elif request_params['operation'] == 'write':
