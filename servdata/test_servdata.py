@@ -317,5 +317,83 @@ def test_write_data_chunk():
 	assert len(json.loads(serverRPC.xmlrpc_read_chunk('my_chunk2'))) == len(json_operations3[1]['content'])
 
 
+def test_extend_data_chunk():
+	json_operations0 = [
+		{
+			'__operation': 		'/create_data_chunk',
+			'title': 			'my_chunk',
+			'content': 			['hello', 'world'],
+			'owner': 			'my_user',
+			'append_enabled': 	False
+		}
+	]
+
+	json_operations1 = [
+		{
+			'__operation': 		'/extend_data_chunk',
+			'title': 			json_operations0[0]['title'],
+			'content': 			['my', 'second'],
+			'user': 			json_operations0[0]['owner']
+		}
+	]
+
+	json_operations2 = [
+		{
+			'__operation': 		'/extend_data_chunk',
+			'title': 			json_operations0[0]['title'],
+			'content': 			['my', 'post', 'is', 'better'],
+			'user': 			'an other user'
+		}
+	]
+
+	json_operations3 = [
+		{
+			'__operation': 		'/create_data_chunk',
+			'title': 			'my_chunk2',
+			'content': 			['hello', 'world'],
+			'owner': 			json_operations0[0]['owner'],
+			'append_enabled': 	False
+		},
+		{
+			'__operation': 		'/extend_data_chunk',
+			'title': 			'my_chunk2',
+			'content': 			['my', 'second', 'post'],
+			'user': 			json_operations0[0]['owner']
+		}
+	]
+
+	json_operations4 = [
+		{
+			'__operation': 		'/create_data_chunk',
+			'title': 			'my_chunk3',
+			'content': 			['hello', 'world'],
+			'owner': 			json_operations0[0]['owner'],
+			'append_enabled': 	True
+		},
+		{
+			'__operation': 		'/extend_data_chunk',
+			'title': 			'my_chunk3',
+			'content': 			['my', 'second', 'post'],
+			'user': 			'an other user'
+		}
+	]
+
+	serverRPC = DataManager(db_name)
+	serverRPC.db.drop_database(db_name)
+
+	assert DataTransaction.process(json_operations0) == True
+	assert DataTransaction.process(json_operations1) == True
+	assert len(json.loads(serverRPC.xmlrpc_read_chunk('my_chunk'))) == 4
+
+	assert DataTransaction.process(json_operations2) == False
+	assert len(json.loads(serverRPC.xmlrpc_read_chunk('my_chunk'))) == 4
+
+	assert DataTransaction.process(json_operations3) == True
+	assert len(json.loads(serverRPC.xmlrpc_read_chunk('my_chunk2'))) == 5
+
+	assert DataTransaction.process(json_operations4) == True
+	assert len(json.loads(serverRPC.xmlrpc_read_chunk('my_chunk3'))) == 5
+
+
 if __name__ == '__main__':
 	test_chunk_creation()

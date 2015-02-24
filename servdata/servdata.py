@@ -292,6 +292,43 @@ class WriteDataChunk(DataOperation):
 			self.user
 		)
 
+@data_chunk_op('/extend_data_chunk')
+class ExtendDataChunk(DataOperation):
+	""" json_operation = {
+		'title': 			'name',
+		'content': 			['hello', 'world'],
+		'user': 			'my_user'
+	}
+	"""
+
+	def __init__(self, json_operation):
+		self.title = validate(json_operation, 'title', str)
+		self.content = validate_content(json_operation)
+		self.user = validate(json_operation, 'user', str)
+
+	def process(self, transaction):
+		chunk = transaction.get_data_chunk(
+			title=self.title
+		)
+
+		if self.user == chunk.owner:
+			pass
+
+		elif chunk.append_enabled:
+			pass
+
+		else:
+			transaction.failure('permission denied')
+
+		chunk.content.extend(self.content)
+
+	def log_summary(self):
+		return "extend_data_chunk(title={}, user={})".format(
+			self.title,
+			self.user
+		)
+
+
 # ---------------------------------------------------------------- RPC INTERFACE
 
 class DataManager(xmlrpc.XMLRPC):
