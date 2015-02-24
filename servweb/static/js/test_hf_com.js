@@ -91,9 +91,53 @@ test_hf_com.test_data_chunk_deletions = function()
     });
 }
 
+test_hf_com.test_encrypt = function() {
+    var key = "AES \n mypassword";
+    var data = "data to encrypt";
+    var is_AES = hf_com.is_AES_key(key);
+    test_utils.assert(is_AES === true, "test is_AES function for encrypting");
+    
+    var encrypted_data = hf_com.encrypt(key, data);
+
+    var get_key = hf_com.get_key(key);
+    test_utils.assert(get_key === " mypassword", "test get_key for encrypting");
+
+    var decrypted_data = sjcl.decrypt(get_key, encrypted_data);
+    test_utils.assert(data === decrypted_data, "test encrypt data for AES method");
+}
+
+test_hf_com.test_encrypt_empty_key = function() {
+    var key = "";
+    var data = "data to encrypt";
+    var encrypted_data = hf_com.encrypt(key,data);
+    test_utils.assert(data === encrypted_data, "test encrypt data AES with empty key");
+}
+
+test_hf_com.test_decrypt = function() {
+    var key = "AES \n mypassword";
+    var data = "data to encrypt";
+
+    var encrypted_data = sjcl.encrypt(key, data);
+    var decrypted_data = sjcl.decrypt(key, encrypted_data);
+    test_utils.assert(data === decrypted_data, "test decrypt data with AES method");
+}
+
+test_hf_com.test_decrypt_empty_key = function() {
+    var key = "";
+    var data = "data to encrypt";
+    var decrypted_data = hf_com.decrypt(key,data);
+    test_utils.assert(data === decrypted_data, "test encrypt data AES with empty key");
+}
+
 test_hf_com.main = function()
 {
     test_utils.run(test_hf_com.test_create_data_chunk, 'test_hf_com.test_create_data_chunk');
     test_utils.run(test_hf_com.test_data_chunk_modifications, 'test_hf_com.test_data_chunk_operations');
-    test_utils.run(test_hf_com.test_data_chunk_deletions, 'test_hf_com.test_data_chunk_delections');
+    test_utils.run(test_hf_com.test_data_chunk_deletions, 'test_hf_com.test_data_chunk_deletions');
+
+    // Test for encrypt AES
+    test_utils.run(test_hf_com.test_encrypt, "test_hf_com.test_encrypt");
+    test_utils.run(test_hf_com.test_encrypt_empty_key, "test_hf_com.test_encrypt_empty_key");
+    test_utils.run(test_hf_com.test_decrypt, "test_hf_com.test_decrypt");
+    test_utils.run(test_hf_com.test_decrypt_empty_key, "test_hf_com.test_decrypt_empty_key");
 }
