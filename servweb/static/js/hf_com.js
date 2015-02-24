@@ -326,12 +326,74 @@ hf_com.encrypt = function(encryption_key, data)
     assert(typeof encryption_key == "string", "wrong type for encryption_key")
     assert(typeof data == "string", "wrong type for data")
 
-    if (encryption_key == '')
-    {
-        return data;
+    if (encryption_key == ''){
+         return data;
     }
 
-    assert(false, "TODO: issues #12 and #13");
+    if(hf_com.is_AES_key(encryption_key)) {
+        return hf_com.encrypt_AES(encryption_key, data);
+    } else if (hf_com.is_RSA(encryption_key)){
+        return hf_com.encrypt_RSA(encryption_key, data);
+    } else {
+        assert(false, "your key to encrypt is false");
+    }
+}
+
+/*
+* @param <encryption_key>: the key for encrypting
+*
+* @return: true if it's key for aes encrypting, false if other
+*/
+hf_com.is_AES_key = function(key) {
+    var splitted_key = key.split("\n")[0];
+    return (splitted_key.trim().toUpperCase() === "AES".toUpperCase());
+}
+
+/*
+* @param <encryption_key>: the key for encrypting
+*
+* @return: true if it's key for RSA encrypting, false if other
+*/
+hf_com.is_RSA_key = function(key) {
+    var splitted_key = key.split("\n")[0];
+    return (splitted_key.trim().toUpperCase() === "RSA-1024-Public".toUpperCase());
+}
+
+/*
+* @param <encryption_key>: data's encryption key
+* @param <data>: data to encrypt
+*
+* @return: crypted data by AES method
+*/
+hf_com.encrypt_AES = function(encryption_key, data) {
+    var key = hf_com.get_key(encryption_key);
+    return sjcl.encrypt(key, data);
+}
+
+/*
+* @param <encryption_key>: data's encryption key
+* @param <data>: data to encrypt
+*
+* @return: crypted data by RSA method
+*/
+hf_com.encrypt_RSA = function(encryption_key, data) {
+    var key = hf_com.get_key(encryption_key);
+   // alert("TODO encrypt RSA");
+}
+
+/*
+* @param <encryption_key>: data's encryption key
+*
+* @return: key for crypting 
+*/
+hf_com.get_key = function(encryption_key) {
+    var splitted_key = encryption_key.split("\n");
+    var key = "";
+    var i;
+    for(i = 1; i < splitted_key.length; i++) {
+        key += splitted_key[i];
+    }
+    return key;
 }
 
 /*
@@ -350,5 +412,32 @@ hf_com.decrypt = function(decryption_key, encrypted_data)
         return encrypted_data;
     }
 
-    assert(false, "TODO: issues #12 and #13");
+    if(hf_com.is_AES_key(decryption_key)) {
+        return hf_com.decrypt_AES(decryption_key, encrypted_data);
+    } else if (hf_com.is_RSA_key(decryption_key)){
+        return hf_com.decrypt_RSA(decryption_key, encrypted_data);
+    } else {
+        assert(false, "your key to decrypt is false");
+    }
+}
+
+/*
+ * @param <decryption_key>: the data's decryption key
+ * @param <encrypted_data>: the data to decrypt.
+ *
+ * @returns the decrypted data by AES method
+ */
+hf_com.decrypt_AES = function(decryption_key, encrypted_data) {
+    var key = hf_com.get_key(decryption_key);
+    return sjcl.decrypt(key, encrypted_data);
+}
+
+/*
+ * @param <decryption_key>: the data's decryption key
+ * @param <encrypted_data>: the data to decrypt.
+ *
+ * @returns the decrypted data by RSA method
+ */
+hf_com.decrypt_RSA = function(decryption_key, encrypted_data) {
+    //TODO
 }
