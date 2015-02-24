@@ -15,6 +15,17 @@ test_hf_service.john_smith_profile = function(id)
     }
 }
 
+test_hf_service.user_example_post = function(user_hash)
+{
+    return {
+        '__meta': {
+            'type': '/post',
+            'author_user_hash': user_hash
+            },
+        'content': "I'm new in HiddenFaces. What should I do first?"
+    }
+}
+
 test_hf_service.create_account = function()
 {
     var user_profile0 = test_hf_service.john_smith_profile();
@@ -152,18 +163,66 @@ test_hf_service.post_message = function()
     hf_service.login_user(user_profile, null);
     test_utils.assert(hf_service.is_connected(), 'should be connected after');
 
-    var post_content = 
-        {'__meta': {
-            'type': '/post',
-            'author_user_hash': user_hash
-            },
-        'content': "I'm new in HiddenFaces. What should I do first?"
-        };
+    //post creation
+    var post_content = test_hf_service.user_example_post(user_hash);
+    var post_info = hf_service.create_post(user_hash,post_content);
+    
+    test_utils.assert(typeof post_info['post_chunk_name'] == "string");
+    test_utils.assert(typeof post_info['symetric_key'] == "string");
 
-    hf_service.create_post(user_hash,post_content, function(json_message){
-        test_utils.assert(typeof json_message['post_chunk_name'] == "string");
-        test_utils.assert(typeof json_message['symetric_key'] == "string");
-    });
+    test_utils.assert_success(3);
+}
+
+test_hf_service.create_thread = function()
+{
+    var user_profile = test_hf_service.john_smith_profile();
+    var user_hash = hf_service.create_user(user_profile);
+
+    //user connexion
+    hf_service.login_user(user_profile, null);
+    test_utils.assert(hf_service.is_connected(), 'should be connected after');
+
+    var thread_info = hf_service.create_thread(user_hash,true);
+    test_utils.assert(typeof thread_info['thread_chunk_name'] == "string");
+    test_utils.assert(typeof thread_info['symetric_key'] == "string");
+
+    test_utils.assert_success(3);
+}
+
+test_hf_service.append_post_to_threads = function()
+{
+    var user_profile = test_hf_service.john_smith_profile();
+    var user_hash = hf_service.create_user(user_profile);
+
+    //user connexion
+    hf_service.login_user(user_profile, null);
+    test_utils.assert(hf_service.is_connected(), 'should be connected after');
+
+    //threads map creation
+    var thread1_info = hf_service.create_thread(user_hash,true);
+    var thread2_info = hf_service.create_thread(user_hash,true);
+    var threads_map = [thread1_info,thread2_info];
+
+    //post creation
+    var post_content = test_hf_service.user_example_post(user_hash);
+    var post_info = hf_service.create_post(user_hash,post_content);
+
+    hf_service.append_post_to_threads(post_info, threads_map);
+
+    hf_com.get_data_chunk(
+            thread1_info['thread_chunk_name'],
+            thread1_info['symetric_key'],
+            function(json_message){
+                test_utils.assert(json_message['chunk_content'].length == 1);
+            }
+        );
+    hf_com.get_data_chunk(
+            thread1_info['thread_chunk_name'],
+            thread1_info['symetric_key'],
+            function(json_message){
+                test_utils.assert(json_message['chunk_content'].length == 1);
+            }
+        );
 
     test_utils.assert_success(3);
 }
@@ -176,4 +235,6 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.save_user_chunks, 'test_hf_service.save_user_chunks');
     test_utils.run(test_hf_service.push_notification, 'test_hf_service.push_notification');
     test_utils.run(test_hf_service.post_message, 'test_hf_service.post_message');
+    test_utils.run(test_hf_service.create_thread, 'test_hf_service.create_thread');
+    test_utils.run(test_hf_service.append_post_to_threads, 'test_hf_service.append_post_to_threads');
 }

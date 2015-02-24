@@ -4,11 +4,11 @@
  * @param <user_hash>: the hash of the owner of the thread
  * @param <public_append>: if anyone can append content on the threads
  */
-hf_service.create_thread = function(user_hash, public_append, callback)
+hf_service.create_thread = function(user_hash, public_append)
 {
     assert(typeof user_hash == "string", "user_hash must be a string in hf_service.create_thread");
     assert(hf.is_hash(user_hash));
-    assert(assert(typeof public_append == "boolean", "public_append must be a boolean in hf_service.create_thread"))
+    assert(typeof public_append == "boolean", "public_append must be a boolean in hf_service.create_thread");
 
     var thread_content = [];
     var thread_chunk_name = 
@@ -30,10 +30,10 @@ hf_service.create_thread = function(user_hash, public_append, callback)
         'symetric_key':   symetric_key
     }; 
 
-    callback(thread_info);
+    return thread_info;
 }
 
-hf_service.create_post = function(user_hash, post_content, callback)
+hf_service.create_post = function(user_hash, post_content)
 {
     assert(typeof user_hash == "string", "user_hash must be a string in hf_service.create_post");
     assert(hf.is_hash(user_hash));
@@ -61,19 +61,32 @@ hf_service.create_post = function(user_hash, post_content, callback)
         'symetric_key':   symetric_key
     }; 
 
-    callback(post_info);
+    return post_info;
 }
 
 hf_service.append_post_to_threads = function(post_info, threads_map)
 {
-    assert(typeof post_info['chunk_name'] == "string");
-    assert(typeof post_info['decryption_key'] == "string");
+    assert(typeof post_info['post_chunk_name'] == "string");
+    assert(typeof post_info['symetric_key'] == "string");
     assert(threads_map instanceof Array, "threads_map must be an Array in hf_service.append_post_to_threads");
+
+    var stringified_post_info = JSON.stringify(post_info);
 
     for (var i = 0; i < threads_map.length; i++)
     {
         assert(typeof threads_map[i]['thread_chunk_name'] == "string");
-        assert(typeof threads_map[i]['thread_encryption_key'] == "string");
-        hf_com.append_data_chunk(threads_map[i]['thread_chunk_name'], threads_map[i]['thread_encryption_key'], post_info, null);
+        assert(typeof threads_map[i]['symetric_key'] == "string");
+        hf_com.append_data_chunk(threads_map[i]['thread_chunk_name'], threads_map[i]['symetric_key'], stringified_post_info, function(json_message) {
+                if (json_message['status'] != 'ok')
+                {
+                    allert(
+                        'hf_service.append_post_to_threads(' +
+                        stringified_post_info + ' , ' +
+                        threads_map[i]['thread_chunk_name'] +
+                        ') failed'
+                    );
+                    return;
+                }
+            });
     }
 }
