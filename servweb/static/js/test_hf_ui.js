@@ -1,32 +1,25 @@
 var test_hf_ui = {};
-var viewPath = 'test_view_template.html';
-var viewPath2 = 'test_view_template2.html';
-
-// Test function load, send a post ajax
-test_hf_ui.testLoad = function() {
-    var context = {title: "My New Post", body: "This is my first post!"};
-    hf_ui.load(viewPath, context, document.getElementById("test_hf_ui_1"));
-    test_utils.assert(1 == hf_ui.templatesCaches.size, "testLoad");
-}
 
 // Test function load_template, value return and the cache
-test_hf_ui.test_load_template = function() {
-    var context = {title: "My second Post", body: "This is my sencond post!"};
-    hf_ui.load_template(viewPath, context, document.getElementById("test_hf_ui_2"));
-    test_utils.assert(1 == hf_ui.templatesCaches.size, "test_load_template ");
+test_hf_ui.apply_template = function() {
+    var context = {
+        title: "My second Post",
+        body: "This is my sencond post!"
+    };
+
+    var viewPath = 'test_view_template.html';
+
+    hf_ui.templatesCaches = new Map();
+    test_utils.assert(hf_ui.templatesCaches.size == 0);
+
+    hf_ui.apply_template(viewPath, context, test_utils.domSandboxElem);
+    test_utils.assert(hf_ui.templatesCaches.size == 1, "apply_template() has cached successfully");
+
+    hf_ui.apply_template(viewPath, context, test_utils.domSandboxElem);
+    test_utils.assert(hf_ui.templatesCaches.size == 1, "apply_template() has used cache successfully");
 }
 
-test_hf_ui.test_load_template2 = function() {
-    var context = {body: "This is my third post!"};
-    hf_ui.load_template(viewPath2, context, document.getElementById("test_hf_ui_3"));
-    test_utils.assert(2 == hf_ui.templatesCaches.size, "test_load_template2 with 2 page in cache");
-}
-
-test_hf_ui.main = function() {
-
-    //test load
-    test_utils.run(test_hf_ui.testLoad, 'test_hf_ui.testLoad');
-
-    test_utils.run(test_hf_ui.test_load_template, 'test_hf_ui.test_load_template');
-    test_utils.run(test_hf_ui.test_load_template2, 'test_hf_ui.test_load_template2');
+test_hf_ui.main = function()
+{
+    test_utils.run(test_hf_ui.apply_template, 'test_hf_ui.apply_template');
 }

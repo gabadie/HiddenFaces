@@ -21,6 +21,9 @@ def index_page():
 def test_page():
     return render_template('index.html', test=True)
 
+
+# ------------------------------------------------------------------------------ TEMPLATE
+
 @app.route("/template/",methods=['POST'])
 def read_page():
     request_params = request.get_json()
@@ -28,19 +31,29 @@ def read_page():
     answer = {
         'status' : 'ok'
     }
-    print request_params
-    page_path = request_params['page_request']
+
+    template_name = request_params['template_name']
 
     try:
-        with open(page_path) as myFile:
-            page_content = myFile.read().replace("\n","")
+        template_source = ''
+        template_path = os.path.abspath('{}/static/view/{}'.format(
+            os.path.dirname(__file__),
+            template_name
+        ))
 
-        answer['page_content'] = page_content
-    except:
-        answer['status'] = 'failded'
-        answer['error'] = '404'
+        print template_path
+
+        with open(template_path) as myFile:
+            template_source = myFile.read()
+
+        answer['template_source'] = template_source
+
+    except Exception as e:
+        print e
+        answer['status'] = 'failed'
 
     return jsonify(answer)
+
 
 # ------------------------------------------------------------------------------ DATA CHUNK
 

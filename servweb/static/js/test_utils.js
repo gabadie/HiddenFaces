@@ -17,8 +17,11 @@ test_utils.run = function(testFunction, testName)
 
     // run the test function on a clean database
     test_utils.drop_database();
+    test_utils.domSandboxElem.innerHTML = '';
 
     testFunction();
+
+    test_utils.domSandboxElem.innerHTML = '';
 }
 
 /*
@@ -140,5 +143,6 @@ test_utils.drop_database = function()
 test_utils.init = function()
 {
     test_utils.domOutput = document.getElementById('test_output');
+    test_utils.domSandboxElem = document.getElementById('test_sandbox_element');
     test_utils.testId = 0;
 }
