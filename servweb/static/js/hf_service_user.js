@@ -80,12 +80,10 @@ hf_service.user_private_chunk_key = function(user_login_profile)
  */
 hf_service.create_user = function(user_profile)
 {
-    assert(typeof user_profile['name'] == "string");
-    assert(typeof user_profile['sirname'] == "string");
-    assert(typeof user_profile['sex'] == "string");
+    assert(typeof user_profile['first_name'] == "string");
+    assert(typeof user_profile['last_name'] == "string");
     assert(typeof user_profile['email'] == "string");
     assert(typeof user_profile['password'] == "string");
-    assert(typeof user_profile['birth_date'] == "string");
     assert(user_profile['password'].length > 0);
 
     var chunks_owner =
@@ -114,11 +112,9 @@ hf_service.create_user = function(user_profile)
             'key':          private_chunk_key
         },
         'profile': {
-            'name':         user_profile['name'],
-            'sirname':      user_profile['sirname'],
-            'sex':          user_profile['sex'],
+            'first_name':   user_profile['first_name'],
+            'last_name':    user_profile['last_name'],
             'email':        user_profile['email'],
-            'birth_date':   user_profile['birth_date'],
         },
         'system': {
             'protected_chunk': {
@@ -140,11 +136,9 @@ hf_service.create_user = function(user_profile)
             'chunk_name':   user_hash
         },
         'profile': {
-            'name':         private_chunk['profile']['name'],
-            'sirname':      private_chunk['profile']['sirname'],
-            'sex':          '',
-            'email':        '',
-            'birth_date':   ''
+            'first_name':   private_chunk['profile']['first_name'],
+            'last_name':    private_chunk['profile']['last_name'],
+            'email':        ''
         },
         'system': {
             'protected_chunk': {

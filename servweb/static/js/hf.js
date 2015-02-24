@@ -72,3 +72,16 @@ hf.generate_hash = function(salt)
 
     return hf.hash(new Date().toLocaleString() + '\n' + salt);
 }
+
+hf.inputs_to_json = function(domElement)
+{
+    var inputs = domElement.getElementsByTagName('input');
+    var obj = {};
+
+    for (var i = 0; i < inputs.length; i++)
+    {
+        obj[inputs[i].name] = inputs[i].value;
+    }
+
+    return obj;
+}

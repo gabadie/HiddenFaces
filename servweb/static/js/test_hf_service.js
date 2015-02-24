@@ -6,27 +6,13 @@ test_hf_service.john_smith_profile = function(id)
     id = id || 0;
 
     return {
-        'name':         'john ' + id,
-        'sirname':      'smith',
+        'first_name':   'john ' + id,
+        'last_name':    'smith',
         'sex':          'm',
         'email':        'john' + id + '@smith.com',
         'password':     'CIA'  + id,
         'birth_date':   '1995-08-27'
     }
-}
-
-test_hf_service.myprofile = function(id) 
-{
-    id = id || 0;
-
-    return {
-        'name':         'hidden ' + id,
-        'sirname':      'faces',
-        'sex':          'm',
-        'email':        'hiddenFaces' + id + '@example.com',
-        'password':     'CIA'  + id,
-        'birth_date':   '1992-09-10'
-    }   
 }
 
 test_hf_service.user_example_post = function(user_hash)
@@ -35,7 +21,7 @@ test_hf_service.user_example_post = function(user_hash)
         '__meta': {
             'type': '/post',
             'author_user_hash': user_hash
-            },
+        },
         'content': "I'm new in HiddenFaces. What should I do first?"
     }
 }
@@ -96,36 +82,36 @@ test_hf_service.login_user = function()
 
 test_hf_service.save_user_chunks = function()
 {
-    var new_birth_date = '1999-12-25';
+    var new_last_name = 'kennedy';
     var user_profile0 = test_hf_service.john_smith_profile();
     var user_hash0 = hf_service.create_user(user_profile0);
 
     hf_service.login_user(user_profile0);
-    hf_service.user_private_chunk['profile']['birth_date'] = new_birth_date;
-    hf_service.user_public_chunk()['profile']['birth_date'] = new_birth_date;
+    hf_service.user_private_chunk['profile']['last_name'] = new_last_name;
+    hf_service.user_public_chunk()['profile']['last_name'] = new_last_name;
     hf_service.disconnect();
 
     hf_service.login_user(user_profile0);
     test_utils.assert(
-        hf_service.user_private_chunk['profile']['birth_date'] == user_profile0['birth_date'],
+        hf_service.user_private_chunk['profile']['last_name'] == user_profile0['last_name'],
         'birth date should not be modified in the private chunk'
     );
     test_utils.assert(
-        hf_service.user_public_chunk()['profile']['birth_date'] == '',
-        'birth date should not be available in the public chunk'
+        hf_service.user_public_chunk()['profile']['last_name'] == user_profile0['last_name'],
+        'birth date should not be modified in the public chunk'
     );
-    hf_service.user_private_chunk['profile']['birth_date'] = new_birth_date;
-    hf_service.user_public_chunk()['profile']['birth_date'] = new_birth_date;
+    hf_service.user_private_chunk['profile']['last_name'] = new_last_name;
+    hf_service.user_public_chunk()['profile']['last_name'] = new_last_name;
     hf_service.save_user_chunks();
     hf_service.disconnect();
 
     hf_service.login_user(user_profile0);
     test_utils.assert(
-        hf_service.user_private_chunk['profile']['birth_date'] == new_birth_date,
+        hf_service.user_private_chunk['profile']['last_name'] == new_last_name,
         'birth date should be modified in the private chunk'
     );
     test_utils.assert(
-        hf_service.user_public_chunk()['profile']['birth_date'] == new_birth_date,
+        hf_service.user_public_chunk()['profile']['last_name'] == new_last_name,
         'birth date should be modified in the public chunk'
     );
     //hf_service.disconnect();
@@ -197,7 +183,7 @@ test_hf_service.post_message = function()
     //post creation
     var post_content = test_hf_service.user_example_post(user_hash);
     var post_info = hf_service.create_post(user_hash,post_content);
-    
+
     test_utils.assert(typeof post_info['post_chunk_name'] == "string");
     test_utils.assert(typeof post_info['symetric_key'] == "string");
 
