@@ -1,7 +1,7 @@
 
 var test_hf_com = {};
 
-setup_data_base = function()
+test_hf_com.setup_data_base = function()
 {
     //create users
     hf_com.create_data_chunk("private_user1", "user1", "", [], false, function(json_message){
@@ -50,7 +50,7 @@ test_hf_com.test_create_data_chunk = function()
 
 test_hf_com.test_data_chunk_modifications = function()
 {
-    setup_data_base();
+    test_hf_com.setup_data_base();
 
     //modify data chunk
     hf_com.write_data_chunk("private_user2","user2","",["name","birthday","interests"],function(json_message){
@@ -73,11 +73,13 @@ test_hf_com.test_data_chunk_modifications = function()
     hf_com.get_data_chunk("post1", "", function(json_message){
         test_utils.assert(json_message["chunk_content"].length == 2, "test get content post1");
     });
+
+    test_utils.assert_success(4 + 6);
 }
 
 test_hf_com.test_data_chunk_deletions = function()
 {
-    setup_data_base();
+    test_hf_com.setup_data_base();
 
     //delete data chunks
     hf_com.delete_data_chunk("post1","user2",null);
@@ -89,6 +91,8 @@ test_hf_com.test_data_chunk_deletions = function()
     hf_com.get_data_chunk("post2", "", function(json_message){
         test_utils.assert(json_message["status"] == "failed", "test delete post2");
     });
+
+    test_utils.assert_success(4 + 2);
 }
 
 test_hf_com.test_encrypt = function() {
@@ -96,7 +100,7 @@ test_hf_com.test_encrypt = function() {
     var data = "data to encrypt";
     var is_AES = hf_com.is_AES_key(key);
     test_utils.assert(is_AES === true, "test is_AES function for encrypting");
-    
+
     var encrypted_data = hf_com.encrypt(key, data);
 
     var get_key = hf_com.get_key(key);
@@ -134,7 +138,7 @@ test_hf_com.test_is_RSA_key = function() {
     test_utils.assert(hf_com.is_RSA_key(key) === true, "is RSA key test");
 
     key = "RSA- 1024-Public \n -----BEGIN PUBLIC KEY----- \nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDlOJu6TyygqxfWT7eLtGDwajtN\nFOb9I5XRb6khyfD1Yt3YiCgQWMNW649887VGJiGr/L5i2osbl8C9+WJTeucF+S76\nxFxdU6jE0NQ+Z+zEdhUTooNRaY5nZiu5PgDB0ED/ZKBUSLKL7eibMxZtMlUDHjm4gwQco1KRMDSmXSMkDwIDAQAB\n-----END PUBLIC KEY-----";
-    test_utils.assert(hf_com.is_RSA_key(key) === false, "is RSA key test false");    
+    test_utils.assert(hf_com.is_RSA_key(key) === false, "is RSA key test false");
 }
 
 test_hf_com.main = function()
