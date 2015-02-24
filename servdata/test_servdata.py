@@ -395,5 +395,164 @@ def test_extend_data_chunk():
 	assert len(json.loads(serverRPC.xmlrpc_read_chunk('my_chunk3'))) == 5
 
 
+def test_delete_existing_data_chunk():
+	json_operations0 = [
+		{
+			'__operation': 		'/create_data_chunk',
+			'title': 			'my_chunk',
+			'content': 			['hello', 'world'],
+			'owner': 			'my_user',
+			'append_enabled': 	False
+		}
+	]
+
+	json_operations1 = [
+		{
+			'__operation': 		'/delete_data_chunk',
+			'title': 			'my_chunk',
+			'user': 			'my_user',
+		}
+	]
+
+	serverRPC = DataManager(db_name)
+	serverRPC.db.drop_database(db_name)
+
+	assert DataTransaction.process(json_operations0) == True
+	assert DataTransaction.process(json_operations1) == True
+	assert len(DataChunk.objects) == 0
+
+
+def test_delete_no_existing_data_chunk():
+	json_operations0 = [
+		{
+			'__operation': 		'/delete_data_chunk',
+			'title': 			'my_chunk',
+			'user': 			'my_user',
+		}
+	]
+
+	serverRPC = DataManager(db_name)
+	serverRPC.db.drop_database(db_name)
+
+	assert DataTransaction.process(json_operations0) == False
+	assert len(DataChunk.objects) == 0
+
+
+def test_create_delete_data_chunk():
+	json_operations0 = [
+		{
+			'__operation': 		'/create_data_chunk',
+			'title': 			'my_chunk',
+			'content': 			['hello', 'world'],
+			'owner': 			'my_user',
+			'append_enabled': 	False
+		},
+		{
+			'__operation': 		'/delete_data_chunk',
+			'title': 			'my_chunk',
+			'user': 			'my_user',
+		}
+	]
+
+	serverRPC = DataManager(db_name)
+	serverRPC.db.drop_database(db_name)
+
+	assert DataTransaction.process(json_operations0) == True
+	assert len(DataChunk.objects) == 0
+
+
+def test_create_delete_create_data_chunk():
+	json_operations0 = [
+		{
+			'__operation': 		'/create_data_chunk',
+			'title': 			'my_chunk',
+			'content': 			['hello', 'world'],
+			'owner': 			'my_user',
+			'append_enabled': 	False
+		},
+		{
+			'__operation': 		'/delete_data_chunk',
+			'title': 			'my_chunk',
+			'user': 			'my_user',
+		},
+		{
+			'__operation': 		'/create_data_chunk',
+			'title': 			'my_chunk',
+			'content': 			['this', 'is', 'greate'],
+			'owner': 			'my_user2',
+			'append_enabled': 	False
+		},
+	]
+
+	serverRPC = DataManager(db_name)
+	serverRPC.db.drop_database(db_name)
+
+	assert DataTransaction.process(json_operations0) == True
+	assert len(DataChunk.objects) == 1
+	assert len(json.loads(serverRPC.xmlrpc_read_chunk('my_chunk'))) == len(json_operations0[2]['content'])
+
+
+def test_create_delete_delete_data_chunk():
+	json_operations0 = [
+		{
+			'__operation': 		'/create_data_chunk',
+			'title': 			'my_chunk',
+			'content': 			['hello', 'world'],
+			'owner': 			'my_user',
+			'append_enabled': 	False
+		},
+		{
+			'__operation': 		'/create_data_chunk',
+			'title': 			'my_chunk2',
+			'content': 			['hello', 'world'],
+			'owner': 			'my_user',
+			'append_enabled': 	False
+		},
+		{
+			'__operation': 		'/delete_data_chunk',
+			'title': 			'my_chunk',
+			'user': 			'my_user',
+		},
+		{
+			'__operation': 		'/delete_data_chunk',
+			'title': 			'my_chunk',
+			'user': 			'my_user',
+		}
+	]
+
+	serverRPC = DataManager(db_name)
+	serverRPC.db.drop_database(db_name)
+
+	assert DataTransaction.process(json_operations0) == False
+	assert len(DataChunk.objects) == 0
+
+
+def test_denied_delete_data_chunk():
+	json_operations0 = [
+		{
+			'__operation': 		'/create_data_chunk',
+			'title': 			'my_chunk',
+			'content': 			['hello', 'world'],
+			'owner': 			'my_user',
+			'append_enabled': 	False
+		}
+	]
+
+	json_operations1 = [
+		{
+			'__operation': 		'/delete_data_chunk',
+			'title': 			'my_chunk',
+			'user': 			'my_user2',
+		},
+	]
+
+	serverRPC = DataManager(db_name)
+	serverRPC.db.drop_database(db_name)
+
+	assert DataTransaction.process(json_operations0) == True
+	assert DataTransaction.process(json_operations1) == False
+	assert len(DataChunk.objects) == 1
+
+
 if __name__ == '__main__':
 	test_chunk_creation()

@@ -85,6 +85,7 @@ class DataTransaction(object):
 
 	def __init__(self, json_operations):
 		self.data_chunk_cache = {}
+		self.data_chunk_operation = {}
 		self.json_operations = json_operations
 		self.current_operation_id = None
 		self.status = 'ok'
@@ -95,6 +96,9 @@ class DataTransaction(object):
 		data_chunk = None
 
 		if title in self.data_chunk_cache:
+			if self.data_chunk_operation[title] in ['delete', 'ignore']:
+				self.failure('data chunk `{}` has been deleted earlier in this transaction'.format(title))
+
 			data_chunk = self.data_chunk_cache[title]
 
 		else:
@@ -105,6 +109,7 @@ class DataTransaction(object):
 				self.failure('unknown data chunk `{}`'.format(title))
 
 			self.data_chunk_cache[title] = data_chunk
+			self.data_chunk_operation[title] = 'save'
 
 		assert data_chunk != None
 		assert isinstance(data_chunk, DataChunk)
@@ -112,23 +117,76 @@ class DataTransaction(object):
 		return data_chunk
 
 	def create_data_chunk(self, title, content, owner, append_enabled):
-		""" Access database
+		""" Create data chunk
 		"""
-		try:
-			data_chunk = DataChunk.objects.get(title=title)
-			self.failure('data chunk `{}` already exists'.format(title))
+		data_chunk = None
 
-		except:
-			pass
+		if title in self.data_chunk_cache:
+			if self.data_chunk_operation[title] == 'save':
+				self.failure('data chunk `{}` already exists'.format(title))
 
-		data_chunk = DataChunk(
-			title=title,
-			owner=owner,
-			content=content,
-			append_enabled=append_enabled
-		)
-		self.data_chunk_cache[title] = data_chunk
+			elif self.data_chunk_operation[title] == 'create':
+				self.failure('data chunk `{}` has already been created earlier in this transaction'.format(title))
+
+			elif self.data_chunk_operation[title] == 'delete':
+				data_chunk = self.data_chunk_cache[title]
+				self.data_chunk_operation[title] = 'save'
+
+			elif self.data_chunk_operation[title] == 'ignore':
+				data_chunk = self.data_chunk_cache[title]
+				self.data_chunk_operation[title] = 'create'
+
+			else:
+				assert False, 'unknwon data chunk operation'
+
+			assert data_chunk.title == title
+			data_chunk.content = content
+			data_chunk.owner = owner
+			data_chunk.append_enabled = append_enabled
+
+		else:
+			try:
+				data_chunk = DataChunk.objects.get(title=title)
+				self.failure('data chunk `{}` already exists'.format(title))
+
+			except:
+				pass
+
+			data_chunk = DataChunk(
+				title=title,
+				owner=owner,
+				content=content,
+				append_enabled=append_enabled
+			)
+			self.data_chunk_cache[title] = data_chunk
+			self.data_chunk_operation[title] = 'create'
+
+		assert data_chunk != None
+
 		return data_chunk
+
+	def delete_data_chunk(self, title):
+		""" Delete data chunk
+		"""
+		if title not in self.data_chunk_cache:
+			self.get_data_chunk(title)
+
+			assert self.data_chunk_operation[title] == 'save'
+			self.data_chunk_operation[title] = 'delete'
+
+			return
+
+		if self.data_chunk_operation[title] == 'save':
+			self.data_chunk_operation[title] = 'delete'
+
+		elif self.data_chunk_operation[title] == 'create':
+			self.data_chunk_operation[title] = 'ignore'
+
+		elif self.data_chunk_operation[title] in ['delete', 'ignore']:
+			self.failure('data chunk `{}` has already been deleted in this transaction'.format(title))
+
+		else:
+			assert False, 'unknwon data chunk operation'
 
 	def failure(self, error_msg):
 		""" Fails the current database. Should be called only in
@@ -152,8 +210,19 @@ class DataTransaction(object):
 		assert self.status == 'ok'
 
 		for data_chunk in self.data_chunk_cache.values():
-			print data_chunk.to_json()
-			data_chunk.save()
+			operation = self.data_chunk_operation[data_chunk.title]
+
+			if operation == 'ignore':
+				continue
+
+			elif operation == 'delete':
+				data_chunk.delete()
+
+			elif operation == 'save' or operation == 'create':
+				data_chunk.save()
+
+			else:
+				assert False, 'unknwon data chunk operation'
 
 	@staticmethod
 	def process(json_operations, logger=None):
@@ -324,6 +393,34 @@ class ExtendDataChunk(DataOperation):
 
 	def log_summary(self):
 		return "extend_data_chunk(title={}, user={})".format(
+			self.title,
+			self.user
+		)
+
+@data_chunk_op('/delete_data_chunk')
+class DeleteDataChunk(DataOperation):
+	""" json_operation = {
+		'title': 			'name',
+		'user': 			'my_user'
+	}
+	"""
+
+	def __init__(self, json_operation):
+		self.title = validate(json_operation, 'title', str)
+		self.user = validate(json_operation, 'user', str)
+
+	def process(self, transaction):
+		chunk = transaction.get_data_chunk(
+			title=self.title
+		)
+
+		if self.user != chunk.owner:
+			transaction.failure('permission denied')
+
+		transaction.delete_data_chunk(title=self.title)
+
+	def log_summary(self):
+		return "delete_data_chunk(title={}, user={})".format(
 			self.title,
 			self.user
 		)
