@@ -54,8 +54,18 @@ def get_data_chunk():
     }
 
     if request_params['operation'] == 'transaction':
-        if not server.data_chunk_transaction(request_params['operations']):
+        transaction_result = server.data_chunk_transaction(request_params['operations'])
+
+        if transaction_result == False:
             answer['status'] = 'failed'
+
+        else:
+            for operation_status in transaction_result['status']:
+                if operation_status != 'commited':
+                    answer['status'] = 'failed'
+
+        answer['operations_status'] = transaction_result['status']
+        answer['operations_return'] = transaction_result['return']
 
     elif request_params['operation'] == 'get':
         try:

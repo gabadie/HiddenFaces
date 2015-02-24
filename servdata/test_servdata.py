@@ -104,7 +104,7 @@ def test_transaction_sanity():
 		}
 	]
 
-	assert DataTransaction.process(json_operations) == True
+	assert DataTransaction.is_success(DataTransaction.process(json_operations))
 
 
 def test_empty_transaction():
@@ -138,7 +138,7 @@ def test_transaction_order():
 
 	OpTestOrder.reset()
 
-	assert DataTransaction.process(json_operations) == True
+	assert DataTransaction.is_success(DataTransaction.process(json_operations))
 	assert OpTestOrder.current_id == 9
 
 def test_transaction_validation_failure():
@@ -199,7 +199,8 @@ def test_transaction_process_failure():
 
 	OpTestOrder.reset()
 
-	assert DataTransaction.process(json_operations) == False
+	assert DataTransaction.process(json_operations) != False
+	assert not DataTransaction.is_success(DataTransaction.process(json_operations))
 	assert OpTestOrder.current_id == 5
 
 
@@ -220,7 +221,7 @@ def test_create_data_chunk():
 	serverRPC.db.drop_database(db_name)
 
 	assert len(DataChunk.objects) == 0
-	assert DataTransaction.process(json_operations) == True
+	assert DataTransaction.is_success(DataTransaction.process(json_operations))
 	assert len(DataChunk.objects) == 1
 	assert len(json.loads(serverRPC.xmlrpc_read_chunk('my_chunk'))) == len(json_operations[0]['content'])
 
@@ -249,9 +250,9 @@ def test_create_duplicated_data_chunk():
 	serverRPC.db.drop_database(db_name)
 
 	assert len(DataChunk.objects) == 0
-	assert DataTransaction.process(json_operations0) == True
+	assert DataTransaction.is_success(DataTransaction.process(json_operations0))
 	assert len(DataChunk.objects) == 1
-	assert DataTransaction.process(json_operations1) == False
+	assert not DataTransaction.is_success(DataTransaction.process(json_operations1))
 	assert len(DataChunk.objects) == 1
 	assert len(json.loads(serverRPC.xmlrpc_read_chunk('my_chunk'))) == len(json_operations0[0]['content'])
 
@@ -279,8 +280,8 @@ def test_write_data_chunk():
 	serverRPC = DataManager(db_name)
 	serverRPC.db.drop_database(db_name)
 
-	assert DataTransaction.process(json_operations0) == True
-	assert DataTransaction.process(json_operations1) == True
+	assert DataTransaction.is_success(DataTransaction.process(json_operations0))
+	assert DataTransaction.is_success(DataTransaction.process(json_operations1))
 	assert len(json.loads(serverRPC.xmlrpc_read_chunk('my_chunk'))) == len(json_operations1[0]['content'])
 
 
@@ -307,8 +308,8 @@ def test_invalid_write_data_chunk():
 	serverRPC = DataManager(db_name)
 	serverRPC.db.drop_database(db_name)
 
-	assert DataTransaction.process(json_operations0) == True
-	assert DataTransaction.process(json_operations1) == False
+	assert DataTransaction.is_success(DataTransaction.process(json_operations0))
+	assert not DataTransaction.is_success(DataTransaction.process(json_operations1))
 	assert len(json.loads(serverRPC.xmlrpc_read_chunk('my_chunk'))) == len(json_operations0[0]['content'])
 
 
@@ -332,7 +333,7 @@ def test_write_data_same_transaction_chunk():
 	serverRPC = DataManager(db_name)
 	serverRPC.db.drop_database(db_name)
 
-	assert DataTransaction.process(json_operations0) == True
+	assert DataTransaction.is_success(DataTransaction.process(json_operations0))
 	assert len(json.loads(serverRPC.xmlrpc_read_chunk('my_chunk'))) == len(json_operations0[1]['content'])
 
 
@@ -400,17 +401,17 @@ def test_extend_data_chunk():
 	serverRPC = DataManager(db_name)
 	serverRPC.db.drop_database(db_name)
 
-	assert DataTransaction.process(json_operations0) == True
-	assert DataTransaction.process(json_operations1) == True
+	assert DataTransaction.is_success(DataTransaction.process(json_operations0))
+	assert DataTransaction.is_success(DataTransaction.process(json_operations1))
 	assert len(json.loads(serverRPC.xmlrpc_read_chunk('my_chunk'))) == 4
 
-	assert DataTransaction.process(json_operations2) == False
+	assert not DataTransaction.is_success(DataTransaction.process(json_operations2))
 	assert len(json.loads(serverRPC.xmlrpc_read_chunk('my_chunk'))) == 4
 
-	assert DataTransaction.process(json_operations3) == True
+	assert DataTransaction.is_success(DataTransaction.process(json_operations3))
 	assert len(json.loads(serverRPC.xmlrpc_read_chunk('my_chunk2'))) == 5
 
-	assert DataTransaction.process(json_operations4) == True
+	assert DataTransaction.is_success(DataTransaction.process(json_operations4))
 	assert len(json.loads(serverRPC.xmlrpc_read_chunk('my_chunk3'))) == 5
 
 
@@ -436,8 +437,8 @@ def test_delete_existing_data_chunk():
 	serverRPC = DataManager(db_name)
 	serverRPC.db.drop_database(db_name)
 
-	assert DataTransaction.process(json_operations0) == True
-	assert DataTransaction.process(json_operations1) == True
+	assert DataTransaction.is_success(DataTransaction.process(json_operations0))
+	assert DataTransaction.is_success(DataTransaction.process(json_operations1))
 	assert len(DataChunk.objects) == 0
 
 
@@ -453,7 +454,7 @@ def test_delete_no_existing_data_chunk():
 	serverRPC = DataManager(db_name)
 	serverRPC.db.drop_database(db_name)
 
-	assert DataTransaction.process(json_operations0) == False
+	assert not DataTransaction.is_success(DataTransaction.process(json_operations0))
 	assert len(DataChunk.objects) == 0
 
 
@@ -476,7 +477,7 @@ def test_create_delete_data_chunk():
 	serverRPC = DataManager(db_name)
 	serverRPC.db.drop_database(db_name)
 
-	assert DataTransaction.process(json_operations0) == True
+	assert DataTransaction.is_success(DataTransaction.process(json_operations0))
 	assert len(DataChunk.objects) == 0
 
 
@@ -506,7 +507,7 @@ def test_create_delete_create_data_chunk():
 	serverRPC = DataManager(db_name)
 	serverRPC.db.drop_database(db_name)
 
-	assert DataTransaction.process(json_operations0) == True
+	assert DataTransaction.is_success(DataTransaction.process(json_operations0))
 	assert len(DataChunk.objects) == 1
 	assert len(json.loads(serverRPC.xmlrpc_read_chunk('my_chunk'))) == len(json_operations0[2]['content'])
 
@@ -542,7 +543,7 @@ def test_create_delete_delete_data_chunk():
 	serverRPC = DataManager(db_name)
 	serverRPC.db.drop_database(db_name)
 
-	assert DataTransaction.process(json_operations0) == False
+	assert not DataTransaction.is_success(DataTransaction.process(json_operations0))
 	assert len(DataChunk.objects) == 0
 
 
@@ -568,10 +569,64 @@ def test_denied_delete_data_chunk():
 	serverRPC = DataManager(db_name)
 	serverRPC.db.drop_database(db_name)
 
-	assert DataTransaction.process(json_operations0) == True
-	assert DataTransaction.process(json_operations1) == False
+	assert DataTransaction.is_success(DataTransaction.process(json_operations0))
+	assert not DataTransaction.is_success(DataTransaction.process(json_operations1))
 	assert len(DataChunk.objects) == 1
 
+def test_get_data_chunk():
+	json_operations0 = [
+		{
+			'__operation': 		'/create_data_chunk',
+			'title': 			'my_chunk',
+			'content': 			['hello', 'world'],
+			'owner': 			'my_user',
+			'append_enabled': 	False
+		},
+		{
+			'__operation': 		'/get_data_chunk',
+			'title': 			'my_chunk'
+		}
+	]
+
+	serverRPC = DataManager(db_name)
+	serverRPC.db.drop_database(db_name)
+
+	r = DataTransaction.process(json_operations0)
+	assert DataTransaction.is_success(r)
+	assert len(r['return'][1]) == len(json_operations0[0]['content'])
+
+def test_get_write_data_chunk():
+	json_operations0 = [
+		{
+			'__operation': 		'/create_data_chunk',
+			'title': 			'my_chunk',
+			'content': 			['hello', 'world'],
+			'owner': 			'my_user',
+			'append_enabled': 	False
+		}
+	]
+
+	json_operations1 = [
+		{
+			'__operation': 		'/get_data_chunk',
+			'title': 			'my_chunk'
+		},
+		{
+			'__operation': 		'/write_data_chunk',
+			'title': 			'my_chunk',
+			'content': 			[],
+			'user': 			'my_user'
+		}
+	]
+
+	serverRPC = DataManager(db_name)
+	serverRPC.db.drop_database(db_name)
+
+	assert DataTransaction.is_success(DataTransaction.process(json_operations0))
+
+	r = DataTransaction.process(json_operations1)
+	assert DataTransaction.is_success(r)
+	assert len(r['return'][1]) == len(json_operations0[0]['content'])
 
 if __name__ == '__main__':
 	test_chunk_creation()

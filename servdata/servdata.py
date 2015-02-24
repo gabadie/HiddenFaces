@@ -261,12 +261,22 @@ class DataTransaction(object):
 			return False
 
 		transaction = DataTransaction(json_operations)
+		transaction_result = {
+			'return': [None for e in json_operations],
+			'status': ['non_executed' for e in json_operations]
+		}
 
 		try:
 			transaction.current_operation_id = 0
 
 			for operation in operations:
-				operation.process(transaction)
+				operation_return = operation.process(transaction)
+
+				if operation_return == None:
+					operation_return = 'ok'
+
+				transaction_result['status'][transaction.current_operation_id] = 'success'
+				transaction_result['return'][transaction.current_operation_id] = operation_return
 
 				transaction.current_operation_id += 1
 
@@ -276,18 +286,44 @@ class DataTransaction(object):
 			for operation in operations:
 				if i == exception.operation_id:
 					operation.failure(str(exception))
+					transaction_result['status'][i] = str(exception)
 
 				else:
 					operation.failure('an other operation has failed')
+					transaction_result['status'][i] = 'discarded'
+
+				transaction_result['return'][i] = None
 
 				i += 1
 
+		else:
+			for operation in operations:
+				operation.success()
+
+			transaction.commit()
+
+			transaction_result['status'] = ['commited' for e in json_operations]
+
+			assert DataTransaction.is_success(transaction_result)
+
+		return transaction_result
+
+	@staticmethod
+	def is_success(transaction_result):
+		""" Checks if the transaction_result is a success
+		"""
+		if transaction_result == False:
 			return False
 
-		for operation in operations:
-			operation.success()
+		assert isinstance(transaction_result, dict)
+		assert len(transaction_result['status']) > 0
+		assert len(transaction_result['status']) == len(transaction_result['return'])
 
-		transaction.commit()
+		for operation_status in transaction_result['status']:
+			assert isinstance(operation_status, str)
+
+			if operation_status != 'commited':
+				return False
 
 		return True
 
@@ -366,6 +402,28 @@ class WriteDataChunk(DataOperation):
 		return "write_data_chunk(title={}, user={})".format(
 			self.title,
 			self.user
+		)
+
+@data_chunk_op('/get_data_chunk')
+class GetDataChunk(DataOperation):
+	""" json_operation = {
+		'title': 			'name'
+	}
+	"""
+
+	def __init__(self, json_operation):
+		self.title = validate(json_operation, 'title', str)
+
+	def process(self, transaction):
+		chunk = transaction.get_data_chunk(
+			title=self.title
+		)
+
+		return [str(s) for s in chunk.content]
+
+	def log_summary(self):
+		return "get_data_chunk(title={})".format(
+			self.title
 		)
 
 @data_chunk_op('/extend_data_chunk')
@@ -479,11 +537,7 @@ class DataManager(xmlrpc.XMLRPC):
 	def xmlrpc_data_chunk_transaction(self, json_operations):
 		""" Processes a data chunk transactions on the database
 		"""
-		process_result = DataTransaction.process(json_operations, self.logger)
-
-		assert process_result in [True, False]
-
-		return process_result
+		return DataTransaction.process(json_operations, self.logger)
 
 
 # ------------------------------------------------------------- MAIN ENTRY POINT
