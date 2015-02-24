@@ -147,10 +147,12 @@ class DataTransaction(object):
 		else:
 			try:
 				data_chunk = DataChunk.objects.get(title=title)
-				self.failure('data chunk `{}` already exists'.format(title))
 
 			except:
 				pass
+
+			else:
+				self.failure('data chunk `{}` already exists'.format(title))
 
 			data_chunk = DataChunk(
 				title=title,
