@@ -11,7 +11,7 @@ hf_service.create_thread = function(user_hash, public_append)
     assert(typeof public_append == "boolean", "public_append must be a boolean in hf_service.create_thread");
 
     var thread_content = [];
-    var thread_chunk_name = 
+    var thread_chunk_name =
         hf.generate_hash('C3jsud4AZkDpd7IKEtEH\n');
     var symetric_key = '' //TODO
 
@@ -19,7 +19,7 @@ hf_service.create_thread = function(user_hash, public_append)
     hf_com.create_data_chunk(
         thread_chunk_name,
         user_hash,
-        symetric_key, 
+        symetric_key,
         thread_content,
         public_append,
         null
@@ -28,7 +28,7 @@ hf_service.create_thread = function(user_hash, public_append)
     var thread_info = {
         'thread_chunk_name':   thread_chunk_name,
         'symetric_key':   symetric_key
-    }; 
+    };
 
     return thread_info;
 }
@@ -41,7 +41,7 @@ hf_service.create_post = function(user_hash, post_content)
     assert(post_content['__meta']['type'] == '/post');
     assert(hf.is_hash(post_content['__meta']['author_user_hash']));
 
-    var post_chunk_name = 
+    var post_chunk_name =
         hf.generate_hash('ERmO4vptXigWBnDUjnEN\n');
     var symetric_key = '' //TODO
     var stringified_post_content = [JSON.stringify(post_content)];
@@ -59,7 +59,7 @@ hf_service.create_post = function(user_hash, post_content)
     var post_info = {
         'post_chunk_name':   post_chunk_name,
         'symetric_key':   symetric_key
-    }; 
+    };
 
     return post_info;
 }
@@ -76,7 +76,12 @@ hf_service.append_post_to_threads = function(post_info, threads_map)
     {
         assert(typeof threads_map[i]['thread_chunk_name'] == "string");
         assert(typeof threads_map[i]['symetric_key'] == "string");
-        hf_com.append_data_chunk(threads_map[i]['thread_chunk_name'], threads_map[i]['symetric_key'], stringified_post_info, function(json_message) {
+        hf_com.append_data_chunk(
+            threads_map[i]['thread_chunk_name'],
+            hf_service.user_chunks_owner(),
+            threads_map[i]['symetric_key'],
+            stringified_post_info,
+            function(json_message) {
                 if (json_message['status'] != 'ok')
                 {
                     allert(
@@ -87,6 +92,7 @@ hf_service.append_post_to_threads = function(post_info, threads_map)
                     );
                     return;
                 }
-            });
+            }
+        );
     }
 }
