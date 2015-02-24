@@ -53,14 +53,9 @@ def get_data_chunk():
         'status': 'ok'
     }
 
-    if request_params['operation'] == 'create':
-        server.new_chunk(request_params['chunk_name'], request_params['user_hash'], request_params['chunk_content'], request_params['public_append'])
-
-    elif request_params['operation'] == 'write':
-        server.write_chunk(request_params['chunk_name'], request_params['user_hash'], request_params['chunk_content'])
-
-    elif request_params['operation'] == 'append':
-        server.append_content(request_params['chunk_name'], request_params['chunk_content'])
+    if request_params['operation'] == 'transaction':
+        if not server.data_chunk_transaction(request_params['operations']):
+            answer['status'] = 'failed'
 
     elif request_params['operation'] == 'get':
         try:
@@ -68,9 +63,6 @@ def get_data_chunk():
             answer['chunk_content'] = content
         except:
             answer['status'] = 'failed'
-
-    elif request_params['operation'] == 'delete':
-        server.delete_chunk(request_params['chunk_name'], request_params['user_hash'])
 
     elif request_params['operation'] == 'testing:drop_database':
         server.testing_drop_database()

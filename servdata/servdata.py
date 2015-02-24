@@ -147,10 +147,12 @@ class DataTransaction(object):
 		else:
 			try:
 				data_chunk = DataChunk.objects.get(title=title)
-				self.failure('data chunk `{}` already exists'.format(title))
 
 			except:
 				pass
+
+			else:
+				self.failure('data chunk `{}` already exists'.format(title))
 
 			data_chunk = DataChunk(
 				title=title,
@@ -237,6 +239,10 @@ class DataTransaction(object):
 		try:
 			assert isinstance(json_operations, list)
 
+			if len(json_operations) == 0:
+				logger.info('transaction doesn\'t have any operations')
+				return False
+
 			for json_operation in json_operations:
 				assert isinstance(json_operation, dict)
 				assert '__operation' in json_operation, 'missing __operation'
@@ -249,7 +255,8 @@ class DataTransaction(object):
 				operations.append(operation)
 
 		except Exception as exception:
-			#TODO: log invalid json_operation
+			if logger:
+				logger.info('failed to parse transaction\'s json operations')
 
 			return False
 
@@ -456,37 +463,9 @@ class DataManager(xmlrpc.XMLRPC):
 		self.db.drop_database(self.db_name)
 		self.logger.info("drop database")
 
-	def xmlrpc_new_chunk(self, title, owner, content, append_enabled):
-
-		chunk = None
-		self.logger.info("chunk creation : title={}".format(title))
-		try:
-			chunk = DataChunk.objects.get(title=title)
-			self.logger.info("chunk creation : chunk {} already existing".format(title))
-		except mongoengine.DoesNotExist as e:
-			chunk = DataChunk(title=title,owner=owner,content=content,append_enabled=append_enabled).save()
-			self.logger.info("chunk creation : new chunk created")
-
-
-	def xmlrpc_write_chunk(self, title, user, content):
-
-		chunk = None
-		self.logger.info("chunk modification : title={}".format(title))
-		try:
-			chunk = DataChunk.objects.get(title=title)
-			self.logger.info("chunk modification : chunk found")
-		except mongoengine.DoesNotExist as e:
-			self.logger.error("chunk modification : chunk not found, error message={}".format(e))
-			return
-
-		if chunk.owner == user:
-			self.logger.info("chunk modification : chunk modified, right owner={}".format(user))
-			chunk.content = content
-			chunk.save()
-
 	def xmlrpc_read_chunk(self, title):
-
-		chunk = None
+		""" Reads a data chunk from database
+		"""
 		self.logger.info("getting chunk : title={}".format(title))
 
 		try:
@@ -497,42 +476,14 @@ class DataManager(xmlrpc.XMLRPC):
 			self.logger.error("getting chunk : chunk not found, error message={}".format(e))
 			return None
 
-	def xmlrpc_append_content(self, title, content):
+	def xmlrpc_data_chunk_transaction(self, json_operations):
+		""" Processes a data chunk transactions on the database
+		"""
+		process_result = DataTransaction.process(json_operations, self.logger)
 
-		chunk = None
-		self.logger.info("appending content to chunk : title={}".format(title))
+		assert process_result in [True, False]
 
-		try:
-			chunk = DataChunk.objects.get(title=title)
-			self.logger.info("appending content to chunk : chunk found")
-		except mongoengine.DoesNotExist as e:
-			self.logger.error("appending content to chunk : chunk not found, error message={}".format(e))
-			return
-
-		if chunk.append_enabled:
-			self.logger.info("appending content to chunk : content appended to chunk")
-			chunk.content.append(content)
-			chunk.save()
-		else:
-			self.logger.error("appending content to chunk : content cannot be appended to the chunk")
-
-	def xmlrpc_delete_chunk(self, title, owner):
-
-		chunk = None
-		self.logger.info("chunk deletion : title={}".format(title))
-
-		try:
-			chunk = DataChunk.objects.get(title=title)
-			self.logger.info("chunk deletion : chunk found")
-		except mongoengine.DoesNotExist as e:
-			self.logger.error("chunk deletion : chunk not found, error message={}".format(e))
-			return
-
-		if chunk.owner == owner:
-			self.logger.info("chunk deletion : chunk deleted, right owner={}".format(owner))
-			chunk.delete()
-		else:
-			self.logger.error("chunk deletion : user {} doesn't have the right to delete chunk".format(owner))
+		return process_result
 
 
 # ------------------------------------------------------------- MAIN ENTRY POINT

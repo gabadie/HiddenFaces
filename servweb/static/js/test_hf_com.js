@@ -56,11 +56,11 @@ test_hf_com.test_data_chunk_modifications = function()
     hf_com.write_data_chunk("private_user2","user2","",["name","birthday","interests"],function(json_message){
         test_utils.assert(json_message["status"] == "ok", "test overwrite private_user2");
     });
-    hf_com.append_data_chunk("post1", "", "user2: amazing <3", function(json_message){
+    hf_com.append_data_chunk("post1", "user2", "", "user2: amazing <3", function(json_message){
         test_utils.assert(json_message["status"] == "ok", "test append to post1");
     });
-    hf_com.append_data_chunk("private_user1", "", "user2: amazing <3", function(json_message){
-        test_utils.assert(json_message["status"] == "ok", "test append to private_user1");
+    hf_com.append_data_chunk("private_user1", "user2", "", "user2: amazing <3", function(json_message){
+        test_utils.assert(json_message["status"] == "failed", "test append to private_user1");
     });
 
     //read data chunks

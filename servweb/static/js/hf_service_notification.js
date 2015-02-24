@@ -34,6 +34,7 @@ hf_service.push_notification = function(user_hash, notification_json, callback)
         // appends the notification to the end of <user_hash>'s protected file
         hf_com.append_data_chunk(
             public_chunk['system']['protected_chunk']['name'],
+            hf_service.user_chunks_owner(),
             public_chunk['system']['protected_chunk']['public_key'],
             JSON.stringify(notification_json),
             function(json_message) {

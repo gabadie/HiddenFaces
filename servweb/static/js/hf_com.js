@@ -56,137 +56,185 @@ hf_com.json_request = function(request_params, callback) {
 }
 
 /*
- * @param <chunk_name>: the data chunk's name
- * @param <access_as>: the accessing user's id
- * @param <encryption_key>: the data chunk's encryption key
- * @param <chunk_content>: the data chunk's content to write
- * @param <public_append>: can the other user append
- * @param <callback>: the callback once the chunk is received
- *      function my_callback(json_message)
- *
- * @returns <json_message> if synchronized
+ * Transaction class
+ */
+hf_com.Transaction = function()
+{
+    // operations to send
+    this.json_operations = [];
+    this.commited = false;
+
+    /*
+     * Appends a json operation to the transaction
+     */
+    this.append_operation = function(json_operation)
+    {
+        assert('__operation' in json_operation);
+
+        this.json_operations[this.json_operations.length] = json_operation;
+
+        assert(this.json_operations.length > 0);
+
+        return this;
+    }
+
+    /*
+     * Commits the transaction to the server
+     * @param <callback>: the callback once transaction completed
+     *      function my_callback(json_message)
+     *
+     * @returns <json_message> if synchronized
+     */
+    this.commit = function(callback)
+    {
+        assert(this.commited == false);
+        assert(this.json_operations.length > 0);
+
+        var params = {
+            'operation': 'transaction',
+            'operations': this.json_operations
+        };
+
+        this.commited = true;
+
+        return hf_com.json_request(params, function(status, json) {
+            if (status != 200)
+            {
+                alert(status);
+                return;
+            }
+
+            if (callback != null)
+            {
+                callback(json);
+            }
+        });
+    }
+
+    /*
+     * @param <chunk_name>: the data chunk's name
+     * @param <owner>: the data chunk's owner
+     * @param <encryption_key>: the data chunk's encryption key
+     * @param <chunk_content>: the data chunk's content to write
+     * @param <public_append>: can the other user append
+     */
+    this.create_data_chunk = function(chunk_name, owner, encryption_key, chunk_content, public_append)
+    {
+        assert(typeof chunk_name == "string");
+        assert(typeof owner == "string");
+        assert(typeof encryption_key == "string");
+        assert(typeof public_append == "boolean");
+
+        var encrypted_chunk_content = hf_com.encrypt_content(encryption_key, chunk_content);
+
+        return this.append_operation({
+            '__operation':      '/create_data_chunk',
+            'title':            chunk_name,
+            'content':          encrypted_chunk_content,
+            'owner':            owner,
+            'append_enabled':   public_append
+        })
+    }
+
+    /*
+     * @param <chunk_name>: the data chunk's name
+     * @param <edit_as>: the accessing user's id
+     * @param <encryption_key>: the data chunk's encryption key
+     * @param <chunk_content>: the data chunk's content to write
+     */
+    this.write_data_chunk = function(chunk_name, edit_as, encryption_key, chunk_content)
+    {
+        assert(typeof chunk_name == "string");
+        assert(typeof edit_as == "string");
+        assert(typeof encryption_key == "string");
+
+        var encrypted_chunk_content = hf_com.encrypt_content(encryption_key, chunk_content);
+
+        return this.append_operation({
+            '__operation':      '/write_data_chunk',
+            'title':            chunk_name,
+            'content':          encrypted_chunk_content,
+            'user':             edit_as
+        })
+    }
+
+    /*
+     * @param <chunk_name>: the data chunk's name
+     * @param <edit_as>: the accessing user's id
+     * @param <encryption_key>: the data chunk's encryption key
+     * @param <chunk_content>: the data chunk's content to write
+     */
+    this.extend_data_chunk = function(chunk_name, edit_as, encryption_key, chunk_content)
+    {
+        assert(typeof chunk_name == "string");
+        assert(typeof edit_as == "string");
+        assert(typeof encryption_key == "string");
+
+        var encrypted_chunk_content = hf_com.encrypt_content(encryption_key, chunk_content);
+
+        return this.append_operation({
+            '__operation':      '/extend_data_chunk',
+            'title':            chunk_name,
+            'content':          encrypted_chunk_content,
+            'user':             edit_as
+        })
+    }
+
+    /*
+     * @param <chunk_name>: the data chunk's name
+     * @param <delete_as>: the deleting user's id
+     */
+    this.delete_data_chunk = function(chunk_name, delete_as)
+    {
+        assert(typeof chunk_name == "string");
+        assert(typeof delete_as == "string");
+
+        return this.append_operation({
+            '__operation':      '/delete_data_chunk',
+            'title':            chunk_name,
+            'user':             delete_as
+        })
+    }
+}
+
+/*
+ * DEPRECATED: Use hf_com.Transaction.create_data_chunk() instead.
  */
 hf_com.create_data_chunk = function(chunk_name, access_as, encryption_key, chunk_content, public_append, callback)
 {
-    assert(typeof access_as == "string", "wrong type for acces_as in create datachunk request")
-    assert(typeof chunk_name == "string", "wrong type for chunk_name in create datachunk request")
-    assert(chunk_content instanceof Array, "wrong type for chunk_content in create datachunk request")
-    assert(typeof public_append == "boolean", "wrong type for public_append in create datachunk request")
-    assert(typeof encryption_key == "string", "wrong type for encryption_key in create datachunk request")
-
-    var encrypted_chunk_content = chunk_content.slice();
-
-    for (var i = 0; i < chunk_content.length; i++)
-    {
-        encrypted_chunk_content[i] = hf_com.encrypt(
-            encryption_key,
-            chunk_content[i]
-        );
-    }
-
-    var params = {
-        'operation': 'create',
-        'user_hash': access_as,
-        'chunk_name': chunk_name,
-        'chunk_content': encrypted_chunk_content,
-        'public_append': public_append
-    };
-
-    return hf_com.json_request(params, function(status, json) {
-        if (status != 200)
-        {
-            alert(status);
-            return;
-        }
-
-        if (callback != null)
-        {
-            callback(json);
-        }
-    });
+    return (new hf_com.Transaction()).create_data_chunk(
+        chunk_name,
+        access_as,
+        encryption_key,
+        chunk_content,
+        public_append
+    ).commit(callback);
 }
 
 /*
- * @param <chunk_name>: the data chunk's name
- * @param <access_as>: the accessing user's id
- * @param <encryption_key>: the data chunk's encryption key
- * @param <chunk_content>: the data chunk's content to write
- * @param <callback>: the callback once the chunk is received
- *      function my_callback(json_message)
- *
- * @returns <json_message> if synchronized
+ * DEPRECATED: Use hf_com.Transaction.write_data_chunk() instead.
  */
 hf_com.write_data_chunk = function(chunk_name, access_as, encryption_key, chunk_content, callback)
 {
-    assert(typeof access_as == "string", "wrong type for acces_as in write datachunk request")
-    assert(typeof chunk_name == "string", "wrong type for chunk_name in write datachunk request")
-    assert(chunk_content instanceof Array, "wrong type for chunk_content in write datachunk request")
-    assert(typeof encryption_key == "string", "wrong type for encryption_key in write datachunk request")
-
-    var encrypted_chunk_content = chunk_content.slice();
-
-    for (var i = 0; i < chunk_content.length; i++)
-    {
-        encrypted_chunk_content[i] = hf_com.encrypt(
-            encryption_key,
-            chunk_content[i]
-        );
-    }
-
-    var params = {
-        'operation': 'write',
-        'user_hash': access_as,
-        'chunk_name': chunk_name,
-        'chunk_content': encrypted_chunk_content
-    };
-
-    return hf_com.json_request(params, function(status, json) {
-        if (status != 200)
-        {
-            alert(status);
-            return;
-        }
-
-        if (callback != null)
-        {
-            callback(json);
-        }
-    });
+    return (new hf_com.Transaction()).write_data_chunk(
+        chunk_name,
+        access_as,
+        encryption_key,
+        chunk_content
+    ).commit(callback);
 }
 
 /*
- * @param <chunk_name>: the data chunk's name
- * @param <encryption_key>: the data chunk's encryption key
- * @param <chunk_content>: the data chunk's content to append
- * @param <callback>: the callback once the chunk is received
- *      function my_callback(json_message)
- *
- * @returns <json_message> if synchronized
+ * DEPRECATED: Use hf_com.Transaction.append_data_chunk() instead.
  */
-hf_com.append_data_chunk = function(chunk_name, encryption_key, chunk_content, callback)
+hf_com.append_data_chunk = function(chunk_name, access_as, encryption_key, chunk_content, callback)
 {
-    assert(typeof chunk_name == "string", "wrong type for chunk_name in append datachunk request")
-    assert(typeof chunk_content == "string", "wrong type for chunk_content in append datachunk request")
-    assert(typeof encryption_key == "string", "wrong type for encryption_key in append datachunk request")
-
-    var params = {
-        'operation': 'append',
-        'chunk_name': chunk_name,
-        'chunk_content': hf_com.encrypt(encryption_key, chunk_content)
-    };
-
-    return hf_com.json_request(params, function(status, json) {
-        if (status != 200)
-        {
-            alert(status);
-            return;
-        }
-
-        if (callback != null)
-        {
-            callback(json);
-        }
-    });
+    return (new hf_com.Transaction()).extend_data_chunk(
+        chunk_name,
+        access_as,
+        encryption_key,
+        [chunk_content]
+    ).commit(callback);
 }
 
 /*
@@ -232,36 +280,39 @@ hf_com.get_data_chunk = function(chunk_name, decryption_key, callback)
 }
 
 /*
- * @param <chunk_name>: the data chunk's name
- * @param <access_as>: the accessing user's id
- * @param <callback>: the callback once the chunk is received
- *      function my_callback(json_message)
- *
- * @returns <json_message> if synchronized
+ * DEPRECATED: Use hf_com.Transaction.delete_data_chunk() instead.
  */
 hf_com.delete_data_chunk = function(chunk_name, access_as, callback)
 {
-    assert(typeof access_as == "string", "wrong type for acces_as in delete datachunk request")
-    assert(typeof chunk_name == "string", "wrong type for chunk_name in delete datachunk request")
+    return (new hf_com.Transaction()).delete_data_chunk(
+        chunk_name,
+        access_as
+    ).commit(callback);
+}
 
-    var params = {
-        'operation': 'delete',
-        'user_hash': access_as,
-        'chunk_name': chunk_name
-    };
+/*
+ * @param <encryption_key>: the chunk content's encryption key
+ * @param <chunk_content>: the chunk content to encrypt
+ *
+ * @returns the encrypted chunk_content
+ */
+hf_com.encrypt_content = function(encryption_key, chunk_content)
+{
+    assert(chunk_content instanceof Array);
 
-    return hf_com.json_request(params, function(status, json) {
-        if (status != 200)
-        {
-            alert(status);
-            return;
-        }
+    var encrypted_chunk_content = chunk_content.slice();
 
-        if (callback != null)
-        {
-            callback(json);
-        }
-    });
+    for (var i = 0; i < chunk_content.length; i++)
+    {
+        assert(typeof chunk_content[i] == "string");
+
+        encrypted_chunk_content[i] = hf_com.encrypt(
+            encryption_key,
+            chunk_content[i]
+        );
+    }
+
+    return encrypted_chunk_content;
 }
 
 /*
