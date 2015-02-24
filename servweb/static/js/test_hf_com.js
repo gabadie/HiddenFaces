@@ -75,7 +75,7 @@ test_hf_com.test_data_chunk_modifications = function()
     });
 }
 
-test_hf_com.test_data_chunk_delections = function()
+test_hf_com.test_data_chunk_deletions = function()
 {
     setup_data_base();
 
@@ -95,5 +95,5 @@ test_hf_com.main = function()
 {
     test_utils.run(test_hf_com.test_create_data_chunk, 'test_hf_com.test_create_data_chunk');
     test_utils.run(test_hf_com.test_data_chunk_modifications, 'test_hf_com.test_data_chunk_operations');
-    test_utils.run(test_hf_com.test_data_chunk_delections, 'test_hf_com.test_data_chunk_delections');
+    test_utils.run(test_hf_com.test_data_chunk_deletions, 'test_hf_com.test_data_chunk_delections');
 }

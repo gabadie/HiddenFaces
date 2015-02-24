@@ -143,6 +143,31 @@ test_hf_service.push_notification = function()
     test_utils.assert_success(3);
 }
 
+test_hf_service.post_message = function()
+{
+    var user_profile = test_hf_service.john_smith_profile();
+    var user_hash = hf_service.create_user(user_profile);
+
+    //user connexion
+    hf_service.login_user(user_profile, null);
+    test_utils.assert(hf_service.is_connected(), 'should be connected after');
+
+    var post_content = 
+        {'__meta': {
+            'type': '/post',
+            'author_user_hash': user_hash
+            },
+        'content': "I'm new in HiddenFaces. What should I do first?"
+        };
+
+    hf_service.create_post(user_hash,post_content, function(json_message){
+        test_utils.assert(typeof json_message['post_chunk_name'] == "string");
+        test_utils.assert(typeof json_message['symetric_key'] == "string");
+    });
+
+    test_utils.assert_success(3);
+}
+
 test_hf_service.main = function()
 {
     test_utils.run(test_hf_service.create_account, 'test_hf_service.create_account');
@@ -150,4 +175,5 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.login_user, 'test_hf_service.login_user');
     test_utils.run(test_hf_service.save_user_chunks, 'test_hf_service.save_user_chunks');
     test_utils.run(test_hf_service.push_notification, 'test_hf_service.push_notification');
+    test_utils.run(test_hf_service.post_message, 'test_hf_service.post_message');
 }
