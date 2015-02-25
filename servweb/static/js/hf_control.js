@@ -7,11 +7,17 @@ hf_control.mainViewRouter = null;
 hf_control.userCookieName = 'user_cookie';
 hf_control.domPageContainer = null;
 
+/*
+ * Displays a view
+ * @param <viewUrl>: the view's url to display
+ *
+ * @returns false to have the syntax: href="return hf_control.view(...)"
+ */
 hf_control.view = function(viewUrl)
 {
     assert(hf_control.mainViewRouter != null);
 
-    hf_control.mainViewRouter.view(viewUrl);
+    return hf_control.mainViewRouter.view(viewUrl);
 }
 
 hf_control.ViewRouter = function(build_up_callback)
@@ -31,6 +37,7 @@ hf_control.ViewRouter = function(build_up_callback)
             if (this.build_up != null)
             {
                 this.build_up(callback);
+                return;
             }
         }
 
@@ -42,9 +49,6 @@ hf_control.ViewRouter = function(build_up_callback)
      *
      * @param <view_prefix>: the view prefix
      * @param <callback>: the callback
-     *
-     *
-     *
      */
     this.route = function(viewPrefix, callback)
     {
@@ -55,6 +59,9 @@ hf_control.ViewRouter = function(build_up_callback)
 
     /*
      * Displays a view
+     * @param <viewUrl>: the view's url to display
+     *
+     * @returns false to have the syntax: href="return hf_control.view(...)"
      */
     this.view = function(viewUrl)
     {
@@ -83,6 +90,8 @@ hf_control.ViewRouter = function(build_up_callback)
 
             match_callback();
         });
+
+        return False;
     }
 }
 
