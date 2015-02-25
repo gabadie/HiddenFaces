@@ -417,17 +417,31 @@ hf_service.add_contact = function(contact_hash, callback)
  * Get all contact's public content
  *
  */
-hf_service.get_contacts_content = function() 
+hf_service.get_contacts_content = function(callback) 
 {
     assert(hf_service.is_connected(), 'user not logged in function get_contacts_content()');
     var contacts = hf_service.user_private_chunk['contacts'];
-    var contact;
+    
+    var objCount = Object.keys(contacts).length; 
     var content=[];
+
+    var iteration = 0; 
+    var contact;
+    
+    if (objCount === 0) {
+        callback(content);
+        return ;
+    }
+
     for(contact in contacts){
         hf_service.get_user_public_chunk(contact, function() {
             content.push(hf_service.users_public_chunks[contact]);
+            iteration++;
+            if (iteration == objCount) {
+                if (callback) {
+                    callback(content);
+                }
+            }
         });
     }
-
-    return content;
 }
