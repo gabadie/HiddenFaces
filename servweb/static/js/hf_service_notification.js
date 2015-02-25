@@ -20,7 +20,8 @@ hf_service.notification_automation = {
  * @param <user_hash>: the user's hash
  * @param <notification_json>: the notification JSON to push
  * @param <callback>: the callback once the notification has been pushed
- *      function my_callback(user_hash, notification_json)
+ *      @param <success>: true or false
+ *      function my_callback(success)
  */
 hf_service.push_notification = function(user_hash, notification_json, callback)
 {
@@ -31,6 +32,12 @@ hf_service.push_notification = function(user_hash, notification_json, callback)
 
     // Gets <user_hash>'s public chunk to find <user_hash>'s protected file
     hf_service.get_user_public_chunk(user_hash, function(public_chunk){
+        if (!public_chunk)
+        {
+            callback(false);
+            return;
+        }
+
         // appends the notification to the end of <user_hash>'s protected file
         hf_com.append_data_chunk(
             public_chunk['system']['protected_chunk']['name'],
@@ -51,7 +58,7 @@ hf_service.push_notification = function(user_hash, notification_json, callback)
 
                 if (callback)
                 {
-                    callback(user_hash, notification_json);
+                    callback(true);
                 }
             }
         )
@@ -60,12 +67,14 @@ hf_service.push_notification = function(user_hash, notification_json, callback)
 
 /*
  * Send a request to friend
- *  
+ *
  * @params <user_has>: user's hash
  * @params <message>: message to send to 2nd user
- * @params <callback>: function to callback
+ * @param <callback>: the callback once the notification has been pushed
+ *      @param <success>: true or false
+ *      function my_callback(success)
  */
-hf_service.send_contact_request = function(user_hash, message, callback) 
+hf_service.send_contact_request = function(user_hash, message, callback)
 {
     assert(hf_service.is_connected(), "user not connected in hf_service.send_contact_request");
     var my_hash = hf_service.user_hash();

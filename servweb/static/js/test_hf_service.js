@@ -143,8 +143,8 @@ test_hf_service.push_notification = function()
             }
         );
 
-        hf_service.push_notification(user_hash0, notification, function(){
-            test_utils.success('notification push with success')
+        hf_service.push_notification(user_hash0, notification, function(success){
+            test_utils.assert(success == true, 'notification push with success')
         });
 
         hf_com.get_data_chunk(
