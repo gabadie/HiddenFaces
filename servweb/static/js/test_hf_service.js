@@ -283,6 +283,40 @@ test_hf_service.add_contact = function() {
     test_utils.assert_success(4);
 }
 
+test_hf_service.get_contacts_content = function() 
+{
+    //create all users
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+
+    var user_hash0 = hf_service.create_user(user_profile0);
+    var user_hash1 = hf_service.create_user(user_profile1);
+
+    var user_profile2 = test_hf_service.john_smith_profile(2);
+    var user_hash2 = hf_service.create_user(user_profile2);
+
+    //user0 is logged
+    hf_service.login_user(user_profile0);
+
+    hf_service.add_contact(user_hash1);
+    hf_service.add_contact(user_hash2);
+
+    //construct expected result
+    var expected_content = [];
+    hf_service.get_user_public_chunk(user_hash1, function() {
+        expected_content.push(hf_service.users_public_chunks[user_hash1])
+    });
+
+    hf_service.get_user_public_chunk(user_hash2, function() {
+        expected_content.push(hf_service.users_public_chunks[user_hash2])
+    });
+
+    //actual result
+    var contacts_content = hf_service.get_contacts_content();
+
+    test_utils.assert(JSON.stringify(expected_content) === JSON.stringify(contacts_content), "get all contacts content is ok");
+}
+
 test_hf_service.main = function()
 {
     test_utils.run(test_hf_service.create_account, 'test_hf_service.create_account');
@@ -295,4 +329,5 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.append_post_to_threads, 'test_hf_service.append_post_to_threads');
     test_utils.run(test_hf_service.contact_request, "test_hf_service.contact_request");
     test_utils.run(test_hf_service.add_contact, "test_hf_service.add_contact");
+    test_utils.run(test_hf_service.get_contacts_content,"test_hf_service.get_contacts_content");
 }
