@@ -48,12 +48,6 @@ hf_service.user_public_chunk = function()
     return hf_service.users_public_chunks[hf_service.user_hash()];
 }
 
-hf_service.user_private_chunk = function() 
-{
-    assert(hf_service.is_connected());
-    return hf_service.user_private_chunk;
-}
-
 /*
  * Gets the private chunk's name and key from the user's email and
  * password.
@@ -220,7 +214,7 @@ hf_service.get_user_public_chunk = function(user_hash, callback)
         assert(public_chunk['__meta']['chunk_name'] == user_hash);
 
         hf_service.users_public_chunks[user_hash] = public_chunk;
-
+       
         if (callback)
         {
             callback(public_chunk);
@@ -351,12 +345,23 @@ hf_service.save_user_chunks = function()
     );
 }
 
+/*
+ * @params <contact_hash>: the contact's hash
+ * @params <contacts>: all contacts's list
+ *
+ */
 hf_service.is_contact_added = function(contact_hash, contacts) 
 {    
     return (contact_hash in contacts);
 }
 
-hf_service.add_contact = function(contact_hash, callback) {
+/*
+ * @params <contact_hash>: contact's hash
+ * @params <callback>: callback funtion
+ *
+ */
+hf_service.add_contact = function(contact_hash, callback) 
+{
     assert(hf_service.is_connected(), 'user not logged in function add_contact()');
     var private_chunk = hf_service.user_private_chunk;
     var contacts = private_chunk['contacts'];
@@ -371,4 +376,23 @@ hf_service.add_contact = function(contact_hash, callback) {
     }else{
         assert(false, contact_hash+ " has added");
     }
+}
+
+/*
+ * Get all contact's public content
+ *
+ */
+hf_service.get_contacts_content = function() 
+{
+    assert(hf_service.is_connected(), 'user not logged in function get_contacts_content()');
+    var contacts = hf_service.user_private_chunk['contacts'];
+    var contact;
+    var content=[];
+    for(contact in contacts){
+        hf_service.get_user_public_chunk(contact, function() {
+            content.push(hf_service.users_public_chunks[contact]);
+        });
+    }
+
+    return content;
 }
