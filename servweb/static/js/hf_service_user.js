@@ -117,103 +117,106 @@ hf_service.create_user = function(user_profile, callback)
     assert(protected_chunk_name != user_hash);
     assert(private_chunk_name != protected_chunk_name);
 
-    // Generates the user's private chunk's content
-    var private_chunk = {
-        '__meta': {
-            'type':         '/user/private_chunk',
-            'user_hash':    user_hash,
-            'chunk_name':   private_chunk_name,
-            'key':          private_chunk_key
-        },
-        'profile': {
-            'first_name':   user_profile['first_name'],
-            'last_name':    user_profile['last_name'],
-            'email':        user_profile['email'],
-        },
-        'system': {
-            'protected_chunk': {
-                'name':         protected_chunk_name,
-                'private_key':  '', //TODO
-                'public_key':   '' //TODO
+    hf_com.generate_RSA_key(function(protected_chunk_private_key, protected_chunk_public_key)
+    {
+        // Generates the user's private chunk's content
+        var private_chunk = {
+            '__meta': {
+                'type':         '/user/private_chunk',
+                'user_hash':    user_hash,
+                'chunk_name':   private_chunk_name,
+                'key':          private_chunk_key
             },
-            'chunks_owner':  chunks_owner
-        },
+            'profile': {
+                'first_name':   user_profile['first_name'],
+                'last_name':    user_profile['last_name'],
+                'email':        user_profile['email'],
+            },
+            'system': {
+                'protected_chunk': {
+                    'name':         protected_chunk_name,
+                    'private_key':  protected_chunk_private_key,
+                    'public_key':   protected_chunk_public_key
+                },
+                'chunks_owner':  chunks_owner
+            },
 
-        /*
-         * pending notifications that have already been fetched but don't have
-         * automated process and are waiting for the user to be processed.
-         */
-        'notifications': [ ],
+            /*
+             * pending notifications that have already been fetched but don't have
+             * automated process and are waiting for the user to be processed.
+             */
+            'notifications': [ ],
 
-        'contacts': {
-        },
-        'circles': []
-    };
+            'contacts': {
+            },
+            'circles': []
+        };
 
-    // Generates the user's private chunk's content
-    var public_chunk = {
-        '__meta': {
-            'type':         '/user/public_chunk',
-            'user_hash':    user_hash,
-            'chunk_name':   user_hash
-        },
-        'profile': {
-            'first_name':   private_chunk['profile']['first_name'],
-            'last_name':    private_chunk['profile']['last_name'],
-            'email':        ''
-        },
-        'system': {
-            'protected_chunk': {
-                'name':         private_chunk['system']['protected_chunk']['name'],
-                'public_key':   private_chunk['system']['protected_chunk']['public_key']
+        // Generates the user's private chunk's content
+        var public_chunk = {
+            '__meta': {
+                'type':         '/user/public_chunk',
+                'user_hash':    user_hash,
+                'chunk_name':   user_hash
+            },
+            'profile': {
+                'first_name':   private_chunk['profile']['first_name'],
+                'last_name':    private_chunk['profile']['last_name'],
+                'email':        ''
+            },
+            'system': {
+                'protected_chunk': {
+                    'name':         private_chunk['system']['protected_chunk']['name'],
+                    'public_key':   private_chunk['system']['protected_chunk']['public_key']
+                }
             }
-        }
-    };
+        };
 
-    var transaction = new hf_com.Transaction();
+        var transaction = new hf_com.Transaction();
 
-    // Creates the user's private chunk
-    transaction.create_data_chunk(
-        private_chunk_name,
-        chunks_owner,
-        private_chunk_key,
-        [JSON.stringify(private_chunk)],
-        false
-    );
+        // Creates the user's private chunk
+        transaction.create_data_chunk(
+            private_chunk_name,
+            chunks_owner,
+            private_chunk_key,
+            [JSON.stringify(private_chunk)],
+            false
+        );
 
-    // Creates the user's public chunk
-    transaction.create_data_chunk(
-        user_hash,
-        chunks_owner,
-        '',
-        [JSON.stringify(public_chunk)],
-        false
-    );
+        // Creates the user's public chunk
+        transaction.create_data_chunk(
+            user_hash,
+            chunks_owner,
+            '',
+            [JSON.stringify(public_chunk)],
+            false
+        );
 
-    // Creates the user's protected chunk
-    transaction.create_data_chunk(
-        protected_chunk_name,
-        chunks_owner,
-        '',
-        [],
-        true
-    );
+        // Creates the user's protected chunk
+        transaction.create_data_chunk(
+            protected_chunk_name,
+            chunks_owner,
+            '',
+            [],
+            true
+        );
 
-    transaction.commit(function(json_message){
-        if (json_message['status'] != 'ok')
-        {
-            alert('create user has failed');
-            return;
-        }
+        transaction.commit(function(json_message){
+            if (json_message['status'] != 'ok')
+            {
+                alert('create user has failed');
+                return;
+            }
 
-        if (callback)
-        {
-            callback(user_hash);
-        }
-    })
+            if (callback)
+            {
+                callback(user_hash);
+            }
+        })
 
-    hf_service.reset_cache();
-    hf_service.users_public_chunks[user_hash] = public_chunk;
+        hf_service.reset_cache();
+        hf_service.users_public_chunks[user_hash] = public_chunk;
+    });
 
     return user_hash;
 }
