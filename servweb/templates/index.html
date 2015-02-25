@@ -48,30 +48,14 @@
     {% if test %}
     <title>HiddenFaces Testing</title>
     <body onload="test_hf.onload();">
-        <div id="test_output">
-        </div>
-        <div id="test_sandbox_element">
-        </div>
+        <div id="test_output"></div>
+        <div id="test_sandbox_element"></div>
+        <div id="test_hf_page_container"></div>
+    </body>
 
     {% else %}
     <title>HiddenFaces</title>
-    <body onload="hf_control.onload();">
-
+    <body onload="hf_control.onload();"></body>
 
     {% endif %}
-
-
-        <!-- Body Main content -->
-
-
-
-        <div id="pageContent"></div>
-
-
-
-
-
-
-
-    </body>
 </html>

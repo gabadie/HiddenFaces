@@ -6,7 +6,7 @@ hf_control.signed_in = new hf_control.ViewRouter(function(callback){
         'private_chunk': hf_service.user_private_chunk
     };
 
-    hf_ui.apply_template("page_layout.html", template_params, document.getElementById("pageContent"), function(){
+    hf_ui.apply_template("page_layout.html", template_params, hf_control.domPageContainer, function(){
         callback();
     });
 });

@@ -145,4 +145,7 @@ test_utils.init = function()
     test_utils.domOutput = document.getElementById('test_output');
     test_utils.domSandboxElem = document.getElementById('test_sandbox_element');
     test_utils.testId = 0;
+
+    // patches up the dom page content
+    hf_control.domPageContainer = document.getElementById('test_hf_page_container');
 }

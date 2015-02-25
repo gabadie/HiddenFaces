@@ -5,6 +5,7 @@ var hf_control = {};
 // the main view router
 hf_control.mainViewRouter = null;
 hf_control.userCookieName = 'user_cookie';
+hf_control.domPageContainer = null;
 
 hf_control.view = function(viewUrl)
 {
@@ -57,6 +58,8 @@ hf_control.ViewRouter = function(build_up_callback)
      */
     this.view = function(viewUrl)
     {
+        assert(hf_control.domPageContainer != null);
+
         var viewRouter = this;
 
         this.bind(function(){
@@ -85,6 +88,9 @@ hf_control.ViewRouter = function(build_up_callback)
 
 hf_control.onload = function()
 {
+    // set up the page content's DOM element
+    hf_control.domPageContainer = document.body;
+
     var user_cookie = hf.get_cookie(hf_control.userCookieName);
 
     if (user_cookie == null)

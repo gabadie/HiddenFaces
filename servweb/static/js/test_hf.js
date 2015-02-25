@@ -32,5 +32,5 @@ test_hf.onload = function()
     // populates the database
     test_hf.populate_db();
 
-    document.getElementById('pageContent').innerHTML = '<a href="./">GOTO LOGIN</a>';
+    hf_control.domPageContainer.innerHTML = '<a href="./">GOTO LOGIN</a>';
 }

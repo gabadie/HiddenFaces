@@ -2,11 +2,11 @@
 hf_control.signed_out = new hf_control.ViewRouter();
 
 hf_control.signed_out.route('/', function(){
-    hf_ui.apply_template("login.html", null, document.getElementById("pageContent"));
+    hf_ui.apply_template("login.html", null, hf_control.domPageContainer);
 });
 
 hf_control.signed_out.route('/signup/', function(){
-    hf_ui.apply_template("signup.html", null, document.getElementById("pageContent"));
+    hf_ui.apply_template("signup.html", null, hf_control.domPageContainer);
 });
 
 hf_control.signed_out.sign_up = function(domElem)
