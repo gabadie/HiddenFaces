@@ -244,6 +244,30 @@ test_hf_service.append_post_to_threads = function()
     test_utils.assert_success(3);
 }
 
+test_hf_service.add_contact = function() {
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+
+    var user_hash0 = hf_service.create_user(user_profile0);
+    var user_hash1 = hf_service.create_user(user_profile1);
+
+    var user_profile2 = test_hf_service.john_smith_profile(2);
+    var user_hash2 = hf_service.create_user(user_profile2);
+
+    hf_service.login_user(user_profile0);
+
+    hf_service.add_contact(user_hash1, function() {
+        test_utils.success('contacts after added ');
+    });
+
+
+    test_utils.assert(hf_service.is_contact_added(user_hash1, hf_service.user_private_chunk['contacts']) == true, "test hf_service.is_contact_added() ok!");
+
+    hf_service.add_contact(user_hash2, function() {
+        test_utils.assert(hf_service.is_contact_added(user_hash2, hf_service.user_private_chunk['contacts']) == true, "test hf_service.is_contact_added() ok!");        
+    });
+}
+
 test_hf_service.main = function()
 {
     test_utils.run(test_hf_service.create_account, 'test_hf_service.create_account');
@@ -255,4 +279,5 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.create_thread, 'test_hf_service.create_thread');
     test_utils.run(test_hf_service.append_post_to_threads, 'test_hf_service.append_post_to_threads');
     test_utils.run(test_hf_service.contact_request, "test_hf_service.contact_request");
+    test_utils.run(test_hf_service.add_contact, "test_hf_service.add_contact");
 }
