@@ -58,7 +58,14 @@ test_hf_service.get_user_public_chunk = function()
         );
     });
 
-    test_utils.assert_success(2);
+    hf_service.get_user_public_chunk('invalid user hash', function(user_public_chunk){
+        test_utils.assert(
+            user_public_chunk == false,
+            'hf_service.get_user_public_chunk() with an invalid user hash should fail'
+        );
+    });
+
+    test_utils.assert_success(3);
 }
 
 test_hf_service.login_user = function()
