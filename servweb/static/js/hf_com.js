@@ -4,6 +4,10 @@ var hf_com = {};
 // Configures if we wants synchronized requests. It is set to true when testing.
 hf_com.synchronized_request = false;
 
+// Bypasses cryptographic stage for easier debuging
+hf_com.cryptographic_bypass = false;
+
+
 hf_com.new_request = function() {
     var request;
 
@@ -499,7 +503,8 @@ hf_com.encrypt = function(encryption_key, data)
     assert(typeof encryption_key == "string", "wrong type for encryption_key")
     assert(typeof data == "string", "wrong type for data")
 
-    if (encryption_key == ''){
+    if (encryption_key == '' || hf_com.cryptographic_bypass)
+    {
          return data;
     }
 
@@ -553,7 +558,7 @@ hf_com.decrypt = function(decryption_key, encrypted_data)
     assert(typeof decryption_key == "string", "wrong type for encryption_key")
     assert(typeof encrypted_data == "string", "wrong type for encrypted_data")
 
-    if (decryption_key == '')
+    if (decryption_key == '' || hf_com.cryptographic_bypass)
     {
         return encrypted_data;
     }

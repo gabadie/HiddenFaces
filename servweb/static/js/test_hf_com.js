@@ -150,13 +150,6 @@ test_hf_com.test_encrypt_AES = function() {
     test_utils.assert(encrypted_data != data,"test encrypt data");
 }
 
-test_hf_com.test_encrypt_empty_key = function() {
-    var key = "";
-    var data = "data to encrypt";
-    var encrypted_data = hf_com.encrypt(key,data);
-    test_utils.assert(data === encrypted_data, "test encrypt data AES with empty key");
-}
-
 test_hf_com.test_decrypt_AES = function() {
     var key = "AES \n mypassword";
     var data = "data to encrypt";
@@ -182,13 +175,6 @@ test_hf_com.test_decrypt_RSA = function() {
     test_utils.assert_success(2);
 }
 
-test_hf_com.test_decrypt_empty_key = function() {
-    var key = "";
-    var data = "data to encrypt";
-    var decrypted_data = hf_com.decrypt(key,data);
-    test_utils.assert(data === decrypted_data, "test encrypt data AES with empty key");
-}
-
 test_hf_com.test_is_RSA_public_key = function() {
     var key = "RSA-1024-Public \n -----BEGIN PUBLIC KEY----- \nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDlOJu6TyygqxfWT7eLtGDwajtN\nFOb9I5XRb6khyfD1Yt3YiCgQWMNW649887VGJiGr/L5i2osbl8C9+WJTeucF+S76\nxFxdU6jE0NQ+Z+zEdhUTooNRaY5nZiu5PgDB0ED/ZKBUSLKL7eibMxZtMlUDHjm4gwQco1KRMDSmXSMkDwIDAQAB\n-----END PUBLIC KEY-----";
     test_utils.assert(hf_com.is_RSA_public_key(key) === true, "is RSA public key test");
@@ -203,9 +189,36 @@ test_hf_com.test_is_RSA_private_key = function() {
 
     key = "RSA- 1024-Private \n";
     test_utils.assert(hf_com.is_RSA_private_key(key) === false, "is RSA private key test false");
-
 }
 
+test_hf_com.crypt_empty_key = function() {
+    var key = "";
+    var data = "data to encrypt";
+
+    var encrypted_data = hf_com.encrypt(key,data);
+    var decrypted_data = hf_com.decrypt(key, data);
+
+    test_utils.assert(data == encrypted_data, "test encrypt data with empty key");
+    test_utils.assert(data == decrypted_data, "test encrypt data with empty key");
+}
+
+test_hf_com.cryptographic_bypass = function()
+{
+    var key = 'AES\nhello world';
+    var data = 'foo bar';
+
+    var real_cryptographic_bypass = hf_com.cryptographic_bypass;
+    hf_com.cryptographic_bypass = true;
+
+    var encrypted_data = hf_com.encrypt(key, data);
+    var decrypted_data = hf_com.decrypt(key, data);
+
+    hf_com.cryptographic_bypass = real_cryptographic_bypass;
+
+    test_utils.assert(hf_com.cryptographic_bypass == false, 'hf_com.cryptographic_bypass is only for debuging');
+    test_utils.assert(data == encrypted_data, "data should not be encrypted");
+    test_utils.assert(data == decrypted_data, "data should not be decrypted");
+}
 
 
 test_hf_com.main = function()
@@ -218,13 +231,14 @@ test_hf_com.main = function()
 
     // Test for encrypt AES
     test_utils.run(test_hf_com.test_encrypt_AES, "test_hf_com.test_encrypt_AES");
-    test_utils.run(test_hf_com.test_encrypt_empty_key, "test_hf_com.test_encrypt_empty_key");
     test_utils.run(test_hf_com.test_decrypt_AES, "test_hf_com.test_decrypt_AES");
-    test_utils.run(test_hf_com.test_decrypt_empty_key, "test_hf_com.test_decrypt_empty_key");
 
+    // Test for encrypt RSA
     test_utils.run(test_hf_com.test_is_RSA_public_key, "test_hf_com.test_is_RSA_public_key");
     test_utils.run(test_hf_com.test_is_RSA_private_key, "test_hf_com.test_is_RSA_private_key");
     test_utils.run(test_hf_com.test_decrypt_RSA,"test_hf_com.test_decrypt_RSA");
 
-
+    // Common encryption tests
+    test_utils.run(test_hf_com.crypt_empty_key, "test_hf_com.crypt_empty_key");
+    test_utils.run(test_hf_com.cryptographic_bypass, "test_hf_com.cryptographic_bypass");
 }
