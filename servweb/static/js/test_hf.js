@@ -10,6 +10,7 @@ test_hf.onload = function()
     hf_com.synchronized_request = true;
 
     // list of tests
+    test_hf_core.main();
     test_hf_com.main();
     test_hf_service.main();
     test_hf_ui.main();
