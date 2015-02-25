@@ -29,17 +29,6 @@ def index_page():
 def test_page():
     return render_template('index.html', test=True)
 
-@app.route("/static/css/main.css")
-def css_main():
-    theme = {}
-    with open(os.path.dirname(os.path.abspath(__file__)) + '/theme.json') as f:
-        theme = json.loads(f.read())
-
-    return Response(
-        render_template('main.css', theme=theme),
-        mimetype='text/css'
-    )
-
 
 # ------------------------------------------------------------------------------ TEMPLATE
 

@@ -1,0 +1,39 @@
+
+body
+{
+    background: #FFF9F1;
+    color: #61513C;
+}
+
+
+/* ---------------------------------------------------------------- Connexion */
+
+.central_panel
+{
+    width: 400px;
+    margin: 15% auto 0 auto;
+    padding: 10px 30px;
+    border-radius: 5px;
+    background: #61513C;
+    color: #FFF9F1;
+}
+
+.central_panel .title
+{
+    padding: 5px 0 0 0;
+    font-size: 24px;
+    font-weight: bolder;
+}
+
+.central_panel .content
+{
+    padding: 5px 30px 15px 30px;
+}
+
+
+/* -------------------------------------------------------------------- Login */
+
+.login_panel input, .login_panel button
+{
+    width: 100%;
+}

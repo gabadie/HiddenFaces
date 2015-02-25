@@ -1,0 +1,70 @@
+
+/* ------------------------------------------------------------- Page top bar */
+
+#hf_page_top_bar
+{
+    background: #61513C;
+    color: #FFF9F1;
+}
+
+#hf_page_top_bar a
+{
+    padding: 8px 20px;
+    display: inline-block;
+    font-weight: bolder;
+    color: #FFF9F1;
+}
+
+#hf_page_top_bar a:hover
+{
+    background: #574123;
+}
+
+/* -------------------------------------------------------------- Page bottom */
+
+#hf_page_bottom
+{
+    padding: 40px 0 200px 0;
+    width: 100%;
+    text-align: center;
+    border-top: 1px solid {{theme.color.reversed_background}};
+}
+
+
+/* --------------------------------------------------------- Page left column */
+
+#hf_page_left_column
+{
+    width: 250px;
+}
+
+#hf_page_left_column .hf_layout_cell
+{
+    padding: 3px 0 10px 0;
+}
+
+#hf_page_left_column .hf_title
+{
+    padding: 4px 20px;
+    width: 100%;
+    display: block;
+    font-weight: bolder;
+}
+
+#hf_page_left_column .hf_list_item
+{
+    padding: 2px 30px;
+    width: 100%;
+    display: block;
+}
+
+#hf_page_left_column a
+{
+    cursor: pointer;
+}
+
+#hf_page_left_column a:hover
+{
+    background: #61513C;
+    color: #FFF9F1;
+}
