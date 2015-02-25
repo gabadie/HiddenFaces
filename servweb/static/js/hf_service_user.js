@@ -230,7 +230,7 @@ hf_service.get_user_public_chunk = function(user_hash, callback)
         assert(public_chunk['__meta']['chunk_name'] == user_hash);
 
         hf_service.users_public_chunks[user_hash] = public_chunk;
-
+       
         if (callback)
         {
             callback(public_chunk);
@@ -370,6 +370,35 @@ hf_service.save_user_chunks = function(callback)
         }
     })
 }
+/*
+ * @params <contact_hash>: the contact's hash
+ * @params <contacts>: all contacts's list
+ *
+ */
+hf_service.is_contact_added = function(contact_hash, contacts) 
+{    
+    return (contact_hash in contacts);
+}
+
+/*
+ * @params <contact_hash>: contact's hash
+ * @params <callback>: callback funtion
+ *
+ */
+hf_service.add_contact = function(contact_hash, callback) 
+{
+    assert(hf_service.is_connected(), 'user not logged in function add_contact()');
+    var private_chunk = hf_service.user_private_chunk;
+    var contacts = private_chunk['contacts'];
+    if (!hf_service.is_contact_added(contact_hash, contacts) && contact_hash != hf_service.user_hash()) {
+        hf_service.user_private_chunk['contacts'][contact_hash] = {
+            'circles': []
+        };
+        if (callback) {
+            callback(hf_service.user_private_chunk['contacts']);
+        }
+    }
+}
 
 hf_service.add_contact = function(contact_hash, callback)
 {
@@ -382,4 +411,23 @@ hf_service.add_contact = function(contact_hash, callback)
     };
 
     hf_service.save_user_chunks(callback);
+}
+
+/*
+ * Get all contact's public content
+ *
+ */
+hf_service.get_contacts_content = function() 
+{
+    assert(hf_service.is_connected(), 'user not logged in function get_contacts_content()');
+    var contacts = hf_service.user_private_chunk['contacts'];
+    var contact;
+    var content=[];
+    for(contact in contacts){
+        hf_service.get_user_public_chunk(contact, function() {
+            content.push(hf_service.users_public_chunks[contact]);
+        });
+    }
+
+    return content;
 }
