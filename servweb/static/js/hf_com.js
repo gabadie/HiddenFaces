@@ -538,13 +538,22 @@ hf_com.encrypt_AES = function(encryption_key, data) {
 *
 * @return: crypted data by RSA method
 */
-hf_com.encrypt_RSA = function(encryption_key, data) {
+hf_com.encrypt_RSA = function(encryption_key, data)
+{
+    // generates an new AES key
+    var AES_key = hf.generate_hash(data);
 
+    // encrypts the AES key using RSA
     var encrypt = new JSEncrypt();
     encrypt.setPublicKey(encryption_key);
-    var encrypted = encrypt.encrypt(data);
-    return encrypted;
+    var encrypted_AES_key = encrypt.encrypt(AES_key);
 
+    // encrypts the data using AES
+    var encrypted_data = sjcl.encrypt(AES_key, data);
+
+    assert(encrypted_AES_key.split(':').length == 1);
+
+    return encrypted_AES_key + ':' + encrypted_data;
 }
 
 /*
@@ -594,11 +603,19 @@ hf_com.decrypt_AES = function(decryption_key, encrypted_data) {
  *
  * @returns the decrypted data by RSA method
  */
-hf_com.decrypt_RSA = function(decryption_key, encrypted_data) {
+hf_com.decrypt_RSA = function(decryption_key, encrypted_data)
+{
+    var encrypted_AES_key = encrypted_data.split(':')[0]
+    encrypted_data = encrypted_data.substr(
+        encrypted_AES_key.length + 1,
+        encrypted_data.length - (encrypted_AES_key.length + 1)
+    );
 
+    // decrypts AES key using RSA
     var decrypt = new JSEncrypt();
     decrypt.setPrivateKey(decryption_key);
-    var uncrypted = decrypt.decrypt(encrypted_data);
-    return uncrypted;
+    var AES_key = decrypt.decrypt(encrypted_AES_key);
 
+    // decrypts data using AES
+    return sjcl.decrypt(AES_key, encrypted_data);
 }

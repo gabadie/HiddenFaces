@@ -162,7 +162,18 @@ test_hf_com.test_decrypt_AES = function() {
 
 test_hf_com.test_decrypt_RSA = function() {
 
-    var data = "data to encrypt";
+    var data = "foo bar";
+
+    /*
+     * expend data to make sure the RSA encryptions works even with a data
+     * larger than the RSA 1024bits' maximum capacity.
+     */
+    for (var i = 0; i < 8; i++)
+    {
+        data += data;
+    }
+
+    test_utils.assert(data.length == 7 * 256, 'invalid data length');
 
     hf_com.generate_RSA_key(function(private_key, public_key){
         var encrypted_data = hf_com.encrypt_RSA(hf_com.get_key(public_key), data);
@@ -172,7 +183,7 @@ test_hf_com.test_decrypt_RSA = function() {
         test_utils.assert(encrypted_data != data,"test encrypt data")
     });
 
-    test_utils.assert_success(2);
+    test_utils.assert_success(3);
 }
 
 test_hf_com.test_is_RSA_public_key = function() {
