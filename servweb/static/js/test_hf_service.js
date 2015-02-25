@@ -280,7 +280,11 @@ test_hf_service.add_contact = function() {
         );
     });
 
-    test_utils.assert_success(4);
+    hf_service.add_contact("blabla", function(data) {
+        test_utils.assert(data == false, "blabla is not a hash");
+    });
+
+    test_utils.assert_success(5);
 }
 
 test_hf_service.get_contacts_content = function() 
@@ -298,6 +302,10 @@ test_hf_service.get_contacts_content = function()
     //user0 is logged
     hf_service.login_user(user_profile0);
 
+    hf_service.get_contacts_content(function(data) {
+        test_utils.assert(Object.keys(data).length == 0, "there is no contact");
+    });
+
     hf_service.add_contact(user_hash1);
     hf_service.add_contact(user_hash2);
 
@@ -312,22 +320,24 @@ test_hf_service.get_contacts_content = function()
     });
 
     //actual result
-    var contacts_content = hf_service.get_contacts_content();
+    hf_service.get_contacts_content(function(data) {
+        test_utils.assert(JSON.stringify(expected_content) === JSON.stringify(data), "get all contacts content is ok");    
+    });
 
-    test_utils.assert(JSON.stringify(expected_content) === JSON.stringify(contacts_content), "get all contacts content is ok");
+    test_utils.assert_success(2);
 }
 
 test_hf_service.main = function()
 {
-    test_utils.run(test_hf_service.create_account, 'test_hf_service.create_account');
-    test_utils.run(test_hf_service.get_user_public_chunk, 'test_hf_service.get_user_public_chunk');
-    test_utils.run(test_hf_service.login_user, 'test_hf_service.login_user');
-    test_utils.run(test_hf_service.save_user_chunks, 'test_hf_service.save_user_chunks');
-    test_utils.run(test_hf_service.push_notification, 'test_hf_service.push_notification');
-    test_utils.run(test_hf_service.post_message, 'test_hf_service.post_message');
-    test_utils.run(test_hf_service.create_thread, 'test_hf_service.create_thread');
-    test_utils.run(test_hf_service.append_post_to_threads, 'test_hf_service.append_post_to_threads');
-    test_utils.run(test_hf_service.contact_request, "test_hf_service.contact_request");
+    // test_utils.run(test_hf_service.create_account, 'test_hf_service.create_account');
+    // test_utils.run(test_hf_service.get_user_public_chunk, 'test_hf_service.get_user_public_chunk');
+    // test_utils.run(test_hf_service.login_user, 'test_hf_service.login_user');
+    // test_utils.run(test_hf_service.save_user_chunks, 'test_hf_service.save_user_chunks');
+    // test_utils.run(test_hf_service.push_notification, 'test_hf_service.push_notification');
+    // test_utils.run(test_hf_service.post_message, 'test_hf_service.post_message');
+    // test_utils.run(test_hf_service.create_thread, 'test_hf_service.create_thread');
+    // test_utils.run(test_hf_service.append_post_to_threads, 'test_hf_service.append_post_to_threads');
+    // test_utils.run(test_hf_service.contact_request, "test_hf_service.contact_request");
     test_utils.run(test_hf_service.add_contact, "test_hf_service.add_contact");
-    test_utils.run(test_hf_service.get_contacts_content,"test_hf_service.get_contacts_content");
+    // test_utils.run(test_hf_service.get_contacts_content,"test_hf_service.get_contacts_content");
 }

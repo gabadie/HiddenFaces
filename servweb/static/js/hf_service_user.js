@@ -209,7 +209,11 @@ hf_service.create_user = function(user_profile, callback)
  */
 hf_service.get_user_public_chunk = function(user_hash, callback)
 {
-    assert(hf.is_hash(user_hash));
+    if(!hf.is_hash(user_hash)) 
+    {
+        callback(false);
+        return ;
+    }
 
     // checks if <user_hash>'s public chunk is already cached
     if (user_hash in hf_service.users_public_chunks)
@@ -225,9 +229,14 @@ hf_service.get_user_public_chunk = function(user_hash, callback)
 
         var public_chunk = JSON.parse(json_message['chunk_content'][0]);
 
-        assert(public_chunk['__meta']['type'] == '/user/public_chunk');
-        assert(public_chunk['__meta']['user_hash'] == user_hash);
-        assert(public_chunk['__meta']['chunk_name'] == user_hash);
+        if (public_chunk['__meta']['type'] != '/user/public_chunk' ||
+            public_chunk['__meta']['user_hash'] != user_hash ||
+            public_chunk['__meta']['chunk_name'] != user_hash)
+        {
+            callback(false);
+            return;
+        }
+
 
         hf_service.users_public_chunks[user_hash] = public_chunk;
        
@@ -381,53 +390,81 @@ hf_service.is_contact_added = function(contact_hash, contacts)
 }
 
 /*
+ * @params <contact_hash>: the contact's has
+ * @params <callback>: callback function, true or false in params
+ *
+ */
+hf_service.is_user_hash = function(contact_hash, callback) 
+{
+    hf_service.get_user_public_chunk(contact_hash, function(public_chunk) {
+        if (callback) {
+            callback(public_chunk != false);
+        }
+    });
+}
+
+/*
  * @params <contact_hash>: contact's hash
  * @params <callback>: callback funtion
  *
  */
-hf_service.add_contact = function(contact_hash, callback) 
-{
-    assert(hf_service.is_connected(), 'user not logged in function add_contact()');
-    var private_chunk = hf_service.user_private_chunk;
-    var contacts = private_chunk['contacts'];
-    if (!hf_service.is_contact_added(contact_hash, contacts) && contact_hash != hf_service.user_hash()) {
-        hf_service.user_private_chunk['contacts'][contact_hash] = {
-            'circles': []
-        };
-        if (callback) {
-            callback(hf_service.user_private_chunk['contacts']);
-        }
-    }
-}
-
 hf_service.add_contact = function(contact_hash, callback)
 {
     assert(hf_service.is_connected());
-    assert(contact_hash != hf_service.user_hash());
-    assert(!(contact_hash in hf_service.user_private_chunk['contacts']));
+    if (contact_hash == hf_service.user_hash() || (contact_hash in hf_service.user_private_chunk['contacts']))
+    {
+        callback(false);
+        return ;
+    }
 
-    hf_service.user_private_chunk['contacts'][contact_hash] = {
-        'circles': []
-    };
+    hf_service.is_user_hash(contact_hash, function(is_user_hash) 
+    {
+        if (!is_user_hash)
+        {
+            callback(false);
+            return;
+        }
 
-    hf_service.save_user_chunks(callback);
+        hf_service.user_private_chunk['contacts'][contact_hash] = {
+            'circles': []
+        };
+
+        hf_service.save_user_chunks(function()
+        {
+            callback(true);
+        });
+    });
 }
 
 /*
  * Get all contact's public content
  *
  */
-hf_service.get_contacts_content = function() 
+hf_service.get_contacts_content = function(callback) 
 {
     assert(hf_service.is_connected(), 'user not logged in function get_contacts_content()');
     var contacts = hf_service.user_private_chunk['contacts'];
-    var contact;
+    
+    var objCount = Object.keys(contacts).length; 
     var content=[];
+
+    var iteration = 0; 
+    var contact;
+    
+    if (objCount === 0) {
+        callback(content);
+        return ;
+    }
+
     for(contact in contacts){
         hf_service.get_user_public_chunk(contact, function() {
             content.push(hf_service.users_public_chunks[contact]);
+            iteration++;
+            if (iteration == objCount) {
+                if (callback) {
+                    callback(content);
+                }
+            }
         });
     }
-
-    return content;
 }
