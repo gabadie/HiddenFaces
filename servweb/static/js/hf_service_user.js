@@ -89,6 +89,7 @@ hf_service.create_user = function(user_profile, callback)
     assert(typeof user_profile['email'] == "string");
     assert(typeof user_profile['password'] == "string");
     assert(user_profile['password'].length > 0);
+    assert(hf.is_function(callback) || callback == undefined);
 
     var chunks_owner =
             hf.generate_hash('2lbfAs5v1yguvf2ETM7S\n' + user_profile['email']);
@@ -212,6 +213,8 @@ hf_service.create_user = function(user_profile, callback)
  */
 hf_service.get_user_public_chunk = function(user_hash, callback)
 {
+    assert(hf.is_function(callback));
+
     if(!hf.is_hash(user_hash))
     {
         callback(false);
@@ -243,10 +246,7 @@ hf_service.get_user_public_chunk = function(user_hash, callback)
 
         hf_service.users_public_chunks[user_hash] = public_chunk;
 
-        if (callback)
-        {
-            callback(public_chunk);
-        }
+        callback(public_chunk);
     });
 }
 
@@ -291,6 +291,7 @@ hf_service.login_user_cookie = function(cookie_content, callback)
 hf_service.login_private_chunk = function(private_chunk_name, private_chunk_key, callback)
 {
     assert(!hf_service.is_connected(), "user not connect in login user");
+    assert(hf.is_function(callback) || callback == undefined);
 
     hf_service.reset_cache();
 
@@ -353,6 +354,7 @@ hf_service.get_user_login_cookie = function(user_login_profile)
 hf_service.save_user_chunks = function(callback)
 {
     assert(hf_service.is_connected());
+    assert(hf.is_function(callback) || callback == undefined);
 
     var user_chunks_owner = hf_service.user_chunks_owner();
     var transaction = new hf_com.Transaction();
@@ -391,10 +393,10 @@ hf_service.save_user_chunks = function(callback)
  */
 hf_service.is_user_hash = function(user_hash, callback)
 {
+    assert(hf.is_function(callback));
+
     hf_service.get_user_public_chunk(user_hash, function(public_chunk) {
-        if (callback) {
-            callback(public_chunk != false);
-        }
+        callback(public_chunk != false);
     });
 }
 
@@ -407,8 +409,11 @@ hf_service.is_user_hash = function(user_hash, callback)
 hf_service.add_contact = function(user_hash, callback)
 {
     assert(hf_service.is_connected());
+    assert(hf.is_function(callback) || callback == undefined);
+
     if (user_hash == hf_service.user_hash() || (user_hash in hf_service.user_private_chunk['contacts']))
     {
+        assert(hf.is_function(callback));
         callback(false);
         return ;
     }
@@ -427,7 +432,10 @@ hf_service.add_contact = function(user_hash, callback)
 
         hf_service.save_user_chunks(function()
         {
-            callback(true);
+            if (callback)
+            {
+                callback(true);
+            }
         });
     });
 }
@@ -436,11 +444,12 @@ hf_service.add_contact = function(user_hash, callback)
  * Lists contact's public chunks
  * @param <callback>: the function called once the response has arrived
  *      @param <public_chunks>: the contacts' public chunk
- *      function my_callback(success)
+ *      function my_callback(public_chunks)
  */
 hf_service.list_contacts = function(callback)
 {
     assert(hf_service.is_connected());
+    assert(hf.is_function(callback));
 
     var contacts = hf_service.user_private_chunk['contacts'];
     var objCount = Object.keys(contacts).length;
@@ -462,9 +471,7 @@ hf_service.list_contacts = function(callback)
 
             iteration++;
             if (iteration == objCount) {
-                if (callback) {
-                    callback(content);
-                }
+                callback(content);
             }
         });
     }

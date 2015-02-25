@@ -426,6 +426,58 @@ hf_com.encrypt_content = function(encryption_key, chunk_content)
 }
 
 /*
+ * @param <encryption_key>: data's encryption key
+ *
+ * @return: key for crypting
+ */
+hf_com.get_key = function(encryption_key) {
+    var splitted_key = encryption_key.split("\n");
+    var key = "";
+    var i;
+    for(i = 1; i < splitted_key.length; i++) {
+        if (i > 1)
+        {
+            key += '\n';
+        }
+        key += splitted_key[i];
+    }
+    return key;
+}
+
+/*
+ * @param <key>: the key to ask
+ * @param <key_type>: the type to test
+ *
+ * @return: true if it's key for aes encrypting, false if other
+ */
+hf_com.is_key_type = function(key, key_type)
+{
+    var splitted_key = key.split("\n")[0];
+    return (splitted_key.trim().toUpperCase() === key_type.toUpperCase());
+}
+
+/*
+* @param <encryption_key>: the key for encrypting
+*
+* @return: true if it's key for aes encrypting, false if other
+*/
+hf_com.is_AES_key = function(key) {
+    return hf_com.is_key_type(key, 'AES');
+}
+
+/*
+* @param <encryption_key>: the key for encrypting
+*
+* @return: true if it's key for RSA encrypting, false if other
+*/
+hf_com.is_RSA_public_key = function(key) {
+    return hf_com.is_key_type(key, 'RSA-1024-Public');
+}
+hf_com.is_RSA_private_key = function(key) {
+    return hf_com.is_key_type(key, 'RSA-1024-Private');
+}
+
+/*
  * @param <encryption_key>: the data's encryption key
  * @param <data>: the data to encrypt.
  *
@@ -440,37 +492,17 @@ hf_com.encrypt = function(encryption_key, data)
          return data;
     }
 
-    if(hf_com.is_AES_key(encryption_key)) {
+    if (hf_com.is_AES_key(encryption_key))
+    {
         return hf_com.encrypt_AES(encryption_key, data);
-    } else if (hf_com.is_RSA(encryption_key)){
-        return hf_com.encrypt_RSA(encryption_key, data);
-    } else {
-        assert(false, "your key to encrypt is false");
     }
-}
-
-/*
-* @param <encryption_key>: the key for encrypting
-*
-* @return: true if it's key for aes encrypting, false if other
-*/
-hf_com.is_AES_key = function(key) {
-    var splitted_key = key.split("\n")[0];
-    return (splitted_key.trim().toUpperCase() === "AES".toUpperCase());
-}
-
-/*
-* @param <encryption_key>: the key for encrypting
-*
-* @return: true if it's key for RSA encrypting, false if other
-*/
-hf_com.is_RSA__public_key = function(key) {
-    var splitted_key = key.split("\n")[0];
-    return (splitted_key.trim().toUpperCase() === "RSA-1024-Public".toUpperCase());
-}
-hf_com.is_RSA__private_key = function(key) {
-    var splitted_key = key.split("\n")[0];
-    return (splitted_key.trim().toUpperCase() === "RSA-1024-Private".toUpperCase());
+    else if (hf_com.is_RSA_public_key(encryption_key)){
+        return hf_com.encrypt_RSA(encryption_key, data);
+    }
+    else
+    {
+        assert(false, "unknwon key type");
+    }
 }
 
 /*
@@ -500,26 +532,6 @@ hf_com.encrypt_RSA = function(encryption_key, data) {
 }
 
 /*
-* @param <encryption_key>: data's encryption key
-*
-* @return: key for crypting
-*/
-hf_com.get_key = function(encryption_key) {
-    var splitted_key = encryption_key.split("\n");
-    var key = "";
-    var i;
-    for(i = 1; i < splitted_key.length; i++) {
-        if (i > 1)
-        {
-            key += '\n';
-        }
-        key += splitted_key[i];
-    }
-    return key;
-}
-
-
-/*
  * @param <decryption_key>: the data's decryption key
  * @param <encrypted_data>: the data to decrypt.
  *
@@ -535,12 +547,17 @@ hf_com.decrypt = function(decryption_key, encrypted_data)
         return encrypted_data;
     }
 
-    if(hf_com.is_AES_key(decryption_key)) {
+    if (hf_com.is_AES_key(decryption_key))
+    {
         return hf_com.decrypt_AES(decryption_key, encrypted_data);
-    } else if (hf_com.is__RSA_private_key(decryption_key)){
+    }
+    else if (hf_com.is_RSA_private_key(decryption_key))
+    {
         return hf_com.decrypt_RSA(decryption_key, encrypted_data);
-    } else {
-        assert(false, "your key to decrypt is false");
+    }
+    else
+    {
+        assert(false, "unknwon key type");
     }
 }
 

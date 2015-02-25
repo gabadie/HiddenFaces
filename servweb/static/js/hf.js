@@ -2,6 +2,14 @@
 var hf = {};
 
 /*
+ * Tests if a function
+ */
+hf.is_function = function(fn)
+{
+    return typeof fn == 'function'
+}
+
+/*
  * Checks if the parameter is a valide hash
  *
  * @param <hash>: value to check
