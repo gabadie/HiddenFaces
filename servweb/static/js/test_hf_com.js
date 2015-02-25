@@ -48,6 +48,29 @@ test_hf_com.test_create_data_chunk = function()
     test_utils.assert_success(3 + chunk_content.length);
 }
 
+test_hf_com.test_get_multiple_data_chunks = function()
+{
+    var t = new hf_com.Transaction();
+
+    t.create_data_chunk('chunk1', 'user', '', ['hello'], false);
+    t.create_data_chunk('chunk2', 'user', '', ['hello', 'world'], false);
+    t.commit();
+
+    hf_com.get_multiple_data_chunks(
+        {
+            'chunk1': '',
+            'chunk2': '',
+        },
+        function(json_message){
+            test_utils.assert(json_message['status'] == 'ok');
+            test_utils.assert(json_message['chunk']['chunk1'].length == 1);
+            test_utils.assert(json_message['chunk']['chunk2'].length == 2);
+        }
+    );
+
+    test_utils.assert_success(3);
+}
+
 test_hf_com.test_data_chunk_modifications = function()
 {
     test_hf_com.setup_data_base();
@@ -159,6 +182,7 @@ test_hf_com.test_is_RSA_key = function() {
 test_hf_com.main = function()
 {
     test_utils.run(test_hf_com.test_create_data_chunk, 'test_hf_com.test_create_data_chunk');
+    test_utils.run(test_hf_com.test_get_multiple_data_chunks, 'test_hf_com.test_get_multiple_data_chunks');
     test_utils.run(test_hf_com.test_data_chunk_modifications, 'test_hf_com.test_data_chunk_operations');
     test_utils.run(test_hf_com.test_data_chunk_deletions, 'test_hf_com.test_data_chunk_deletions');
     test_utils.run(test_hf_com.transaction_get_data_chunk, 'test_hf_com.transaction_get_data_chunk');

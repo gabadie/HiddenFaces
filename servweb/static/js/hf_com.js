@@ -263,6 +263,29 @@ hf_com.Transaction = function()
 }
 
 /*
+ * @param <chunk_name>: the data chunk's name associated with a value
+ * @param <callback>: the callback called once recieved
+ *
+ *  function commit_callback(json_message)
+ *  {
+ *      json_message['chunk'][<chunk_name>]
+ *  }
+ */
+hf_com.get_multiple_data_chunks = function(chunk_names, callback)
+{
+    var transaction = new hf_com.Transaction();
+
+    for (chunk_name in chunk_names)
+    {
+        var decryption_key = chunk_names[chunk_name];
+
+        transaction.get_data_chunk(chunk_name, decryption_key);
+    }
+
+    return transaction.commit(callback);
+}
+
+/*
  * DEPRECATED: Use hf_com.Transaction.create_data_chunk() instead.
  */
 hf_com.create_data_chunk = function(chunk_name, access_as, encryption_key, chunk_content, public_append, callback)
@@ -277,7 +300,7 @@ hf_com.create_data_chunk = function(chunk_name, access_as, encryption_key, chunk
 }
 
 /*
- * DEPRECATED: Use hf_com.Transaction.write_data_chunk() instead.
+ * DEPRECATED: Use hf_com.Transaction.write_data_chunk() instead
  */
 hf_com.write_data_chunk = function(chunk_name, access_as, encryption_key, chunk_content, callback)
 {
@@ -303,12 +326,8 @@ hf_com.append_data_chunk = function(chunk_name, access_as, encryption_key, chunk
 }
 
 /*
- * @param <chunk_name>: the data chunk's name
- * @param <decryption_key>: the data chunk's decryption key
- * @param <callback>: the callback once the chunk is received
- *      function my_callback(json_message) (ex: json_message['chunk_content'])
- *
- * @returns <json_message> if synchronized
+ * DEPRECATED: Use hf_com.Transaction.get_data_chunk() or
+ *      hf_com.get_multiple_data_chunks() instead.
  */
 hf_com.get_data_chunk = function(chunk_name, decryption_key, callback)
 {
