@@ -287,7 +287,7 @@ test_hf_service.add_contact = function() {
     test_utils.assert_success(5);
 }
 
-test_hf_service.get_contacts_content = function() 
+test_hf_service.list_contacts = function()
 {
     //create all users
     var user_profile0 = test_hf_service.john_smith_profile(0);
@@ -302,7 +302,7 @@ test_hf_service.get_contacts_content = function()
     //user0 is logged
     hf_service.login_user(user_profile0);
 
-    hf_service.get_contacts_content(function(data) {
+    hf_service.list_contacts(function(data) {
         test_utils.assert(Object.keys(data).length == 0, "there is no contact");
     });
 
@@ -320,8 +320,8 @@ test_hf_service.get_contacts_content = function()
     });
 
     //actual result
-    hf_service.get_contacts_content(function(data) {
-        test_utils.assert(JSON.stringify(expected_content) === JSON.stringify(data), "get all contacts content is ok");    
+    hf_service.list_contacts(function(data) {
+        test_utils.assert(JSON.stringify(expected_content) === JSON.stringify(data), "get all contacts content is ok");
     });
 
     test_utils.assert_success(2);
@@ -340,5 +340,5 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.contact_request, "test_hf_service.contact_request");
 
     test_utils.run(test_hf_service.add_contact, "test_hf_service.add_contact");
-    test_utils.run(test_hf_service.get_contacts_content,"test_hf_service.get_contacts_content");
+    test_utils.run(test_hf_service.list_contacts,"test_hf_service.list_contacts");
 }

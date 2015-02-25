@@ -206,10 +206,13 @@ hf_service.create_user = function(user_profile, callback)
  * Gets an user's public chunk
  *
  * @param <user_hash>: the user's hash
+ * @param <callback>: the function called once the response has arrived
+ *      @param <public_chunk>: is the user's public chunk or false otherwise.
+ *      function my_callback(public_chunk)
  */
 hf_service.get_user_public_chunk = function(user_hash, callback)
 {
-    if(!hf.is_hash(user_hash)) 
+    if(!hf.is_hash(user_hash))
     {
         callback(false);
         return ;
@@ -239,7 +242,7 @@ hf_service.get_user_public_chunk = function(user_hash, callback)
 
 
         hf_service.users_public_chunks[user_hash] = public_chunk;
-       
+
         if (callback)
         {
             callback(public_chunk);
@@ -379,24 +382,16 @@ hf_service.save_user_chunks = function(callback)
         }
     })
 }
-/*
- * @params <contact_hash>: the contact's hash
- * @params <contacts>: all contacts's list
- *
- */
-hf_service.is_contact_added = function(contact_hash, contacts) 
-{    
-    return (contact_hash in contacts);
-}
 
 /*
- * @params <contact_hash>: the contact's has
- * @params <callback>: callback function, true or false in params
- *
+ * @param <user_hash>: contact's user hash
+ * @param <callback>: the function called once the response has arrived
+ *      @param <is_user_hash>: true or false
+ *      function my_callback(is_user_hash)
  */
-hf_service.is_user_hash = function(contact_hash, callback) 
+hf_service.is_user_hash = function(user_hash, callback)
 {
-    hf_service.get_user_public_chunk(contact_hash, function(public_chunk) {
+    hf_service.get_user_public_chunk(user_hash, function(public_chunk) {
         if (callback) {
             callback(public_chunk != false);
         }
@@ -404,20 +399,21 @@ hf_service.is_user_hash = function(contact_hash, callback)
 }
 
 /*
- * @params <contact_hash>: contact's hash
- * @params <callback>: callback funtion
- *
+ * @param <user_hash>: contact's user hash
+ * @param <callback>: the function called once the response has arrived
+ *      @param <success>: true or false
+ *      function my_callback(success)
  */
-hf_service.add_contact = function(contact_hash, callback)
+hf_service.add_contact = function(user_hash, callback)
 {
     assert(hf_service.is_connected());
-    if (contact_hash == hf_service.user_hash() || (contact_hash in hf_service.user_private_chunk['contacts']))
+    if (user_hash == hf_service.user_hash() || (user_hash in hf_service.user_private_chunk['contacts']))
     {
         callback(false);
         return ;
     }
 
-    hf_service.is_user_hash(contact_hash, function(is_user_hash) 
+    hf_service.is_user_hash(user_hash, function(is_user_hash)
     {
         if (!is_user_hash)
         {
@@ -425,7 +421,7 @@ hf_service.add_contact = function(contact_hash, callback)
             return;
         }
 
-        hf_service.user_private_chunk['contacts'][contact_hash] = {
+        hf_service.user_private_chunk['contacts'][user_hash] = {
             'circles': []
         };
 
@@ -437,28 +433,33 @@ hf_service.add_contact = function(contact_hash, callback)
 }
 
 /*
- * Get all contact's public content
- *
+ * Lists contact's public chunks
+ * @param <callback>: the function called once the response has arrived
+ *      @param <public_chunks>: the contacts' public chunk
+ *      function my_callback(success)
  */
-hf_service.get_contacts_content = function(callback) 
+hf_service.list_contacts = function(callback)
 {
-    assert(hf_service.is_connected(), 'user not logged in function get_contacts_content()');
+    assert(hf_service.is_connected());
+
     var contacts = hf_service.user_private_chunk['contacts'];
-    
-    var objCount = Object.keys(contacts).length; 
+    var objCount = Object.keys(contacts).length;
     var content=[];
 
-    var iteration = 0; 
-    var contact;
-    
     if (objCount === 0) {
         callback(content);
         return ;
     }
 
-    for(contact in contacts){
-        hf_service.get_user_public_chunk(contact, function() {
-            content.push(hf_service.users_public_chunks[contact]);
+    var iteration = 0;
+
+    for(var contact in contacts) {
+        hf_service.get_user_public_chunk(contact, function(public_chunk) {
+            if (public_chunk)
+            {
+                content.push(public_chunk);
+            }
+
             iteration++;
             if (iteration == objCount) {
                 if (callback) {
