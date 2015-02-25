@@ -133,7 +133,7 @@ test_hf_com.transaction_get_data_chunk = function()
     test_utils.assert_success(2);
 }
 
-test_hf_com.test_encrypt = function() {
+test_hf_com.test_encrypt_AES = function() {
     var key = "AES \n mypassword";
     var data = "data to encrypt";
     var is_AES = hf_com.is_AES_key(key);
@@ -155,13 +155,28 @@ test_hf_com.test_encrypt_empty_key = function() {
     test_utils.assert(data === encrypted_data, "test encrypt data AES with empty key");
 }
 
-test_hf_com.test_decrypt = function() {
+test_hf_com.test_decrypt_AES = function() {
     var key = "AES \n mypassword";
     var data = "data to encrypt";
 
     var encrypted_data = sjcl.encrypt(hf_com.get_key(key), data);
     var decrypted_data = hf_com.decrypt(key, encrypted_data);
     test_utils.assert(data === decrypted_data, "test decrypt data with AES method");
+}
+
+test_hf_com.test_decrypt_RSA = function() {
+
+    var data = "data to encrypt";
+
+    hf_com.generate_RSA_key(function(private_key, public_key){
+        var encrypted_data = hf_com.encrypt_RSA(hf_com.get_key(public_key), data);
+        var decrypted_data = hf_com.decrypt_RSA(hf_com.get_key(private_key), encrypted_data);
+
+        test_utils.assert(data === decrypted_data,"test decrypt data with RSA method");
+        test_utils.assert(encrypted_data != data,"test encrypt data")
+    });
+
+    test_utils.assert_success(2);
 }
 
 test_hf_com.test_decrypt_empty_key = function() {
@@ -171,13 +186,23 @@ test_hf_com.test_decrypt_empty_key = function() {
     test_utils.assert(data === decrypted_data, "test encrypt data AES with empty key");
 }
 
-test_hf_com.test_is_RSA_key = function() {
+test_hf_com.test_is_RSA_public_key = function() {
     var key = "RSA-1024-Public \n -----BEGIN PUBLIC KEY----- \nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDlOJu6TyygqxfWT7eLtGDwajtN\nFOb9I5XRb6khyfD1Yt3YiCgQWMNW649887VGJiGr/L5i2osbl8C9+WJTeucF+S76\nxFxdU6jE0NQ+Z+zEdhUTooNRaY5nZiu5PgDB0ED/ZKBUSLKL7eibMxZtMlUDHjm4gwQco1KRMDSmXSMkDwIDAQAB\n-----END PUBLIC KEY-----";
-    test_utils.assert(hf_com.is_RSA_key(key) === true, "is RSA key test");
+    test_utils.assert(hf_com.is_RSA__public_key(key) === true, "is RSA public key test");
 
     key = "RSA- 1024-Public \n -----BEGIN PUBLIC KEY----- \nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDlOJu6TyygqxfWT7eLtGDwajtN\nFOb9I5XRb6khyfD1Yt3YiCgQWMNW649887VGJiGr/L5i2osbl8C9+WJTeucF+S76\nxFxdU6jE0NQ+Z+zEdhUTooNRaY5nZiu5PgDB0ED/ZKBUSLKL7eibMxZtMlUDHjm4gwQco1KRMDSmXSMkDwIDAQAB\n-----END PUBLIC KEY-----";
-    test_utils.assert(hf_com.is_RSA_key(key) === false, "is RSA key test false");
+    test_utils.assert(hf_com.is_RSA__public_key(key) === false, "is RSA public key test false");
 }
+test_hf_com.test_is_RSA_private_key = function() {
+    var key = "RSA-1024-Private \n";
+    test_utils.assert(hf_com.is_RSA__private_key(key) === true, "is RSA private key test");
+
+    key = "RSA- 1024-Private \n";
+    test_utils.assert(hf_com.is_RSA__private_key(key) === false, "is RSA private key test false");
+
+}
+
+
 
 test_hf_com.main = function()
 {
@@ -188,10 +213,14 @@ test_hf_com.main = function()
     test_utils.run(test_hf_com.transaction_get_data_chunk, 'test_hf_com.transaction_get_data_chunk');
 
     // Test for encrypt AES
-    test_utils.run(test_hf_com.test_encrypt, "test_hf_com.test_encrypt");
+    test_utils.run(test_hf_com.test_encrypt_AES, "test_hf_com.test_encrypt_AES");
     test_utils.run(test_hf_com.test_encrypt_empty_key, "test_hf_com.test_encrypt_empty_key");
-    test_utils.run(test_hf_com.test_decrypt, "test_hf_com.test_decrypt");
+    test_utils.run(test_hf_com.test_decrypt_AES, "test_hf_com.test_decrypt_AES");
     test_utils.run(test_hf_com.test_decrypt_empty_key, "test_hf_com.test_decrypt_empty_key");
 
-    test_utils.run(test_hf_com.test_is_RSA_key, "test_hf_com.test_is_RSA_key");
+    test_utils.run(test_hf_com.test_is_RSA_public_key, "test_hf_com.test_is_RSA__public_key");
+    test_utils.run(test_hf_com.test_is_RSA_private_key, "test_hf_com.test_is_RSA__private_key");
+    test_utils.run(test_hf_com.test_decrypt_RSA,"test_hf_com.test_decrypt_RSA");
+
+
 }

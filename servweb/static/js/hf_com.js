@@ -375,6 +375,32 @@ hf_com.delete_data_chunk = function(chunk_name, access_as, callback)
 }
 
 /*
+ * Generate RSA keys 1024 bits
+ * @param <callback>: the callback called once recieved
+ *
+ *  function callback(private_key, public_key)
+ */
+hf_com.generate_RSA_key = function(callback)
+{
+    var params = {
+        'operation': 'generate_rsa_keys'
+    };
+    return hf_com.json_request(params, function(status, json) {
+        if(status != 200)
+        {
+            alert(status);
+            return;
+        }
+
+        if (callback != null)
+        {
+            callback(json['private_key'], json['public_key']);
+
+        }
+    });
+}
+
+/*
  * @param <encryption_key>: the chunk content's encryption key
  * @param <chunk_content>: the chunk content to encrypt
  *
@@ -438,9 +464,13 @@ hf_com.is_AES_key = function(key) {
 *
 * @return: true if it's key for RSA encrypting, false if other
 */
-hf_com.is_RSA_key = function(key) {
+hf_com.is_RSA__public_key = function(key) {
     var splitted_key = key.split("\n")[0];
     return (splitted_key.trim().toUpperCase() === "RSA-1024-Public".toUpperCase());
+}
+hf_com.is_RSA__private_key = function(key) {
+    var splitted_key = key.split("\n")[0];
+    return (splitted_key.trim().toUpperCase() === "RSA-1024-Private".toUpperCase());
 }
 
 /*
@@ -461,8 +491,12 @@ hf_com.encrypt_AES = function(encryption_key, data) {
 * @return: crypted data by RSA method
 */
 hf_com.encrypt_RSA = function(encryption_key, data) {
-    var key = hf_com.get_key(encryption_key);
-   // alert("TODO encrypt RSA");
+
+    var encrypt = new JSEncrypt();
+    encrypt.setPublicKey(encryption_key);
+    var encrypted = encrypt.encrypt(data);
+    return encrypted;
+
 }
 
 /*
@@ -475,10 +509,15 @@ hf_com.get_key = function(encryption_key) {
     var key = "";
     var i;
     for(i = 1; i < splitted_key.length; i++) {
+        if (i > 1)
+        {
+            key += '\n';
+        }
         key += splitted_key[i];
     }
     return key;
 }
+
 
 /*
  * @param <decryption_key>: the data's decryption key
@@ -498,7 +537,7 @@ hf_com.decrypt = function(decryption_key, encrypted_data)
 
     if(hf_com.is_AES_key(decryption_key)) {
         return hf_com.decrypt_AES(decryption_key, encrypted_data);
-    } else if (hf_com.is_RSA_key(decryption_key)){
+    } else if (hf_com.is__RSA_private_key(decryption_key)){
         return hf_com.decrypt_RSA(decryption_key, encrypted_data);
     } else {
         assert(false, "your key to decrypt is false");
@@ -523,5 +562,10 @@ hf_com.decrypt_AES = function(decryption_key, encrypted_data) {
  * @returns the decrypted data by RSA method
  */
 hf_com.decrypt_RSA = function(decryption_key, encrypted_data) {
-    //TODO
+
+    var decrypt = new JSEncrypt();
+    decrypt.setPrivateKey(decryption_key);
+    var uncrypted = decrypt.decrypt(encrypted_data);
+    return uncrypted;
+
 }
