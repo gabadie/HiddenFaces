@@ -91,7 +91,7 @@ hf_control.ViewRouter = function(build_up_callback)
             match_callback();
         });
 
-        return False;
+        return false;
     }
 }
 
