@@ -11,6 +11,7 @@ hf_ui.templatesCaches = new Map();
 hf_ui.apply_template = function(template_name, params, domElement, callback)
 {
     assert(typeof template_name == 'string');
+    assert(domElement);
 
     callback = callback || null;
 
