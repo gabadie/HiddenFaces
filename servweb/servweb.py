@@ -19,50 +19,49 @@ app.debug = True
 server = xmlrpclib.Server('http://localhost:7090/')
 
 def generate_rsa_keys():
-
-    tp1 = tempfile.mktemp()
+    """ Generates valide RSA public an private keys
+    """
     openssl_bin = 'openssl'
 
     if _platform == 'win32':
         openssl_bin += '.exe'
 
-    private_key = subprocess.Popen([openssl_bin, 'genrsa', '-out', tp1, '1024'],
-    stdout = subprocess.PIPE
+    tp1 = tempfile.mktemp()
+    private_key = subprocess.Popen(
+        [openssl_bin, 'genrsa', '-out', tp1, '1024'],
+        stdout = subprocess.PIPE
     )
 
     private_key.wait()
     assert private_key.returncode == 0
-
     assert os.path.exists(tp1)
+
     with open(tp1) as myfile:
         private_key = myfile.read()
         private_key = 'RSA-1024-Private\n' + private_key
 
-    print private_key
-    assert private_key.startswith('RSA-1024-Private\n')
-
-
     tp2 = tempfile.mktemp()
 
-    public_key = subprocess.Popen([openssl_bin, 'rsa', '-pubout', '-in', tp1,'-out', tp2],
-    stdout=subprocess.PIPE
+    public_key = subprocess.Popen(
+        [openssl_bin, 'rsa', '-pubout', '-in', tp1,'-out', tp2],
+        stdout=subprocess.PIPE
     )
 
     public_key.wait()
     assert public_key.returncode == 0
-
     assert os.path.exists(tp2)
+
     with open(tp2) as myfile1:
         public_key = myfile1.read()
         public_key = 'RSA-1024-Public\n' + public_key
-    print public_key
-    assert public_key.startswith('RSA-1024-Public\n')
 
     os.remove(tp1)
     os.remove(tp2)
     assert not os.path.exists(tp1)
     assert not os.path.exists(tp2)
 
+    assert private_key.startswith('RSA-1024-Private\n')
+    assert public_key.startswith('RSA-1024-Public\n')
 
     return private_key, public_key
 
