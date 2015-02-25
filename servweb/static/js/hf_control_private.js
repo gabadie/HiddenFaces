@@ -20,24 +20,6 @@ hf_control.signed_in.route('/', function(){
     );
 });
 
-/*
- * Logs out the user
- */
-hf_control.log_out = function()
-{
-    assert(hf_service.is_connected());
-
-    hf.delete_cookie(hf_control.userCookieName);
-
-    /*
-     * we reload completly the page by security so that the JS context is fully
-     * cleaned.
-     */
-    window.location.replace("./");
-
-    return false;
-}
-
 hf_control.refresh_left_column = function()
 {
     hf_ui.apply_template(

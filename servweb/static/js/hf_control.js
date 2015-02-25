@@ -78,9 +78,18 @@ hf_control.ViewRouter = function(build_up_callback)
 
             for (var i = 1; i < dirs.length; i++)
             {
-                matchTry += dirs[i] + '/';
+                if (i > 1)
+                {
+                    matchTry += '/';
+                }
 
-                if (viewRouter.viewPrefix.has(matchTry))
+                matchTry += dirs[i];
+
+                if (viewRouter.viewPrefix.has(matchTry + '/'))
+                {
+                    match_callback = viewRouter.viewPrefix.get(matchTry + '/');
+                }
+                else if (viewRouter.viewPrefix.has(matchTry))
                 {
                     match_callback = viewRouter.viewPrefix.get(matchTry);
                 }

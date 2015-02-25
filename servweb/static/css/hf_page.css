@@ -48,9 +48,10 @@
     top: 35px;
     left: 0px;
     z-index: 10;
-    padding: 5px 0;
-    border-bottom-right-radius: 5px;
-    border-bottom-left-radius:  5px;
+    padding: 3px 0;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius:  3px;
+    min-width: 150px;
 }
 
 #hf_page_top_bar li:hover .hf_sublist
@@ -61,7 +62,8 @@
 #hf_page_top_bar li:hover .hf_sublist a
 {
     font-weight: normal;
-    padding: 3px 20px;
+    padding: 2px 20px;
+    width: 100%;
 }
 
 
@@ -114,6 +116,11 @@
 #hf_page_left_column a
 {
     cursor: pointer;
+}
+
+#hf_page_left_column a:nth-child(even)
+{
+    background: #FFFBF5;
 }
 
 #hf_page_left_column a:hover
