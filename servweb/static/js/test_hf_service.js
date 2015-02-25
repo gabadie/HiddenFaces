@@ -177,6 +177,83 @@ test_hf_service.push_notification = function()
     test_utils.assert_success(3);
 }
 
+test_hf_service.notification_automation_util = function(send_notification_callback)
+{
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+
+    var user_hash0 = hf_service.create_user(user_profile0);
+    var user_hash1 = hf_service.create_user(user_profile1);
+
+    hf_service.login_user(user_profile0);
+
+    var assert_count = send_notification_callback(user_hash1);
+
+    hf_service.disconnect();
+    hf_service.login_user(user_profile1);
+
+    hf_com.get_data_chunk(
+        hf_service.user_public_chunk()['system']['protected_chunk']['name'],
+        '',
+        function(json_message){
+            test_utils.assert(
+                json_message['chunk_content'].length > 0,
+                'looks like the notification has not been sent to user_profile1'
+            );
+        }
+    );
+
+    hf_service.pull_fresh_notifications();
+
+    hf_com.get_data_chunk(
+        hf_service.user_public_chunk()['system']['protected_chunk']['name'],
+        '',
+        function(json_message){
+            test_utils.assert(
+                json_message['chunk_content'].length == 0,
+                'hf_service.pull_fresh_notifications() failed should clean the protected chunk'
+            );
+        }
+    );
+
+    test_utils.assert(
+        hf_service.user_private_chunk['notifications'].length == 0,
+        'hf_service.pull_fresh_notifications() should not modify the user\'s private chunk'
+    );
+
+    test_utils.assert_success(assert_count + 3);
+}
+
+test_hf_service.notification_automation_sanity = function()
+{
+    test_hf_service.notification_automation_util(function(user_hash){
+        var original_notification = {
+            '__meta': {
+                'type': '/notification/testing',
+                'author_user_hash': hf_service.user_hash()
+            }
+        };
+
+        hf_service.notification_automation['/notification/testing'] = function(notification)
+        {
+            test_utils.assert(
+                notification['__meta']['type'] == '/notification/testing',
+                'corrupted notification type'
+            );
+            test_utils.assert(
+                notification['__meta']['author_user_hash'] == original_notification['__meta']['author_user_hash'],
+                'corrupted notification author'
+            );
+        };
+
+        hf_service.push_notification(user_hash, original_notification, function(success){
+            test_utils.assert(success == true, 'notification push with success')
+        });
+
+        return 3;
+    });
+}
+
 test_hf_service.contact_request = function() {
 
     var user_profile0 = test_hf_service.john_smith_profile(0);
@@ -352,6 +429,7 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.login_user, 'test_hf_service.login_user');
     test_utils.run(test_hf_service.save_user_chunks, 'test_hf_service.save_user_chunks');
     test_utils.run(test_hf_service.push_notification, 'test_hf_service.push_notification');
+    test_utils.run(test_hf_service.notification_automation_sanity, 'test_hf_service.notification_automation_sanity');
     test_utils.run(test_hf_service.post_message, 'test_hf_service.post_message');
     test_utils.run(test_hf_service.create_thread, 'test_hf_service.create_thread');
     test_utils.run(test_hf_service.append_post_to_threads, 'test_hf_service.append_post_to_threads');

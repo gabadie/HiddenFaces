@@ -138,8 +138,14 @@ hf_service.create_user = function(user_profile, callback)
             },
             'chunks_owner':  chunks_owner
         },
-        'contacts': {
 
+        /*
+         * pending notifications that have already been fetched but don't have
+         * automated process and are waiting for the user to be processed.
+         */
+        'notifications': [ ],
+
+        'contacts': {
         },
         'circles': []
     };

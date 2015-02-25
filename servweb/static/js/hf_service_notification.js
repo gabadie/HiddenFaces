@@ -64,6 +64,92 @@ hf_service.push_notification = function(user_hash, notification_json, callback)
 }
 
 /*
+ * Pulls fresh notifications, processes automated one and stores the remaining
+ * into the user's private chunk.
+ */
+hf_service.pull_fresh_notifications = function()
+{
+    assert(hf_service.is_connected());
+
+    var transaction = new hf_com.Transaction();
+    var protected_chunk_name =
+        hf_service.user_private_chunk['system']['protected_chunk']['name'];
+
+    transaction.get_data_chunk(
+        protected_chunk_name,
+        hf_service.user_private_chunk['system']['protected_chunk']['private_key']
+    );
+    transaction.write_data_chunk(
+        protected_chunk_name,
+        hf_service.user_chunks_owner(),
+        '',
+        []
+    );
+
+    transaction.commit(function(json_message){
+        assert(json_message['status'] == 'ok');
+
+        var notifications_json = json_message['chunk'][protected_chunk_name];
+        var needChunkSave = false;
+
+        for (var i = 0; i < notifications_json.length; i++)
+        {
+            var notification_json = {};
+            var notificationAutomation = null;
+
+            try
+            {
+                notification_json = JSON.parse(notifications_json[i]);
+
+                /*
+                 * TODO: need to validate the notification in case someone else has
+                 * appened an invalid one (issue #27).
+                 */
+
+                var notificationType = notification_json['__meta']['type'] ;
+
+                assert(notificationType in hf_service.notification_automation);
+
+                notificationAutomation = hf_service.notification_automation[notificationType];
+            }
+            catch (err)
+            {
+                continue;
+            }
+
+            if (notificationAutomation != null)
+            {
+                console.into(notificationType);
+
+                assert(hf.is_function(notificationAutomation));
+
+                notificationAutomation(notification_json);
+
+                continue;
+            }
+
+            /*
+             * We store this notification into the user's private chunk
+             */
+            needChunkSave = true;
+
+            hf_service.user_private_chunk['notifications'].push(notification_json);
+        }
+
+        if (needChunkSave)
+        {
+            assert(notifications_json.length > 0);
+            assert(hf_service.user_private_chunk['notifications'].length > 0);
+
+            hf_service.save_user_chunks();
+        }
+    });
+}
+
+
+// ------------------------------------------------ NOTIFICATION IMPLEMENTATIONS
+
+/*
  * Send a request to friend
  *
  * @params <user_has>: user's hash
