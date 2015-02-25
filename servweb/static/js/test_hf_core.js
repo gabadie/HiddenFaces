@@ -21,6 +21,11 @@ test_hf_core.cookies = function()
 
         test_utils.assert(cookie_content == cookie_db[cookie_name], cookie_name + ' failed');
     }
+
+    for(var cookie_name in cookie_db)
+    {
+        hf.delete_cookie(cookie_name);
+    }
 }
 
 test_hf_core.main = function()

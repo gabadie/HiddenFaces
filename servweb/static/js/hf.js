@@ -153,5 +153,5 @@ hf.get_cookie = function(name)
  */
 hf.delete_cookie = function(name)
 {
-    createCookie(name, "", -1);
+    hf.create_cookie(name, "", -1);
 }
