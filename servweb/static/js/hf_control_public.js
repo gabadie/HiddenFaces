@@ -13,8 +13,6 @@ hf_control.signed_out.sign_up = function(domElem)
 {
     var user_profile = hf.inputs_to_json(domElem);
 
-    alert(JSON.stringify(user_profile));
-
     if (user_profile['first_name'] == '')
     {
         alert('first name required');

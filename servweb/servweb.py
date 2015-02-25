@@ -60,8 +60,6 @@ def read_page():
             template_name
         ))
 
-        print template_path
-
         with open(template_path) as myFile:
             template_source = myFile.read()
 
