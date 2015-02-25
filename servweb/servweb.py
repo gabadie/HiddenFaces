@@ -45,7 +45,7 @@ def read_page():
     try:
         template_source = ''
         template_path = os.path.abspath('{}/static/view/{}'.format(
-            os.path.dirname(__file__),
+            os.path.dirname(os.path.abspath(__file__)),
             template_name
         ))
 
