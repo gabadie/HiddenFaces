@@ -231,12 +231,36 @@ hf_service.get_user_public_chunk = function(user_hash, callback)
  */
 hf_service.login_user = function(user_login_profile, callback)
 {
-    assert(!hf_service.is_connected(), "user not connect in login user");
-
     var private_chunk_name =
             hf_service.user_private_chunk_name(user_login_profile);
     var private_chunk_key =
             hf_service.user_private_chunk_key(user_login_profile);
+
+    return hf_service.login_private_chunk(
+        private_chunk_name,
+        private_chunk_key,
+        callback
+    );
+}
+
+hf_service.login_user_cookie = function(cookie_content, callback)
+{
+    assert(typeof cookie_content == 'string');
+
+    var private_chunk_infos = cookie_content.split(':');
+    var private_chunk_name = private_chunk_infos[0];
+    var private_chunk_key = private_chunk_infos[1];
+
+    return hf_service.login_private_chunk(
+        private_chunk_name,
+        private_chunk_key,
+        callback
+    );
+}
+
+hf_service.login_private_chunk = function(private_chunk_name, private_chunk_key, callback)
+{
+    assert(!hf_service.is_connected(), "user not connect in login user");
 
     hf_service.reset_cache();
 
@@ -274,6 +298,21 @@ hf_service.login_user = function(user_login_profile, callback)
             }
         });
     });
+}
+
+/*
+ * Gets the user's login cookie's content
+ *
+ * @param <user_login_profile>: a map at least containing keys "email" and "password"
+ */
+hf_service.get_user_login_cookie = function(user_login_profile)
+{
+    var private_chunk_name =
+            hf_service.user_private_chunk_name(user_login_profile);
+    var private_chunk_key =
+            hf_service.user_private_chunk_key(user_login_profile);
+
+    return private_chunk_name + ':' + private_chunk_key;
 }
 
 /*

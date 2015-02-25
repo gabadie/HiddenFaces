@@ -75,5 +75,11 @@ hf_control.signed_out.login = function(domElem)
         }
 
         hf_control.signed_in.view('/');
+
+        /*
+         * Saves the login cookie
+         */
+        var cookie_content = hf_service.get_user_login_cookie(user_login_profile);
+        hf.create_cookie(hf_control.userCookieName, cookie_content, 1);
     });
 }

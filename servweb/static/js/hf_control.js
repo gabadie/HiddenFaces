@@ -4,6 +4,7 @@ var hf_control = {};
 
 // the main view router
 hf_control.mainViewRouter = null;
+hf_control.userCookieName = 'user_cookie';
 
 hf_control.view = function(viewUrl)
 {
@@ -84,5 +85,27 @@ hf_control.ViewRouter = function(build_up_callback)
 
 hf_control.onload = function()
 {
-    hf_control.signed_out.view('/');
+    var user_cookie = hf.get_cookie(hf_control.userCookieName);
+
+    if (user_cookie == null)
+    {
+        hf_control.signed_out.view('/');
+
+        return;
+    }
+
+    hf_service.login_user_cookie(user_cookie, function(user_hash){
+        if (user_hash == null)
+        {
+            /*
+             * looks like the connection has failed with this cookie. So we drop
+             * it and load the signed out view '/'
+             */
+            hf.delete_cookie(hf_control.userCookieName);
+            hf_control.signed_out.view('/');
+            return;
+        }
+
+        hf_control.signed_in.view('/');
+    });
 }
