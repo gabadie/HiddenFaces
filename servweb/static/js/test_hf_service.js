@@ -72,6 +72,10 @@ test_hf_service.login_user = function()
 {
     var user_profile0 = test_hf_service.john_smith_profile();
     var user_hash0 = hf_service.create_user(user_profile0);
+    var user_wrong_login_profile = {
+        'email': user_profile0['email'],
+        'password': (user_profile0['email'] + ' wrong password')
+    };
 
     test_utils.assert(!hf_service.is_connected(), 'no-one should be signed in after sign up');
 
@@ -87,7 +91,14 @@ test_hf_service.login_user = function()
 
     test_utils.assert(!hf_service.is_connected(), 'should be disconneted');
 
-    test_utils.assert_success(5);
+    hf_service.login_user(user_wrong_login_profile, function(user_connection_hash){
+        test_utils.assert(user_connection_hash == null, 'user_connection_hash should be null');
+        test_utils.assert(!hf_service.is_connected(), 'should not be connected after failed log in');
+    });
+
+    test_utils.assert(!hf_service.is_connected(), 'should be disconneted');
+
+    test_utils.assert_success(8);
 }
 
 test_hf_service.save_user_chunks = function()

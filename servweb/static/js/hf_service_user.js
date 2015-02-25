@@ -70,7 +70,16 @@ hf_service.user_private_chunk_name = function(user_login_profile)
 
 hf_service.user_private_chunk_key = function(user_login_profile)
 {
-    return ''; //TODO
+    assert(typeof user_login_profile['email'] == "string", "email is not string");
+    assert(typeof user_login_profile['password'] == "string", "password is not string");
+
+    var salt = '5ObbCwaiMi3PwMTVs67m';
+
+    return 'AES\n' + hf.hash(
+        salt + '\n' +
+        user_login_profile['email'] + '\n' +
+        user_login_profile['password']
+    );
 }
 
 /*

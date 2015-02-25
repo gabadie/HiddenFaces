@@ -375,6 +375,17 @@ hf_com.delete_data_chunk = function(chunk_name, access_as, callback)
 }
 
 /*
+ * Generate AES key
+ * @param <salt>: the salt
+ *
+ * @return the AES key
+ */
+hf_com.generate_AES_key = function(salt)
+{
+    return 'AES\n' + hf.generate_hash(salt);
+}
+
+/*
  * Generate RSA keys 1024 bits
  * @param <callback>: the callback called once recieved
  *
