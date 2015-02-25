@@ -48,12 +48,6 @@ hf_service.user_public_chunk = function()
     return hf_service.users_public_chunks[hf_service.user_hash()];
 }
 
-hf_service.user_private_chunk = function() 
-{
-    assert(hf_service.is_connected());
-    return hf_service.user_private_chunk;
-}
-
 /*
  * Gets the private chunk's name and key from the user's email and
  * password.
@@ -325,50 +319,51 @@ hf_service.get_user_login_cookie = function(user_login_profile)
 
 /*
  * Saves user's public and private chunks
+ * @param <callback>: the function called once done
+ *      function my_callback()
  */
-hf_service.save_user_chunks = function()
+hf_service.save_user_chunks = function(callback)
 {
     assert(hf_service.is_connected());
 
     var user_chunks_owner = hf_service.user_chunks_owner();
+    var transaction = new hf_com.Transaction();
 
     // saves user's private chunk
-    hf_com.write_data_chunk(
+    transaction.write_data_chunk(
         hf_service.user_private_chunk['__meta']['chunk_name'],
         user_chunks_owner,
         hf_service.user_private_chunk['__meta']['key'],
-        [JSON.stringify(hf_service.user_private_chunk)],
-        null
+        [JSON.stringify(hf_service.user_private_chunk)]
     );
 
     // saves user's public chunk
-    hf_com.write_data_chunk(
+    transaction.write_data_chunk(
         hf_service.user_hash(),
         user_chunks_owner,
         '',
-        [JSON.stringify(hf_service.user_public_chunk())],
-        null
+        [JSON.stringify(hf_service.user_public_chunk())]
     );
-}
 
-hf_service.is_contact_added = function(contact_hash, contacts) 
-{    
-    return (contact_hash in contacts);
-}
+    transaction.commit(function(json_message){
+        assert(json_message['status'] == 'ok');
 
-hf_service.add_contact = function(contact_hash, callback) {
-    assert(hf_service.is_connected(), 'user not logged in function add_contact()');
-    var private_chunk = hf_service.user_private_chunk;
-    var contacts = private_chunk['contacts'];
-    if (!hf_service.is_contact_added(contact_hash, contacts) && contact_hash != hf_service.user_hash()) {
-        hf_service.user_private_chunk['contacts'][contact_hash] = {
-            'circles': []
-        };
-        if (callback) {
-            callback(hf_service.user_private_chunk['contacts']);
+        if (callback)
+        {
+            callback();
         }
-        hf_service.save_user_chunks();
-    }else{
-        assert(false, contact_hash+ " has added");
-    }
+    })
+}
+
+hf_service.add_contact = function(contact_hash, callback)
+{
+    assert(hf_service.is_connected());
+    assert(contact_hash != hf_service.user_hash());
+    assert(!(contact_hash in hf_service.user_private_chunk['contacts']));
+
+    hf_service.user_private_chunk['contacts'][contact_hash] = {
+        'circles': []
+    };
+
+    hf_service.save_user_chunks(callback);
 }

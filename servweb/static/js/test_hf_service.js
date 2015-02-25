@@ -247,25 +247,37 @@ test_hf_service.append_post_to_threads = function()
 test_hf_service.add_contact = function() {
     var user_profile0 = test_hf_service.john_smith_profile(0);
     var user_profile1 = test_hf_service.john_smith_profile(1);
+    var user_profile2 = test_hf_service.john_smith_profile(2);
 
     var user_hash0 = hf_service.create_user(user_profile0);
     var user_hash1 = hf_service.create_user(user_profile1);
-
-    var user_profile2 = test_hf_service.john_smith_profile(2);
     var user_hash2 = hf_service.create_user(user_profile2);
 
     hf_service.login_user(user_profile0);
 
     hf_service.add_contact(user_hash1, function() {
-        test_utils.success('contacts after added ');
+        test_utils.assert(
+            user_hash1 in hf_service.user_private_chunk['contacts'],
+            'user_hash1 should be added into contacts'
+        );
+        test_utils.assert(
+            !(user_hash2 in hf_service.user_private_chunk['contacts']),
+            'user_hash2 should not be added into contacts'
+        );
     });
-
-
-    test_utils.assert(hf_service.is_contact_added(user_hash1, hf_service.user_private_chunk['contacts']) == true, "test hf_service.is_contact_added() ok!");
 
     hf_service.add_contact(user_hash2, function() {
-        test_utils.assert(hf_service.is_contact_added(user_hash2, hf_service.user_private_chunk['contacts']) == true, "test hf_service.is_contact_added() ok!");        
+        test_utils.assert(
+            user_hash1 in hf_service.user_private_chunk['contacts'],
+            'user_hash1 should already be in contacts'
+        );
+        test_utils.assert(
+            user_hash1 in hf_service.user_private_chunk['contacts'],
+            'user_hash2 should be added into contacts'
+        );
     });
+
+    test_utils.assert_success(4);
 }
 
 test_hf_service.main = function()
