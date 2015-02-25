@@ -329,15 +329,16 @@ test_hf_service.get_contacts_content = function()
 
 test_hf_service.main = function()
 {
-    // test_utils.run(test_hf_service.create_account, 'test_hf_service.create_account');
-    // test_utils.run(test_hf_service.get_user_public_chunk, 'test_hf_service.get_user_public_chunk');
-    // test_utils.run(test_hf_service.login_user, 'test_hf_service.login_user');
-    // test_utils.run(test_hf_service.save_user_chunks, 'test_hf_service.save_user_chunks');
-    // test_utils.run(test_hf_service.push_notification, 'test_hf_service.push_notification');
-    // test_utils.run(test_hf_service.post_message, 'test_hf_service.post_message');
-    // test_utils.run(test_hf_service.create_thread, 'test_hf_service.create_thread');
-    // test_utils.run(test_hf_service.append_post_to_threads, 'test_hf_service.append_post_to_threads');
-    // test_utils.run(test_hf_service.contact_request, "test_hf_service.contact_request");
+    test_utils.run(test_hf_service.create_account, 'test_hf_service.create_account');
+    test_utils.run(test_hf_service.get_user_public_chunk, 'test_hf_service.get_user_public_chunk');
+    test_utils.run(test_hf_service.login_user, 'test_hf_service.login_user');
+    test_utils.run(test_hf_service.save_user_chunks, 'test_hf_service.save_user_chunks');
+    test_utils.run(test_hf_service.push_notification, 'test_hf_service.push_notification');
+    test_utils.run(test_hf_service.post_message, 'test_hf_service.post_message');
+    test_utils.run(test_hf_service.create_thread, 'test_hf_service.create_thread');
+    test_utils.run(test_hf_service.append_post_to_threads, 'test_hf_service.append_post_to_threads');
+    test_utils.run(test_hf_service.contact_request, "test_hf_service.contact_request");
+
     test_utils.run(test_hf_service.add_contact, "test_hf_service.add_contact");
-    // test_utils.run(test_hf_service.get_contacts_content,"test_hf_service.get_contacts_content");
+    test_utils.run(test_hf_service.get_contacts_content,"test_hf_service.get_contacts_content");
 }
