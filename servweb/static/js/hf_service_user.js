@@ -77,8 +77,12 @@ hf_service.user_private_chunk_key = function(user_login_profile)
  * Creates an user
  *
  * @param <user_profile>: the user profile
+ * @param <callback>: the function once
+ *      function my_callback(user_hash)
+ *
+ *      @param <user_hash>: is the user's hash if success login or null otherwise.
  */
-hf_service.create_user = function(user_profile)
+hf_service.create_user = function(user_profile, callback)
 {
     assert(typeof user_profile['first_name'] == "string");
     assert(typeof user_profile['last_name'] == "string");
@@ -150,35 +154,47 @@ hf_service.create_user = function(user_profile)
         }
     };
 
+    var transaction = new hf_com.Transaction();
+
     // Creates the user's private chunk
-    hf_com.create_data_chunk(
+    transaction.create_data_chunk(
         private_chunk_name,
         chunks_owner,
         private_chunk_key,
         [JSON.stringify(private_chunk)],
-        false,
-        null
+        false
     );
 
     // Creates the user's public chunk
-    hf_com.create_data_chunk(
+    transaction.create_data_chunk(
         user_hash,
         chunks_owner,
         '',
         [JSON.stringify(public_chunk)],
-        false,
-        null
+        false
     );
 
     // Creates the user's protected chunk
-    hf_com.create_data_chunk(
+    transaction.create_data_chunk(
         protected_chunk_name,
         chunks_owner,
         '',
         [],
-        true,
-        null
+        true
     );
+
+    transaction.commit(function(json_message){
+        if (json_message['status'] != 'ok')
+        {
+            alert('create user has failed');
+            return;
+        }
+
+        if (callback)
+        {
+            callback(user_hash);
+        }
+    })
 
     hf_service.reset_cache();
     hf_service.users_public_chunks[user_hash] = public_chunk;

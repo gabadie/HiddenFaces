@@ -30,9 +30,12 @@ test_hf_service.create_account = function()
 {
     var user_profile0 = test_hf_service.john_smith_profile();
 
-    hf_service.create_user(user_profile0);
+    hf_service.create_user(user_profile0, function(user_hash){
+        test_utils.assert(hf.is_hash(user_hash));
+    });
 
     test_utils.assert(!hf_service.is_connected(), 'no-one should be signed in after sign up');
+    test_utils.assert_success(2);
 }
 
 test_hf_service.get_user_public_chunk = function()
