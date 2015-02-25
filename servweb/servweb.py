@@ -159,15 +159,3 @@ def generate_rsa_keys():
     assert public_key.startswith('-----BEGIN PUBLIC KEY-----\n')
 
     return private_key, public_key
-
-
-
-
-
-
-
-
-
-
-
-

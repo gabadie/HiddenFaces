@@ -1,15 +1,10 @@
-import unittest
-import os
-from servweb import generate
-import tempfile
 
+from servweb import generate_rsa_keys
 
-"""Test if file exists"""
 
 def test_generate_rsa_keys():
-    generate();
+    generate_rsa_keys();
+
 
 if __name__ == '__main__':
-    test_exist();
-
-    generate_rsa_keys();
+    test_generate_rsa_keys();

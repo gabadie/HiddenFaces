@@ -1,6 +1,8 @@
 
 # ----------------------------------------------- Files
-PYTEST_FILES:=
+PYTEST_FILES:=\
+	servweb/test_servweb.py
+
 SHTEST_FILES:=\
 	servdata/test_servdata.sh
 

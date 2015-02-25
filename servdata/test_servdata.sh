@@ -10,7 +10,7 @@ MONGO_PID=$!
 sleep 1
 
 cd servdata
-py.test test_servdata.py
+py.test -q test_servdata.py
 
 kill -9 $MONGO_PID
 
