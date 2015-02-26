@@ -379,8 +379,9 @@ test_hf_service.list_notifications = function()
     test_utils.assert_success(4);
 }
 
-test_hf_service.contact_request = function() {
-
+test_hf_service.send_message = function()
+{
+    var message = 'hello, could you add me as friend, DDD';
     var user_profile0 = test_hf_service.john_smith_profile(0);
     var user_profile1 = test_hf_service.john_smith_profile(1);
 
@@ -389,11 +390,15 @@ test_hf_service.contact_request = function() {
 
     hf_service.login_user(user_profile0);
 
-    hf_service.send_contact_request(user_hash1, "hello, could you add me as friend, DDD", function() {
-        test_utils.success("sent contact request successful");
+    hf_service.send_message(user_hash1, message, function(success) {
+        test_utils.assert(success == true, "sent message must have successed");
     });
 
-    test_utils.assert_success(1);
+    hf_service.send_message(user_hash0, message, function(success) {
+        test_utils.assert(success == false, "sent message must have failed");
+    });
+
+    test_utils.assert_success(2);
 }
 
 
@@ -489,7 +494,7 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.push_notification, 'test_hf_service.push_notification');
     test_utils.run(test_hf_service.notification_automation_sanity, 'test_hf_service.notification_automation_sanity');
     test_utils.run(test_hf_service.list_notifications, 'test_hf_service.list_notifications');
-    test_utils.run(test_hf_service.contact_request, "test_hf_service.contact_request");
+    test_utils.run(test_hf_service.send_message, "test_hf_service.send_message");
 
     // THREADS & POSTS TESTS
     test_utils.run(test_hf_service.post_message, 'test_hf_service.post_message');

@@ -10,8 +10,7 @@
  * }
  */
 hf_service.notification_automation = {
-    '/notification/message': null,
-    '/notification/contact_request': null
+    '/notification/message': null
 };
 
 /*
@@ -188,23 +187,30 @@ hf_service.list_notifications = function(callback)
 // ------------------------------------------------ NOTIFICATION IMPLEMENTATIONS
 
 /*
- * Send a request to friend
+ * Sends message to an user. Might be use for that user to add the currently
+ * connected user as a contact.
  *
- * @params <user_has>: user's hash
+ * @params <user_has>: user's hash we want to send the message
  * @params <message>: message to send to 2nd user
  * @param <callback>: the callback once the notification has been pushed
  *      @param <success>: true or false
  *      function my_callback(success)
  */
-hf_service.send_contact_request = function(user_hash, message, callback)
+hf_service.send_message = function(user_hash, message, callback)
 {
     assert(hf_service.is_connected(), "user not connected in hf_service.send_contact_request");
-    var my_hash = hf_service.user_hash();
+    assert(hf.is_function(callback));
+
+    if (user_hash == hf_service.user_hash())
+    {
+        callback(false);
+        return;
+    }
 
     var notification = {
         '__meta': {
-            'type': '/notification/contact_request',
-            'author_user_hash': my_hash
+            'type': '/notification/message',
+            'author_user_hash': hf_service.user_hash()
         },
         'content': message
     };
