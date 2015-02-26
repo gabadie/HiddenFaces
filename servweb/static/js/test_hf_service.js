@@ -234,15 +234,16 @@ test_hf_service.push_notification = function()
     var user_profile0 = test_hf_service.john_smith_profile();
     var user_hash0 = hf_service.create_user(user_profile0);
 
+    hf_service.login_user(user_profile0);
+
     var notification = {
         '__meta': {
-            'type': '/notification/message',
-            'author_user_hash': hf.hash('other_user')
+            'type': '/notification/testing/manual',
+            'author_user_hash': hf_service.user_hash()
         },
         'content': 'Hi John! How are you?'
     };
 
-    hf_service.login_user(user_profile0);
     hf_service.get_user_public_chunk(user_hash0, function(user_public_chunk){
         hf_com.get_data_chunk(
             user_public_chunk['system']['protected_chunk']['name'],

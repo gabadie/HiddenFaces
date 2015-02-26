@@ -25,10 +25,11 @@ hf_service.notification_automation = {
  */
 hf_service.push_notification = function(user_hash, notification_json, callback)
 {
+    assert(hf_service.is_connected());
     assert(hf.is_hash(user_hash));
     assert(typeof notification_json['__meta']['type'] == 'string');
     assert(notification_json['__meta']['type'] in hf_service.notification_automation);
-    assert(hf.is_hash(notification_json['__meta']['author_user_hash']));
+    assert(notification_json['__meta']['author_user_hash'] == hf_service.user_hash());
     assert(hf.is_function(callback));
 
     // Gets <user_hash>'s public chunk to find <user_hash>'s protected file
