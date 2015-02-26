@@ -82,6 +82,29 @@ hf.generate_hash = function(salt)
 }
 
 /*
+ * Clones deeply an object.
+ */
+hf.clone = function(obj)
+{
+    if (obj == null || typeof(obj) != 'object')
+    {
+        return obj;
+    }
+
+    var temp = obj.constructor(); // changed
+
+    for (var key in obj)
+    {
+        if (obj.hasOwnProperty(key))
+        {
+            temp[key] = hf.clone(obj[key]);
+        }
+    }
+
+    return temp;
+}
+
+/*
  * Fetch a form's json
  *
  * @param <domElement>: the form's DOM element
