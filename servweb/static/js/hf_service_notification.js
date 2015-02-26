@@ -66,10 +66,15 @@ hf_service.push_notification = function(user_hash, notification_json, callback)
 /*
  * Pulls fresh notifications, processes automated one and stores the remaining
  * into the user's private chunk.
+ *
+ * @param <callback>: the function called once done
+ *      @param <success>: true or false
+ *      function my_callback(success)
  */
-hf_service.pull_fresh_notifications = function()
+hf_service.pull_fresh_notifications = function(callback)
 {
     assert(hf_service.is_connected());
+    assert(hf.is_function(callback) || callback == undefined);
 
     var transaction = new hf_com.Transaction();
     var protected_chunk_name =
@@ -87,7 +92,12 @@ hf_service.pull_fresh_notifications = function()
     );
 
     transaction.commit(function(json_message){
-        assert(json_message['status'] == 'ok');
+        if (json_message['status'] != 'ok')
+        {
+            ssert(hf.is_function(callback));
+            callback(false);
+            return;
+        }
 
         var notifications_json = json_message['chunk'][protected_chunk_name];
         var needChunkSave = false;
@@ -143,6 +153,33 @@ hf_service.pull_fresh_notifications = function()
 
             hf_service.save_user_chunks();
         }
+
+        if (callback)
+        {
+            callback(true);
+        }
+    });
+}
+
+/*
+ * Pulls fresh notifications, processes automated one and stores the remaining
+ * into the user's private chunk.
+ *
+ * @param <callback>: the function called once done
+ *      @param <notifcations_list>: the list of notifications
+ *      function my_callback(notifcations_list)
+ */
+hf_service.list_notifications = function(callback)
+{
+    assert(hf.is_function(callback));
+
+    hf_service.pull_fresh_notifications(function(success){
+        if (!success)
+        {
+            alert('hf_service.list_notifications() failed');
+        }
+
+        callback(hf_service.user_private_chunk['notifications']);
     });
 }
 

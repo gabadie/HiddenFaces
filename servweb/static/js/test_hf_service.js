@@ -138,6 +138,8 @@ test_hf_service.save_user_chunks = function()
     //hf_service.disconnect();
 }
 
+hf_service.notification_automation['/notification/testing/manual'] = null;
+
 test_hf_service.push_notification = function()
 {
     var user_profile0 = test_hf_service.john_smith_profile();
@@ -229,15 +231,15 @@ test_hf_service.notification_automation_sanity = function()
     test_hf_service.notification_automation_util(function(user_hash){
         var original_notification = {
             '__meta': {
-                'type': '/notification/testing',
+                'type': '/notification/testing/automated',
                 'author_user_hash': hf_service.user_hash()
             }
         };
 
-        hf_service.notification_automation['/notification/testing'] = function(notification)
+        hf_service.notification_automation['/notification/testing/automated'] = function(notification)
         {
             test_utils.assert(
-                notification['__meta']['type'] == '/notification/testing',
+                notification['__meta']['type'] == '/notification/testing/automated',
                 'corrupted notification type'
             );
             test_utils.assert(
@@ -252,6 +254,39 @@ test_hf_service.notification_automation_sanity = function()
 
         return 3;
     });
+}
+
+test_hf_service.list_notifications = function()
+{
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_hash0 = hf_service.create_user(user_profile0);
+
+    var original_notification = {
+        '__meta': {
+            'type': '/notification/testing/manual',
+            'author_user_hash': user_hash0
+        }
+    };
+
+    hf_service.login_user(user_profile0);
+
+    hf_service.list_notifications(function(notifications_list){
+        test_utils.assert(notifications_list.length == 0, 'should not have any notifications');
+    });
+
+    hf_service.push_notification(user_hash0, original_notification, function(success){
+        test_utils.assert(success == true, 'should push a testing notification');
+    });
+
+    hf_service.push_notification(user_hash0, original_notification, function(success){
+        test_utils.assert(success == true, 'should push another testing notification');
+    });
+
+    hf_service.list_notifications(function(notifications_list){
+        test_utils.assert(notifications_list.length == 2, 'should have one notification');
+    });
+
+    test_utils.assert_success(4);
 }
 
 test_hf_service.contact_request = function() {
@@ -430,6 +465,7 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.save_user_chunks, 'test_hf_service.save_user_chunks');
     test_utils.run(test_hf_service.push_notification, 'test_hf_service.push_notification');
     test_utils.run(test_hf_service.notification_automation_sanity, 'test_hf_service.notification_automation_sanity');
+    test_utils.run(test_hf_service.list_notifications, 'test_hf_service.list_notifications');
     test_utils.run(test_hf_service.post_message, 'test_hf_service.post_message');
     test_utils.run(test_hf_service.create_thread, 'test_hf_service.create_thread');
     test_utils.run(test_hf_service.append_post_to_threads, 'test_hf_service.append_post_to_threads');
