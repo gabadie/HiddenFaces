@@ -100,13 +100,18 @@ hf_service.create_user = function(user_profile, callback)
     assert(user_profile['password'].length > 0);
     assert(hf.is_function(callback) || callback == undefined);
 
-    var chunks_owner =
-            hf.generate_hash('2lbfAs5v1yguvf2ETM7S\n' + user_profile['email']);
-    var protected_chunk_name =
-            hf.generate_hash('qUaMF8HtvLUtsXArCfhU\n' + user_profile['email']);
-
-    var user_hash =
-            hf.generate_hash('fWdFPoyxE4uNoTKoBswp\n' + user_profile['email']);
+    var chunks_owner = hf.generate_hash(
+        '2lbfAs5v1yguvf2ETM7S\n' +
+        user_profile['email']
+    );
+    var protected_chunk_name = hf.generate_hash(
+        'qUaMF8HtvLUtsXArCfhU\n' +
+        user_profile['email']
+    );
+    var user_hash = hf.generate_hash(
+        'fWdFPoyxE4uNoTKoBswp\n' +
+        user_profile['email']
+    );
 
     var private_chunk_name =
             hf_service.user_private_chunk_name(user_profile);

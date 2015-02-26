@@ -78,7 +78,7 @@ hf.generate_hash = function(salt)
 
     assert(typeof salt == 'string');
 
-    return hf.hash(new Date().toLocaleString() + '\n' + salt);
+    return hf.hash(new Date().toLocaleString() + '\n' + Math.random() + '\n' + salt);
 }
 
 /*

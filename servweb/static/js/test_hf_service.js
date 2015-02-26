@@ -8,12 +8,62 @@ test_hf_service.john_smith_profile = function(id)
 {
     id = id || 0;
 
+    var first_names = [
+        'john',
+        'michael',
+        'matthew',
+        'joshua',
+        'andrew',
+        'daniel',
+        'james',
+        'david',
+        'ashley',
+        'jessica',
+        'brittany',
+        'amanda',
+        'samantha',
+        'sarah',
+        'stephanie',
+        'jennifer'
+    ];
+
+    var last_names = [
+        'smith',
+        'johnson',
+        'williams',
+        'jones',
+        'brown',
+        'davis',
+        'miller',
+        'wilson',
+        'moore',
+        'taylor',
+        'anderson',
+        'thomas',
+        'jackson',
+        'white',
+        'harris',
+        'martin'
+    ];
+
+    assert(first_names.length == 16);
+    assert(last_names.length == 16);
+
+    var first_name_id = id % first_names.length;
+    var last_name_id = (id / first_names.length) ^ first_name_id;
+    var sex = 'm';
+
+    if (first_name_id >= 8)
+    {
+        sex = 'f';
+    }
+
     return {
-        'first_name':   'john ' + id,
-        'last_name':    'smith',
-        'sex':          'm',
-        'email':        'john' + id + '@smith.com',
-        'password':     'CIA'  + id,
+        'first_name':   first_names[first_name_id],
+        'last_name':    last_names[last_name_id],
+        'sex':          sex,
+        'email':        first_names[first_name_id] + '@' + last_names[last_name_id] + '.com',
+        'password':     first_names[first_name_id],
         'birth_date':   '1995-08-27'
     }
 }
