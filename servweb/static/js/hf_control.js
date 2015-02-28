@@ -38,6 +38,14 @@ hf_control.view = function(viewUrl)
     return hf_control.mainViewRouter.view(viewUrl);
 }
 
+/*
+ * Refreshes the current view
+ */
+hf_control.refresh_view = function()
+{
+    hf_control.view(hf_control.current_view_url());
+}
+
 hf_control.ViewRouter = function(build_up_callback)
 {
     this.viewPrefix = new Map();

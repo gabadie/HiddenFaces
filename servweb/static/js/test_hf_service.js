@@ -234,6 +234,27 @@ test_hf_service.add_contact = function() {
     test_utils.assert_success(5);
 }
 
+test_hf_service.is_contact = function()
+{
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+    var user_profile2 = test_hf_service.john_smith_profile(2);
+
+    var user_hash0 = hf_service.create_user(user_profile0);
+    var user_hash1 = hf_service.create_user(user_profile1);
+    var user_hash2 = hf_service.create_user(user_profile2);
+
+    hf_service.login_user(user_profile0);
+
+    test_utils.assert(hf_service.is_contact(user_hash1) == false, 'user_hash1 should not be a contact');
+    test_utils.assert(hf_service.is_contact(user_hash2) == false, 'user_hash2 should not be a contact');
+
+    hf_service.add_contact(user_hash1);
+
+    test_utils.assert(hf_service.is_contact(user_hash1) == true, 'user_hash1 should be a contact');
+    test_utils.assert(hf_service.is_contact(user_hash2) == false, 'user_hash2 should be a contact');
+}
+
 test_hf_service.list_contacts = function()
 {
     //create all users
@@ -544,6 +565,7 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.login_user, 'test_hf_service.login_user');
     test_utils.run(test_hf_service.save_user_chunks, 'test_hf_service.save_user_chunks');
     test_utils.run(test_hf_service.add_contact, "test_hf_service.add_contact");
+    test_utils.run(test_hf_service.is_contact, "test_hf_service.is_contact");
     test_utils.run(test_hf_service.list_contacts,"test_hf_service.list_contacts");
 
     // NOTIFICATIONS TESTS

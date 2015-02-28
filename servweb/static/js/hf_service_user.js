@@ -425,6 +425,20 @@ hf_service.is_user_hash = function(user_hash, callback)
 
 /*
  * @param <user_hash>: contact's user hash
+ *
+ * @returns true or false
+ */
+hf_service.is_contact = function(user_hash)
+{
+    assert(hf_service.is_connected());
+    assert(hf.is_hash(user_hash));
+    assert(user_hash != hf_service.user_hash());
+
+    return user_hash in hf_service.user_private_chunk['contacts'];
+}
+
+/*
+ * @param <user_hash>: contact's user hash
  * @param <callback>: the function called once the response has arrived
  *      @param <success>: true or false
  *      function my_callback(success)

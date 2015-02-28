@@ -34,3 +34,9 @@
 {
     font-weight: bolder;
 }
+
+.hf_layout_cell .hf_action_bar
+{
+    width: 100%;
+    padding: 10px 20px 20px 20px;
+}

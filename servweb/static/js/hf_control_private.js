@@ -20,6 +20,15 @@ hf_control.signed_in.route('/', function(){
     );
 });
 
+hf_control.add_contact = function(user_hash)
+{
+    hf_service.add_contact(user_hash, function(success){
+        assert(success);
+
+        hf_control.refresh_view();
+    });
+}
+
 hf_control.refresh_left_column = function()
 {
     hf_ui.apply_template(
