@@ -449,11 +449,56 @@ test_hf_service.list_notifications = function()
     });
 
     hf_service.list_notifications(function(notifications_list){
-        test_utils.assert(notifications_list.length == 2, 'should have one notification');
+        test_utils.assert(notifications_list.length == 2, 'should have two notifications');
         test_utils.assert('author' in notifications_list[0], 'should have author resolved');
+        test_utils.assert(
+            hf.is_hash(notifications_list[0]['__meta']['hash']),
+            'notification[\'__meta\'][\'hash\'] should be a hash'
+        );
     });
 
-    test_utils.assert_success(5);
+    test_utils.assert_success(6);
+}
+
+test_hf_service.delete_notification = function()
+{
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_hash0 = hf_service.create_user(user_profile0);
+
+    var original_notification = {
+        '__meta': {
+            'type': '/notification/testing/manual',
+            'author_user_hash': user_hash0
+        }
+    };
+
+    hf_service.login_user(user_profile0);
+
+    hf_service.delete_notification(hf.generate_hash(''), function(success){
+        test_utils.assert(success == false, 'deleting a non existing notification should fail');
+    });
+
+    hf_service.push_notification(user_hash0, original_notification, function(success){
+        test_utils.assert(success == true, 'should push a testing notification');
+    });
+
+    hf_service.push_notification(user_hash0, original_notification, function(success){
+        test_utils.assert(success == true, 'should push another testing notification');
+    });
+
+    hf_service.list_notifications(function(notifications_list){
+        test_utils.assert(notifications_list.length == 2, 'should have two notifications');
+
+        hf_service.delete_notification(notifications_list[0]['__meta']['hash'], function(success){
+            test_utils.assert(success == true, 'deleting existing notification should success');
+        });
+    });
+
+    hf_service.list_notifications(function(notifications_list){
+        test_utils.assert(notifications_list.length == 1, 'should have one notification');
+    });
+
+    test_utils.assert_success(6);
 }
 
 test_hf_service.send_message = function()
@@ -572,6 +617,7 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.push_notification, 'test_hf_service.push_notification');
     test_utils.run(test_hf_service.notification_automation_sanity, 'test_hf_service.notification_automation_sanity');
     test_utils.run(test_hf_service.list_notifications, 'test_hf_service.list_notifications');
+    test_utils.run(test_hf_service.delete_notification, 'test_hf_service.delete_notification');
     test_utils.run(test_hf_service.send_message, "test_hf_service.send_message");
 
     // THREADS & POSTS TESTS
