@@ -144,7 +144,7 @@ hf.create_cookie = function(name, value, days)
         var expires = "; expires="+date.toGMTString();
     }
 
-    document.cookie = name + "=" + value + expires + "; path=/";
+    document.cookie = name + "=" + window.btoa(value) + expires + "; path=/";
 }
 
 /*
@@ -170,7 +170,7 @@ hf.get_cookie = function(name)
 
         if (c.indexOf(nameEQ) == 0)
         {
-            return c.substring(nameEQ.length,c.length);
+            return window.atob(c.substring(nameEQ.length,c.length));
         }
     }
 

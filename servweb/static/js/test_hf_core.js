@@ -7,7 +7,9 @@ test_hf_core.cookies = function()
     var cookie_db = {
         'cookie0': 'my_content 0',
         'cookie1': 'my_content 1',
-        'cookie2': 'my_content 2',
+        'cookie2': 'my\ncontent',
+        'cookie3': 'my:content',
+        'cookie4': 'my;content'
     };
 
     for(var cookie_name in cookie_db)
