@@ -7,6 +7,24 @@ hf_control.mainViewRouter = null;
 hf_control.userCookieName = 'user_cookie';
 hf_control.domPageContainer = null;
 
+
+/*
+ * Gets the current view's URL
+ */
+hf_control.current_view_url = function()
+{
+    var href = window.location.href.split('#');
+
+    if (href.length < 2)
+    {
+        return '/';
+    }
+
+    assert(href.length == 2);
+
+    return href[1];
+}
+
 /*
  * Displays a view
  * @param <viewUrl>: the view's url to display
@@ -119,6 +137,8 @@ hf_control.onload = function()
     }
 
     hf_service.login_user_cookie(user_cookie, function(user_hash){
+        var viewUrl = hf_control.current_view_url();
+
         if (user_hash == null)
         {
             /*
@@ -126,10 +146,10 @@ hf_control.onload = function()
              * it and load the signed out view '/'
              */
             hf.delete_cookie(hf_control.userCookieName);
-            hf_control.signed_out.view('/');
+            hf_control.signed_out.view(viewUrl);
             return;
         }
 
-        hf_control.signed_in.view('/');
+        hf_control.signed_in.view(viewUrl);
     });
 }
