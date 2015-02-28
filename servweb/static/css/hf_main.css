@@ -5,6 +5,15 @@ body
     color: #61513C;
 }
 
+a, label
+{
+    cursor: pointer;
+}
+
+a:hover, label:hover
+{
+    text-decoration: none;
+}
 
 /* ---------------------------------------------------------------- Connexion */
 

@@ -22,10 +22,16 @@ hf_control.log_out = function()
 // --------------------------------------------------------------- NOTIFICATIONS
 
 hf_control.signed_in.route('/notifications', function(){
-    hf_ui.apply_template(
-        "list_notification.html",
-        null,
-        document.getElementById('hf_page_main_content')
-    );
+    hf_service.list_notifications(function(notifications_list){
+        var template_param = {
+            'cells': notifications_list
+        };
+
+        hf_ui.apply_template(
+            "list_notification.html",
+            template_param,
+            document.getElementById('hf_page_main_content')
+        );
+    });
 });
 

@@ -1,17 +1,41 @@
 
 // -------------------------------------------------------- NOTIFICATION SERVICE
 /*
- * Contains all notification's automation
+ * Notifications' virtual table: it contains one interface for each
+ * notifications
  *
  * @param <notification_json>: the received notification
- * function(notification_json)
+ * function automation(notification_json)
  * {
- *     // my code
+ *     // code called once the notificatio has just been received.
+ * }
+ *
+ * @param <notification_json>: the received notification
+ * function resolve(notification_json, callback)
+ * {
+ *     // code to export a notification's JSON to a real notification.
+ *
+ *     // return the notification
+ *     callback(notification)
  * }
  */
-hf_service.notification_automation = {
-    '/notification/message': null
-};
+hf_service.notification_interface = {};
+
+/*
+ * Defines a new notification type in the notifications' virtual table
+ *
+ * @param <notification_type>: the notification type. (ex: '/notification/message')
+ * @param <calls>: an interface containing the automation and resolve functions.
+ */
+hf_service.define_notification = function(notification_type, notification_interface)
+{
+    assert(hf.is_function(notification_interface.automation) || notification_interface.automation == null);
+    assert(hf.is_function(notification_interface.resolve) || notification_interface.resolve == null);
+    assert(!(notification_type in hf_service.notification_interface));
+
+    hf_service.notification_interface[notification_type] = notification_interface;
+}
+
 
 /*
  * Pushs a notification to an user's protected chunk
@@ -27,7 +51,7 @@ hf_service.push_notification = function(user_hash, notification_json, callback)
     assert(hf_service.is_connected());
     assert(hf.is_hash(user_hash));
     assert(typeof notification_json['__meta']['type'] == 'string');
-    assert(notification_json['__meta']['type'] in hf_service.notification_automation);
+    assert(notification_json['__meta']['type'] in hf_service.notification_interface);
     assert(notification_json['__meta']['author_user_hash'] == hf_service.user_hash());
     assert(hf.is_function(callback));
 
@@ -118,9 +142,9 @@ hf_service.pull_fresh_notifications = function(callback)
 
                 var notificationType = notification_json['__meta']['type'] ;
 
-                assert(notificationType in hf_service.notification_automation);
+                assert(notificationType in hf_service.notification_interface);
 
-                notificationAutomation = hf_service.notification_automation[notificationType];
+                notificationAutomation = hf_service.notification_interface[notificationType].automation;
             }
             catch (err)
             {
@@ -179,12 +203,80 @@ hf_service.list_notifications = function(callback)
             alert('hf_service.list_notifications() failed');
         }
 
-        callback(hf_service.user_private_chunk['notifications']);
+        var notifications = [];
+        var callbacks_remaining = hf_service.user_private_chunk['notifications'].length;
+
+        var notifications_json = hf_service.user_private_chunk['notifications'];
+
+        for (var i = 0; i < notifications_json.length; i++)
+        {
+            var notification_json = notifications_json[i];
+
+            assert(notification_json['__meta']['type'] in hf_service.notification_interface);
+
+            hf_service.notification_interface[notification_json['__meta']['type']].resolve(
+                notification_json,
+                function(notification)
+                {
+                    if (notification)
+                    {
+                        notifications[notifications.length] = notification;
+                    }
+
+                    callbacks_remaining--;
+
+                    if (callbacks_remaining == 0)
+                    {
+                        callback(notifications);
+                    }
+                }
+            );
+        }
+
+        if (notifications_json.length == 0)
+        {
+            callback(notifications);
+            return;
+        }
     });
 }
 
 
 // ------------------------------------------------ NOTIFICATION IMPLEMENTATIONS
+
+/*
+ * Generic notification resolver adding the ['author'] key fetched frorm the
+ * ['__meta']['author_user_hash']
+ */
+hf_service.resolve_notification_author = function(notification_json, callback)
+{
+    hf_service.get_user_public_chunk(
+        notification_json['__meta']['author_user_hash'],
+        function(user_public_chunk)
+        {
+            if (user_public_chunk == null)
+            {
+                callback(null);
+                return;
+            }
+
+            var notification = hf.clone(notification_json);
+
+            notification['author'] = user_public_chunk;
+
+            callback(notification);
+        }
+    );
+}
+
+/*
+ * Define a notification interface for /notification/message
+ */
+hf_service.define_notification('/notification/message', {
+    automation: null,
+    resolve: hf_service.resolve_notification_author
+});
+
 
 /*
  * Sends message to an user. Might be use for that user to add the currently
@@ -207,7 +299,7 @@ hf_service.send_message = function(user_hash, message, callback)
         return;
     }
 
-    var notification = {
+    var notification_json = {
         '__meta': {
             'type': '/notification/message',
             'author_user_hash': hf_service.user_hash()
@@ -215,5 +307,5 @@ hf_service.send_message = function(user_hash, message, callback)
         'content': message
     };
 
-    hf_service.push_notification(user_hash, notification, callback);
+    hf_service.push_notification(user_hash, notification_json, callback);
 }

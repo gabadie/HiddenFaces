@@ -1,1 +1,13 @@
-Hello
+
+{{#each cells}}
+<div class="hf_layout_cell">
+    <div class="hf_layout_expand">
+        <div class="hf_author">
+            {{#hf_user_link author}}{{/hf_user_link}}
+        </div>
+        <div class="hf_post">
+            {{content}}
+        </div>
+    </div>
+</div>
+{{/each}}

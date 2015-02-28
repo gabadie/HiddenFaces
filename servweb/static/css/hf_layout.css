@@ -19,3 +19,18 @@
 {
     width: 100%;
 }
+
+.hf_layout_cell .hf_author
+{
+    padding: 20px 30px 10px 30px;
+}
+
+.hf_layout_cell .hf_post
+{
+    padding: 0 50px 20px 50px;
+}
+
+.hf_layout_cell .hf_user_link
+{
+    font-weight: bolder;
+}

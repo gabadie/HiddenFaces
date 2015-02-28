@@ -277,7 +277,10 @@ test_hf_service.list_contacts = function()
 
 // --------------------------------------------------------- NOTIFICATIONS TESTS
 
-hf_service.notification_automation['/notification/testing/manual'] = null;
+hf_service.define_notification('/notification/testing/manual', {
+    automation: null,
+    resolve: hf_service.resolve_notification_author
+});
 
 test_hf_service.push_notification = function()
 {
@@ -376,17 +379,19 @@ test_hf_service.notification_automation_sanity = function()
             }
         };
 
-        hf_service.notification_automation['/notification/testing/automated'] = function(notification)
-        {
-            test_utils.assert(
-                notification['__meta']['type'] == '/notification/testing/automated',
-                'corrupted notification type'
-            );
-            test_utils.assert(
-                notification['__meta']['author_user_hash'] == original_notification['__meta']['author_user_hash'],
-                'corrupted notification author'
-            );
-        };
+        hf_service.define_notification('/notification/testing/automated', {
+            automation: function(notification_json) {
+                test_utils.assert(
+                    notification_json['__meta']['type'] == '/notification/testing/automated',
+                    'corrupted notification type'
+                );
+                test_utils.assert(
+                    notification_json['__meta']['author_user_hash'] == original_notification['__meta']['author_user_hash'],
+                    'corrupted notification author'
+                );
+            },
+            resolve: null
+        });
 
         hf_service.push_notification(user_hash, original_notification, function(success){
             test_utils.assert(success == true, 'notification push with success')
@@ -424,9 +429,10 @@ test_hf_service.list_notifications = function()
 
     hf_service.list_notifications(function(notifications_list){
         test_utils.assert(notifications_list.length == 2, 'should have one notification');
+        test_utils.assert('author' in notifications_list[0], 'should have author resolved');
     });
 
-    test_utils.assert_success(4);
+    test_utils.assert_success(5);
 }
 
 test_hf_service.send_message = function()
