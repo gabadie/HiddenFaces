@@ -29,6 +29,15 @@ hf_control.add_contact = function(user_hash)
     });
 }
 
+hf_control.delete_notification = function(notification_hash)
+{
+    hf_service.delete_notification(notification_hash, function(success){
+        assert(success);
+
+        hf_control.refresh_view();
+    });
+}
+
 hf_control.refresh_left_column = function()
 {
     hf_ui.apply_template(
