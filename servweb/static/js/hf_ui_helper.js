@@ -1,4 +1,14 @@
 
+Handlebars.registerHelper('hf_cell', function(options) {
+    var out = (
+        '<div class="hf_layout_cell"><div class="hf_layout_expand">' +
+        options.fn(this) +
+        '</div></div>'
+    );
+
+    return new Handlebars.SafeString(out);
+});
+
 Handlebars.registerHelper('hf_user_link', function(user_public_chunk, options){
     var out = '<a'
 
