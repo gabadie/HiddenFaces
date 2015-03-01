@@ -159,25 +159,8 @@ hf_service.create_user = function(user_profile, callback)
 
         hf_service.init_key_repository(private_chunk);
 
-        // Generates the user's private chunk's content
-        var public_chunk = {
-            '__meta': {
-                'type':         '/user/public_chunk',
-                'user_hash':    user_hash,
-                'chunk_name':   user_hash
-            },
-            'profile': {
-                'first_name':   private_chunk['profile']['first_name'],
-                'last_name':    private_chunk['profile']['last_name'],
-                'email':        ''
-            },
-            'system': {
-                'protected_chunk': {
-                    'name':         private_chunk['system']['protected_chunk']['name'],
-                    'public_key':   private_chunk['system']['protected_chunk']['public_key']
-                }
-            }
-        };
+        // Generates the user's public chunk's content
+        var public_chunk = hf_service.export_user_public_chunk(private_chunk);
 
         var transaction = new hf_com.Transaction();
 
@@ -226,6 +209,37 @@ hf_service.create_user = function(user_profile, callback)
     });
 
     return user_hash;
+}
+
+/*
+ * Export user's public chunk from the user's private chunk
+ *
+ * @param <user_private_chunk>: the user's private chunk
+ *
+ * @returns the newly generated user's public chunk
+ */
+hf_service.export_user_public_chunk = function(user_private_chunk)
+{
+    var public_chunk = {
+        '__meta': {
+            'type':         '/user/public_chunk',
+            'user_hash':    user_private_chunk['__meta']['user_hash'],
+            'chunk_name':   user_private_chunk['__meta']['user_hash']
+        },
+        'profile': {
+            'first_name':   user_private_chunk['profile']['first_name'],
+            'last_name':    user_private_chunk['profile']['last_name'],
+            'email':        ''
+        },
+        'system': {
+            'protected_chunk': {
+                'name':         user_private_chunk['system']['protected_chunk']['name'],
+                'public_key':   user_private_chunk['system']['protected_chunk']['public_key']
+            }
+        }
+    };
+
+    return public_chunk;
 }
 
 /*
@@ -382,6 +396,10 @@ hf_service.save_user_chunks = function(callback)
     assert(hf.is_function(callback) || callback == undefined);
 
     var user_chunks_owner = hf_service.user_chunks_owner();
+
+    hf_service.users_public_chunks[hf_service.user_hash()] =
+        hf_service.export_user_public_chunk(hf_service.user_private_chunk);
+
     var transaction = new hf_com.Transaction();
 
     // saves user's private chunk
