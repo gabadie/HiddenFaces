@@ -157,6 +157,8 @@ hf_service.create_user = function(user_profile, callback)
             'circles': []
         };
 
+        hf_service.init_key_repository(private_chunk);
+
         // Generates the user's private chunk's content
         var public_chunk = {
             '__meta': {

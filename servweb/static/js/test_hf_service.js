@@ -590,6 +590,22 @@ test_hf_service.keys_repository = function()
     );
 }
 
+test_hf_service.send_chunks_keys = function()
+{
+    test_hf_service.notification_automation_util(function(user_hash){
+        var chunks_keys = {};
+
+        chunks_keys[hf.hash('chunk0')] = 'AES\nhello';
+        chunks_keys[hf.hash('chunk1')] = 'AES\nworld';
+
+        hf_service.send_chunks_keys([user_hash], chunks_keys, function(success){
+            test_utils.assert(success == true, 'notification push with success')
+        });
+
+        return 1;
+    });
+}
+
 
 // ------------------------------------------------------- THREADS & POSTS TESTS
 
@@ -689,6 +705,7 @@ test_hf_service.main = function()
 
     // KEYKEEPER TESTS
     test_utils.run(test_hf_service.keys_repository, 'test_hf_service.keys_repository');
+    test_utils.run(test_hf_service.send_chunks_keys, 'test_hf_service.send_chunks_keys');
 
     // THREADS & POSTS TESTS
     test_utils.run(test_hf_service.post_message, 'test_hf_service.post_message');
