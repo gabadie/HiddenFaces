@@ -524,6 +524,73 @@ test_hf_service.send_message = function()
 }
 
 
+// ------------------------------------------------------------- KEYKEEPER TESTS
+
+test_hf_service.keys_repository = function()
+{
+    var fake_chunk = {};
+    var chunk_name = [
+        hf.hash('chunk 0'),
+        hf.hash('chunk 1'),
+        hf.hash('chunk 2'),
+        hf.hash('chunk 3')
+    ];
+
+    hf_service.init_key_repository(fake_chunk);
+
+    test_utils.assert(
+        hf_service.get_encryption_key(fake_chunk, chunk_name[0]) == '',
+        'unknown chunk\'s encryption key should be empty'
+    );
+    test_utils.assert(
+        hf_service.get_decryption_key(fake_chunk, chunk_name[0]) == '',
+        'unknown chunk\'s decryption key should be empty'
+    );
+
+    hf_service.store_key(fake_chunk, chunk_name[0], test_hf_com.fake_AES_key(0));
+    hf_service.store_key(fake_chunk, chunk_name[1], test_hf_com.fake_RSA_public_key(1));
+    hf_service.store_key(fake_chunk, chunk_name[2], test_hf_com.fake_RSA_private_key(2));
+    hf_service.store_key(fake_chunk, chunk_name[3], test_hf_com.fake_RSA_public_key(3));
+    hf_service.store_key(fake_chunk, chunk_name[3], test_hf_com.fake_RSA_private_key(3));
+
+    test_utils.assert(
+        hf_service.get_encryption_key(fake_chunk, chunk_name[0]) == test_hf_com.fake_AES_key(0),
+        'invalid chunk_name[0]\'s encryption key'
+    );
+    test_utils.assert(
+        hf_service.get_decryption_key(fake_chunk, chunk_name[0]) == test_hf_com.fake_AES_key(0),
+        'invalid chunk_name[0]\'s decryption key'
+    );
+
+    test_utils.assert(
+        hf_service.get_encryption_key(fake_chunk, chunk_name[1]) == test_hf_com.fake_RSA_public_key(1),
+        'invalid chunk_name[1]\'s encryption key'
+    );
+    test_utils.assert(
+        hf_service.get_decryption_key(fake_chunk, chunk_name[1]) == '',
+        'invalid chunk_name[1]\'s decryption key'
+    );
+
+    test_utils.assert(
+        hf_service.get_encryption_key(fake_chunk, chunk_name[2]) == '',
+        'invalid chunk_name[2]\'s encryption key'
+    );
+    test_utils.assert(
+        hf_service.get_decryption_key(fake_chunk, chunk_name[2]) == test_hf_com.fake_RSA_private_key(2),
+        'invalid chunk_name[2]\'s decryption key'
+    );
+
+    test_utils.assert(
+        hf_service.get_encryption_key(fake_chunk, chunk_name[3]) == test_hf_com.fake_RSA_public_key(3),
+        'invalid chunk_name[3]\'s encryption key'
+    );
+    test_utils.assert(
+        hf_service.get_decryption_key(fake_chunk, chunk_name[3]) == test_hf_com.fake_RSA_private_key(3),
+        'invalid chunk_name[3]\'s decryption key'
+    );
+}
+
+
 // ------------------------------------------------------- THREADS & POSTS TESTS
 
 test_hf_service.post_message = function()
@@ -619,6 +686,9 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.list_notifications, 'test_hf_service.list_notifications');
     test_utils.run(test_hf_service.delete_notification, 'test_hf_service.delete_notification');
     test_utils.run(test_hf_service.send_message, "test_hf_service.send_message");
+
+    // KEYKEEPER TESTS
+    test_utils.run(test_hf_service.keys_repository, 'test_hf_service.keys_repository');
 
     // THREADS & POSTS TESTS
     test_utils.run(test_hf_service.post_message, 'test_hf_service.post_message');

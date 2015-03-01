@@ -1,6 +1,33 @@
 
 var test_hf_com = {};
 
+test_hf_com.fake_AES_key = function(id)
+{
+    var key = 'AES\n' + hf.hash('AES ' + id);
+
+    assert(hf_com.is_AES_key(key));
+
+    return key;
+}
+
+test_hf_com.fake_RSA_private_key = function(id)
+{
+    var key = 'RSA-1024-Private\n' + hf.hash('RSA-private ' + id);
+
+    assert(hf_com.is_RSA_private_key(key));
+
+    return key;
+}
+
+test_hf_com.fake_RSA_public_key = function(id)
+{
+    var key = 'RSA-1024-Public\n' + hf.hash('RSA-public ' + id);
+
+    assert(hf_com.is_RSA_public_key(key));
+
+    return key;
+}
+
 test_hf_com.setup_data_base = function()
 {
     //create users
