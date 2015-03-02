@@ -1,13 +1,13 @@
 /*
  * Creates a thread
  *
- * @param <user_hash>: the hash of the owner of the thread
+ * @param <owner_hash>: the hash of the owner of the thread
  * @param <public_append>: if anyone can append content on the threads
  */
-hf_service.create_thread = function(user_hash, public_append, public_thread, callback)
+hf_service.create_thread = function(owner_hash, public_append, public_thread, callback)
 {
-    assert(typeof user_hash == "string", "user_hash must be a string in hf_service.create_thread");
-    assert(hf.is_hash(user_hash));
+    assert(typeof owner_hash == "string", "owner_hash must be a string in hf_service.create_thread");
+    assert(hf.is_hash(owner_hash));
     assert(typeof public_append == "boolean", "public_append must be a boolean in hf_service.create_thread");
 
     var thread_content = [];
@@ -23,7 +23,7 @@ hf_service.create_thread = function(user_hash, public_append, public_thread, cal
     // Creates the thread's chunk
     hf_com.create_data_chunk(
         thread_chunk_name,
-        user_hash,
+        owner_hash,
         symetric_key,
         thread_content,
         public_append,
@@ -42,17 +42,24 @@ hf_service.create_thread = function(user_hash, public_append, public_thread, cal
     );
 }
 
-hf_service.create_post = function(user_hash, post_content,threads_list,callback)
+hf_service.create_post = function(post_content,threads_list,callback)
 {
-    assert(typeof user_hash == "string", "user_hash must be a string in hf_service.create_post");
-    assert(hf.is_hash(user_hash));
-    assert(typeof post_content['__meta']['type'] == 'string');
-    assert(post_content['__meta']['type'] == '/post');
-    assert(hf.is_hash(post_content['__meta']['author_user_hash']));
+    assert(typeof post_content == 'string', "post_content must be a string in hf_service.create_post");
+    
+    var owner_hash = hf_service.user_chunks_owner();
+    var user_hash = hf_service.user_hash();
 
+    var post_chunk_content = {
+        '__meta': {
+            'type': '/post',
+            'author_user_hash': user_hash
+        },
+        'content': post_content
+    }
+    
     var post_chunk_name =
         hf.generate_hash('ERmO4vptXigWBnDUjnEN\n');
-    var stringified_post_content = [JSON.stringify(post_content)];
+    var stringified_post_content = [JSON.stringify(post_chunk_content)];
 
     var salt = 'uhgGFoMBXi';
     var symetric_key = hf_com.generate_AES_key(salt);
@@ -60,7 +67,7 @@ hf_service.create_post = function(user_hash, post_content,threads_list,callback)
     // Creates the thread's chunk
     hf_com.create_data_chunk(
         post_chunk_name,
-        user_hash,
+        owner_hash,
         symetric_key,
         stringified_post_content,
         true,
@@ -91,6 +98,7 @@ hf_service.append_post_to_threads = function(post_info, threads_list,callback)
     assert(typeof post_info['post_chunk_name'] == "string");
     assert(typeof post_info['symetric_key'] == "string");
     assert(threads_list instanceof Array, "threads_list must be an Array in hf_service.append_post_to_threads");
+    assert(typeof threads_list[0] !== 'undefined', "threads_list is empty in hf_service.append_post_to_threads")
 
     var stringified_post_info = JSON.stringify(post_info);
 

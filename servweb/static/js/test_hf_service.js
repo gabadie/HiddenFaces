@@ -68,15 +68,9 @@ test_hf_service.john_smith_profile = function(id)
     }
 }
 
-test_hf_service.user_example_post = function(user_hash)
+test_hf_service.user_example_post = function()
 {
-    return {
-        '__meta': {
-            'type': '/post',
-            'author_user_hash': user_hash
-        },
-        'content': "I'm new in HiddenFaces. What should I do first?"
-    }
+    return "I'm new in HiddenFaces. What should I do first?";
 }
 
 
@@ -634,16 +628,15 @@ test_hf_service.send_chunks_keys = function()
 test_hf_service.post_message = function()
 {
     var user_profile = test_hf_service.john_smith_profile();
-    var user_hash = hf_service.create_user(user_profile);
+    hf_service.create_user(user_profile);
 
     //user connexion
     hf_service.login_user(user_profile, null);
     test_utils.assert(hf_service.is_connected(), 'should be connected after');
 
     //post creation
-    var post_content = test_hf_service.user_example_post(user_hash);
-    hf_service.create_post(user_hash,post_content, null,function(post_info)
-        {
+    var post_content = test_hf_service.user_example_post();
+    hf_service.create_post(post_content, null,function(post_info){
             test_utils.assert(post_info['status'] == "ok");
             test_utils.assert(typeof post_info['post_chunk_name'] == "string");
             test_utils.assert(typeof post_info['symetric_key'] == "string");
@@ -655,13 +648,15 @@ test_hf_service.post_message = function()
 test_hf_service.create_thread = function()
 {
     var user_profile = test_hf_service.john_smith_profile();
-    var user_hash = hf_service.create_user(user_profile);
+    hf_service.create_user(user_profile);
+
+    var owner_hash = hf.generate_hash("cWDb8suW3i");
 
     //user connexion
     hf_service.login_user(user_profile, null);
     test_utils.assert(hf_service.is_connected(), 'should be connected after');
 
-    hf_service.create_thread(user_hash,true,true,function(thread_info)
+    hf_service.create_thread(owner_hash,true,true,function(thread_info)
         {
             test_utils.assert(thread_info['status'] == "ok");
             test_utils.assert(typeof thread_info['thread_chunk_name'] == "string");
@@ -674,7 +669,9 @@ test_hf_service.create_thread = function()
 test_hf_service.append_post_to_threads = function()
 {
     var user_profile = test_hf_service.john_smith_profile();
-    var user_hash = hf_service.create_user(user_profile);
+    hf_service.create_user(user_profile);
+
+    var owner_hash = hf.generate_hash("cWDb8suW3i");
 
     //user connexion
     hf_service.login_user(user_profile, null);
@@ -684,11 +681,11 @@ test_hf_service.append_post_to_threads = function()
     var thread2_info = null;
 
     //threads list creation
-    hf_service.create_thread(user_hash,true,true,function(thread_info){
+    hf_service.create_thread(owner_hash,true,true,function(thread_info){
             test_utils.assert(thread_info['status'] == "ok");
             thread1_info = thread_info;
         });
-    hf_service.create_thread(user_hash,true,true,function(thread_info){
+    hf_service.create_thread(owner_hash,true,true,function(thread_info){
             test_utils.assert(thread_info['status'] == "ok");
             thread2_info = thread_info;
         });
@@ -698,8 +695,8 @@ test_hf_service.append_post_to_threads = function()
     var threads_list = [thread1_info,thread2_info];
 
     //post creation directly appended to threads
-    var post_content = test_hf_service.user_example_post(user_hash);
-    hf_service.create_post(user_hash,post_content,threads_list, function(success){
+    var post_content = test_hf_service.user_example_post();
+    hf_service.create_post(post_content,threads_list, function(success){
             test_utils.assert(success);
         });
 
