@@ -369,7 +369,11 @@ test_hf_service.notification_automation_util = function(send_notification_callba
         }
     );
 
+    test_utils.assert_success(1);
+
     hf_service.pull_fresh_notifications();
+
+    test_utils.assert_success(assert_count);
 
     hf_com.get_data_chunk(
         hf_service.user_public_chunk()['system']['protected_chunk']['name'],
@@ -387,7 +391,7 @@ test_hf_service.notification_automation_util = function(send_notification_callba
         'hf_service.pull_fresh_notifications() should not modify the user\'s private chunk'
     );
 
-    test_utils.assert_success(assert_count + 3);
+    test_utils.assert_success(2);
 }
 
 test_hf_service.notification_automation_sanity = function()
@@ -418,7 +422,9 @@ test_hf_service.notification_automation_sanity = function()
             test_utils.assert(success == true, 'notification push with success')
         });
 
-        return 3;
+        test_utils.assert_success(1);
+
+        return 2;
     });
 }
 
@@ -592,18 +598,34 @@ test_hf_service.keys_repository = function()
 
 test_hf_service.send_chunks_keys = function()
 {
+    var chunks_names = [
+        hf.hash('chunk0'),
+        hf.hash('chunk1')
+    ];
+
+    var chunks_keys = {};
+    chunks_keys[chunks_names[0]] = 'AES\nhello';
+    chunks_keys[chunks_names[1]] = 'AES\nworld';
+
     test_hf_service.notification_automation_util(function(user_hash){
-        var chunks_keys = {};
-
-        chunks_keys[hf.hash('chunk0')] = 'AES\nhello';
-        chunks_keys[hf.hash('chunk1')] = 'AES\nworld';
-
         hf_service.send_chunks_keys([user_hash], chunks_keys, function(success){
             test_utils.assert(success == true, 'notification push with success')
         });
 
-        return 1;
+        test_utils.assert_success(1);
+
+        return 0;
     });
+
+    test_utils.assert(
+        hf_service.get_encryption_key(hf_service.user_private_chunk, chunks_names[0]) == chunks_keys[chunks_names[0]],
+        'invalid chunk_name[0]\'s encryption key'
+    );
+
+    test_utils.assert(
+        hf_service.get_encryption_key(hf_service.user_private_chunk, chunks_names[1]) == chunks_keys[chunks_names[1]],
+        'invalid chunk_name[1]\'s encryption key'
+    );
 }
 
 
