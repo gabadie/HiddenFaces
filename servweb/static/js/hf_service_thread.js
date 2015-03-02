@@ -108,6 +108,7 @@ hf_service.append_post_to_threads = function(post_info, threads_list,callback)
     {
         assert(typeof threads_list[i]['thread_chunk_name'] == "string");
         assert(typeof threads_list[i]['symetric_key'] == "string");
+
         transaction.extend_data_chunk(
             threads_list[i]['thread_chunk_name'],
             hf_service.user_chunks_owner(),
@@ -139,4 +140,82 @@ hf_service.append_post_to_threads = function(post_info, threads_list,callback)
             callback(true);
         }
     });
+}
+
+/*
+ * List of the posts of a thread
+ * @param <thread_name> : thread's name
+ * @param <thread_key> : thread's decryption key
+ * @param <callback>: the function called once the response has arrived
+ *      
+ */
+hf_service.list_posts = function(thread_name,thread_key,callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf.is_function(callback));
+    assert(typeof thread_name == 'string');
+    assert(typeof thread_key == 'string');
+
+    var list_posts_info = null;
+    hf_com.get_data_chunk(
+            thread_name,
+            thread_key,
+            function(json_message){
+                list_posts_info = json_message['chunk_content'];
+            }
+        );
+    assert(list_posts_info != null);
+
+    var list_resolved_posts = [];
+    for(var i = 0; i < list_posts_info.length; i++) {
+        var post_info_json = JSON.parse(list_posts_info[i]);
+        var post_content = null;
+
+        hf_com.get_data_chunk(
+            post_info_json['post_chunk_name'],
+            post_info_json['symetric_key'],
+            function(json_message){
+                if(json_message){
+                    post_content = JSON.parse(json_message['chunk_content']);
+                }else{
+                    callback(null);
+                }
+            }
+        );
+        assert(post_content != null);
+
+        hf_service.resolve_post_author(post_content, function(resolved_post){
+            if(resolved_post){
+                list_resolved_posts.push(resolved_post);
+            }else{
+                callback(null);
+            }
+        });
+    }
+    callback(list_resolved_posts);
+}
+
+
+/*
+ * Generic post resolver adding the ['author'] key fetched from the
+ * ['__meta']['author_user_hash']
+ */
+hf_service.resolve_post_author = function(post_json, callback)
+{
+    hf_service.get_user_public_chunk(
+        post_json['__meta']['author_user_hash'],
+        function(user_public_chunk)
+        {
+            if (user_public_chunk == null)
+            {
+                callback(null);
+            }
+
+            var post = hf.clone(post_json);
+
+            post['author'] = user_public_chunk;
+
+            callback(post);
+        }
+    );
 }
