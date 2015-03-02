@@ -3,6 +3,13 @@
  *
  * @param <owner_hash>: the hash of the owner of the thread
  * @param <public_append>: if anyone can append content on the threads
+ * @param <public_thread> : if the thread is private or not
+ * @param <callback>: the function called once the response has arrived with parameter 
+            {
+                'status':,
+                'thread_chunk_name':,
+                'symetric_key':
+            };
  */
 hf_service.create_thread = function(owner_hash, public_append, public_thread, callback)
 {
@@ -42,6 +49,18 @@ hf_service.create_thread = function(owner_hash, public_append, public_thread, ca
     );
 }
 
+/*
+ * Creates a post
+ *
+ * @param <post_content>: the content of the post
+ * @param <threads_list>: list the threads the post will be posted to (= null if unspecified)
+ * @param <callback>: the function called once the response has arrived with parameter 
+            {
+                'status':,
+                'post_chunk_name':,
+                'symetric_key':
+            };
+ */
 hf_service.create_post = function(post_content,threads_list,callback)
 {
     assert(typeof post_content == 'string', "post_content must be a string in hf_service.create_post");
@@ -93,8 +112,19 @@ hf_service.create_post = function(post_content,threads_list,callback)
     );
 }
 
+/*
+ * Appends a post to a list of threads
+ *
+ * @param <post_name>: the name of the post
+ * @param <post_key> : the decryption key of the post
+ * @param <threads_list>: list the threads the post will be posted to
+ * @param <callback>: the function called once the response has arrived with parameter 
+            = true if the append had succeded
+            = false otherwise
+ */
 hf_service.append_post_to_threads = function(post_info, threads_list,callback)
 {
+    //TODO : split post_info  into two parameters
     assert(typeof post_info['post_chunk_name'] == "string");
     assert(typeof post_info['symetric_key'] == "string");
     assert(threads_list instanceof Array, "threads_list must be an Array in hf_service.append_post_to_threads");
@@ -151,6 +181,8 @@ hf_service.append_post_to_threads = function(post_info, threads_list,callback)
  */
 hf_service.list_posts = function(thread_name,thread_key,callback)
 {
+    //TODO : find thread_key in key keeper
+    //TODO : callback when all get_data_chunk callbacks have been called
     assert(hf_service.is_connected());
     assert(hf.is_function(callback));
     assert(typeof thread_name == 'string');
