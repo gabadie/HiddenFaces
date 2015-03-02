@@ -620,7 +620,7 @@ test_hf_service.post_message = function()
 
     //post creation
     var post_content = test_hf_service.user_example_post(user_hash);
-    hf_service.create_post(user_hash,post_content, function(post_info)
+    hf_service.create_post(user_hash,post_content, null,function(post_info)
         {
             test_utils.assert(post_info['status'] == "ok");
             test_utils.assert(typeof post_info['post_chunk_name'] == "string");
@@ -662,13 +662,11 @@ test_hf_service.append_post_to_threads = function()
     var thread2_info = null;
 
     //threads list creation
-    hf_service.create_thread(user_hash,true,true,function(thread_info)
-        {
+    hf_service.create_thread(user_hash,true,true,function(thread_info){
             test_utils.assert(thread_info['status'] == "ok");
             thread1_info = thread_info;
         });
-    hf_service.create_thread(user_hash,true,true,function(thread_info)
-        {
+    hf_service.create_thread(user_hash,true,true,function(thread_info){
             test_utils.assert(thread_info['status'] == "ok");
             thread2_info = thread_info;
         });
@@ -677,22 +675,13 @@ test_hf_service.append_post_to_threads = function()
     test_utils.assert(thread2_info != null);
     var threads_list = [thread1_info,thread2_info];
 
-    //post creation
+    //post creation directly appended to threads
     var post_content = test_hf_service.user_example_post(user_hash);
-
-    var post_info = null;
-    hf_service.create_post(user_hash,post_content,function(json)
-        {
-            test_utils.assert(json['status'] == "ok");
-            post_info = json;
-        });
-    test_utils.assert(post_info != null);
-
-    hf_service.append_post_to_threads(post_info, threads_list,function(success)
-        {
+    hf_service.create_post(user_hash,post_content,threads_list, function(success){
             test_utils.assert(success);
         });
 
+    //verification threads' content
     hf_com.get_data_chunk(
             thread1_info['thread_chunk_name'],
             thread1_info['symetric_key'],
@@ -708,7 +697,7 @@ test_hf_service.append_post_to_threads = function()
             }
         );
 
-    test_utils.assert_success(10);
+    test_utils.assert_success(8);
 }
 
 

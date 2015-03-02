@@ -42,7 +42,7 @@ hf_service.create_thread = function(user_hash, public_append, public_thread, cal
     );
 }
 
-hf_service.create_post = function(user_hash, post_content,callback)
+hf_service.create_post = function(user_hash, post_content,threads_list,callback)
 {
     assert(typeof user_hash == "string", "user_hash must be a string in hf_service.create_post");
     assert(hf.is_hash(user_hash));
@@ -65,6 +65,11 @@ hf_service.create_post = function(user_hash, post_content,callback)
         stringified_post_content,
         true,
         function(json_message){
+            if (json_message['status'] != 'ok')
+            {
+                allert("post creation has failed");
+                return;
+            }
 
             var post_info = {
                 'status' :  json_message['status'], 
@@ -72,7 +77,9 @@ hf_service.create_post = function(user_hash, post_content,callback)
                 'symetric_key':   symetric_key
             };
 
-            if (callback){
+            if(threads_list){
+                hf_service.append_post_to_threads(post_info, threads_list,callback);
+            }else if (callback){
                 callback(post_info);
             }
         }
