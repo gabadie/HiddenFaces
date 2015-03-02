@@ -1,0 +1,11 @@
+<div class="hf_author">
+    {{#hf_user_link author}}{{/hf_user_link}}
+</div>
+<div class="hf_post">
+    {{content}}
+</div>
+<div class="hf_action_bar" align="right">
+    {{#hf_user_add_contact author}}{{/hf_user_add_contact}}
+    <button class="btn btn-default"
+        onclick="hf_control.delete_notification('{{__meta.hash}}');">Delete</button>
+</div>

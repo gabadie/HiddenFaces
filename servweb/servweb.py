@@ -76,14 +76,16 @@ def load_views_templates():
 
     for root, dirnames, filenames in os.walk(template_path_dir):
         for filename in fnmatch.filter(filenames, '*.html'):
+            template_path = root + '/' + filename
+
+            assert os.path.exists(template_path)
+
             template_json = {
-                'name': filename,
+                'name': os.path.relpath(template_path, template_path_dir),
                 'source': ''
             }
 
-            assert os.path.exists(template_path_dir + '/' + filename)
-
-            with open(template_path_dir + '/' + filename) as myFile:
+            with open(template_path) as myFile:
                 template_json['source'] = myFile.read()
 
             templates_json.append(template_json)

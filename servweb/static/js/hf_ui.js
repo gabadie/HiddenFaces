@@ -26,7 +26,7 @@ hf_ui.apply_template = function(template_name, params, domElement, callback)
 hf_ui.template = function(template_name, template_context)
 {
     assert(typeof template_name == 'string');
-    assert(hf_ui.templatesCaches.has(template_name));
+    assert(hf_ui.templatesCaches.has(template_name), 'unknown template: ' + template_name);
 
     var template = hf_ui.templatesCaches.get(template_name);
 

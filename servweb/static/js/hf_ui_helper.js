@@ -40,4 +40,8 @@ Handlebars.registerHelper('hf_user_add_contact', function(user_public_chunk, opt
     return out;
 });
 
-hf_service.is_contact
+Handlebars.registerHelper('hf_chunk', function(chunk, options){
+    var template_name = chunk['__meta']['type'].substring(1) + '.html';
+
+    return hf_ui.template(template_name, this);
+});
