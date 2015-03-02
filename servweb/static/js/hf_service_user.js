@@ -443,6 +443,8 @@ hf_service.is_user_hash = function(user_hash, callback)
     });
 }
 
+
+// -------------------------------------------------------------------- CONTACTS
 /*
  * @param <user_hash>: contact's user hash
  *
@@ -532,4 +534,99 @@ hf_service.list_contacts = function(callback)
             }
         });
     }
+}
+
+
+// --------------------------------------------------------------------- CIRCLES
+
+/*
+ * @param <circle_name>: circle's name
+ * @param <callback>: the function called once the response has arrived
+ *      @param <success>: true or false
+ *      function my_callback(success)
+ */
+hf_service.create_circle = function(circle_name, callback)
+{
+    assert(hf_service.is_connected());
+    assert(typeof circle_name == 'string');
+    assert(hf.is_function(callback));
+
+    var circle_hash = null;
+
+    hf_service.create_thread(hf_service.user_chunks_owner(), false, false, function(thread_info){
+        assert(thread_info['status'] == 'ok');
+
+        var thread_chunk_name = thread_info['thread_chunk_name'];
+        var thread_chunk_key = thread_info['symetric_key'];
+
+        var circle_infos = {
+            'name':                 circle_name,
+            'contacts':             [],
+            'thread_chunk_name':    thread_chunk_name
+        };
+
+        var user_private_chunk = hf_service.user_private_chunk;
+
+        user_private_chunk['circles'][thread_chunk_name] = circle_infos;
+
+        hf_service.store_key(user_private_chunk, thread_chunk_name, thread_chunk_key);
+
+        hf_service.save_user_chunks(function(){
+            callback(true);
+        });
+
+        circle_hash = thread_chunk_name;
+    });
+
+    /*
+     * For testing efficiency, we return the circle's hash
+     */
+    return circle_hash;
+}
+
+/*
+ * @param <circle_hash>: circle's hash tp test
+ *
+ * @returns true or false
+ */
+hf_service.is_circle_hash = function(circle_hash)
+{
+    assert(hf_service.is_connected());
+    assert(hf.is_hash(circle_hash));
+
+    return circle_hash in hf_service.user_private_chunk['circles'];
+}
+
+/*
+ * @param <contact_user_hash>: contact's user hash
+ * @param <circle_hash>: circle's hash
+ * @param <callback>: the function called once the response has arrived
+ *      @param <success>: true or false
+ *      function my_callback(success)
+ */
+hf_service.add_contact_to_circle = function(contact_user_hash, circle_hash, callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf_service.is_contact(contact_user_hash));
+    assert(hf_service.is_circle_hash(circle_hash));
+
+    var circle_infos = hf_service.user_private_chunk['circles'][circle_hash];
+    var contact_infos = hf_service.user_private_chunk['contacts'][contact_user_hash];
+
+    if (circle_infos['contacts'].indexOf(contact_user_hash) >= 0)
+    {
+        assert(contact_infos['circles'].indexOf(circle_hash) >= 0);
+
+        callback(false);
+        return;
+    }
+
+    assert(contact_infos['circles'].indexOf(circle_hash) < 0);
+
+    circle_infos['contacts'].push(contact_user_hash);
+    contact_infos['circles'].push(circle_hash);
+
+    hf_service.save_user_chunks(function(){
+        callback(true); // TODO: send keys
+    });
 }

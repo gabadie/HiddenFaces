@@ -762,6 +762,60 @@ test_hf_service.list_posts_thread = function()
 }
 
 
+// --------------------------------------------------------------------- CIRCLES
+
+test_hf_service.create_circle = function()
+{
+    var user_profile0 = test_hf_service.john_smith_profile();
+
+    hf_service.create_user(user_profile0);
+    hf_service.login_user(user_profile0);
+
+    hf_service.create_circle('INSA Lyon', function(success) {
+        test_utils.assert(success == true, 'hf_service.create_circle() 1 has failed');
+    });
+
+    hf_service.create_circle('IF Promoyion 2015', function(success) {
+        test_utils.assert(success == true, 'hf_service.create_circle() 2 has failed');
+    });
+
+    test_utils.assert_success(2);
+}
+
+test_hf_service.add_contact_to_circle = function()
+{
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+    var user_profile2 = test_hf_service.john_smith_profile(2);
+
+    var user_hash0 = hf_service.create_user(user_profile0);
+    var user_hash1 = hf_service.create_user(user_profile1);
+    var user_hash2 = hf_service.create_user(user_profile2);
+
+    hf_service.login_user(user_profile0);
+    hf_service.add_contact(user_hash1);
+    hf_service.add_contact(user_hash2);
+
+    var circle_hash = hf_service.create_circle('INSA Lyon', function(success) {
+        test_utils.assert(success == true, 'hf_service.create_circle() has failed');
+    });
+
+    hf_service.add_contact_to_circle(user_hash1, circle_hash, function(success) {
+        test_utils.assert(success == true, 'hf_service.add_contact_to_circle() 1 has failed');
+    });
+
+    hf_service.add_contact_to_circle(user_hash1, circle_hash, function(success) {
+        test_utils.assert(success == false, 'hf_service.add_contact_to_circle() 2 has successed');
+    });
+
+    hf_service.add_contact_to_circle(user_hash2, circle_hash, function(success) {
+        test_utils.assert(success == true, 'hf_service.add_contact_to_circle() 3 has failed');
+    });
+
+    test_utils.assert_success(4);
+}
+
+
 // ------------------------------------------------- SERVICE's TESTS ENTRY POINT
 
 test_hf_service.main = function()
@@ -791,4 +845,8 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.create_thread, 'test_hf_service.create_thread');
     test_utils.run(test_hf_service.append_post_to_threads, 'test_hf_service.append_post_to_threads');
     test_utils.run(test_hf_service.list_posts_thread, 'test_hf_service.list_posts_thread');
+
+    // CIRCLES
+    test_utils.run(test_hf_service.create_circle, 'test_hf_service.create_circle');
+    test_utils.run(test_hf_service.add_contact_to_circle, 'test_hf_service.add_contact_to_circle');
 }
