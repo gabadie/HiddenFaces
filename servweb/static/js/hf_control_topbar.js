@@ -24,11 +24,11 @@ hf_control.log_out = function()
 hf_control.signed_in.route('/notifications', function(){
     hf_service.list_notifications(function(notifications_list){
         var template_param = {
-            'cells': notifications_list
+            'chunks': notifications_list
         };
 
         hf_ui.apply_template(
-            "list_notification.html",
+            "list_chunks.html",
             template_param,
             document.getElementById('hf_page_main_content')
         );
