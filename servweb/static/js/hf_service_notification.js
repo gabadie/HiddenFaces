@@ -192,8 +192,6 @@ hf_service.pull_fresh_notifications = function(callback)
 
             if (notificationAutomation != null)
             {
-                console.into(notificationType);
-
                 assert(hf.is_function(notificationAutomation));
 
                 notificationAutomation(notification_json);
