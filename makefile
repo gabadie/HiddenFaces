@@ -47,4 +47,4 @@ $(SHTEST_FILES): %.sh:
 # ----------------------------------------------- HTML tests
 .PHONY: html
 html:
-	@python $(GIT_DIR)test.py
+	python $(GIT_DIR)deploy.py --testing --firefox-test

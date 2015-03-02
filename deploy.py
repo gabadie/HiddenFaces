@@ -1,10 +1,15 @@
+
+import argparse
 import os
 import shutil
 import signal
 import subprocess
+import sys
 import time
 
+
 DEFAULT_CWD=os.path.dirname(os.path.abspath(__file__)) + '/'
+
 
 def popen(cmd, cwd=DEFAULT_CWD):
     p = subprocess.Popen(cmd, cwd=cwd)
@@ -48,10 +53,15 @@ def popen_firefox(profile, url):
 
     return popen(cmd)
 
-def popen_serv(server_type):
+def popen_serv(server_type, testing_profile=False):
     assert server_type in ['web', 'data']
 
-    p = popen(['python', 'serv{t}/serv{t}.py'.format(t=server_type), '--testing'])
+    cmd = ['python', 'serv{t}/serv{t}.py'.format(t=server_type)]
+
+    if testing_profile:
+        cmd.append('--testing')
+
+    p = popen(cmd)
     time.sleep(5)
     return p
 
@@ -61,6 +71,21 @@ def pclose(p):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description='Runs the HiddenFaces\' data server.'
+    )
+    parser.add_argument("--testing",
+        help="turns on the testing profile",
+        action="store_true",
+        dest="testing_profile"
+    )
+    parser.add_argument("--firefox-test",
+        help="launch tests in firefox",
+        action="store_true",
+        dest="firefox_test"
+    )
+    args = parser.parse_args(sys.argv[1:])
+
     db_name = 'test.db'
     web_server_domain = '127.0.0.1'
     web_server_port = 5000
@@ -70,11 +95,15 @@ if __name__ == '__main__':
     )
 
     mongod = popen_mongod(db_name)
-    servdata = popen_serv('data')
-    servweb = popen_serv('web')
+    servdata = popen_serv('data', testing_profile=args.testing_profile)
+    servweb = popen_serv('web', testing_profile=args.testing_profile)
 
-    firefox = popen_firefox(DEFAULT_CWD + 'test.firefox-profile', web_test)
-    firefox.wait()
+    if args.firefox_test:
+        firefox = popen_firefox(DEFAULT_CWD + 'test.firefox-profile', web_test)
+        firefox.wait()
+
+    else:
+        raw_input("Press enter to stop\n")
 
     pclose(servweb)
     pclose(servdata)
