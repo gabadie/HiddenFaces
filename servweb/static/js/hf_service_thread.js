@@ -13,7 +13,12 @@ hf_service.create_thread = function(user_hash, public_append, public_thread, cal
     var thread_content = [];
     var thread_chunk_name =
         hf.generate_hash('C3jsud4AZkDpd7IKEtEH\n');
-    var symetric_key = ''; //TODO
+
+    var symetric_key = '';
+    if(!public_thread){
+        var salt = 'BJNWuPHteW';
+        symetric_key = hf_com.generate_AES_key(salt);
+    }
 
     // Creates the thread's chunk
     hf_com.create_data_chunk(
@@ -47,8 +52,10 @@ hf_service.create_post = function(user_hash, post_content,callback)
 
     var post_chunk_name =
         hf.generate_hash('ERmO4vptXigWBnDUjnEN\n');
-    var symetric_key = ''; //TODO
     var stringified_post_content = [JSON.stringify(post_content)];
+
+    var salt = 'uhgGFoMBXi';
+    var symetric_key = hf_com.generate_AES_key(salt);
 
     // Creates the thread's chunk
     hf_com.create_data_chunk(
