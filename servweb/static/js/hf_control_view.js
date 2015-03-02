@@ -1,4 +1,14 @@
 
+// ---------------------------------------------------------------- VIEW ROUTERS
+
+/*
+ * View router when loged out
+ */
+hf_control.signed_out = new hf_control.ViewRouter();
+
+/*
+ * View router when loged in
+ */
 hf_control.signed_in = new hf_control.ViewRouter(function(callback){
     assert(hf_service.is_connected());
 
@@ -12,6 +22,20 @@ hf_control.signed_in = new hf_control.ViewRouter(function(callback){
     });
 });
 
+
+// ------------------------------------------------------------- LOGED OUT VIEWS
+
+hf_control.signed_out.route('/', function(){
+    hf_ui.apply_template("login.html", null, hf_control.domPageContainer);
+});
+
+hf_control.signed_out.route('/signup/', function(){
+    hf_ui.apply_template("signup.html", null, hf_control.domPageContainer);
+});
+
+
+// ------------------------------------------------------------------------ HOME
+
 hf_control.signed_in.route('/', function(){
     hf_ui.apply_template(
         "list_post.html",
@@ -20,23 +44,22 @@ hf_control.signed_in.route('/', function(){
     );
 });
 
-hf_control.add_contact = function(user_hash)
-{
-    hf_service.add_contact(user_hash, function(success){
-        assert(success);
 
-        hf_control.refresh_view();
+// -------------------------------------------------------- NOTIFICATIONS' VIEWS
+
+hf_control.signed_in.route('/notifications', function(){
+    hf_service.list_notifications(function(notifications_list){
+        var template_param = {
+            'chunks': notifications_list
+        };
+
+        hf_ui.apply_template(
+            "list_chunks.html",
+            template_param,
+            document.getElementById('hf_page_main_content')
+        );
     });
-}
-
-hf_control.delete_notification = function(notification_hash)
-{
-    hf_service.delete_notification(notification_hash, function(success){
-        assert(success);
-
-        hf_control.refresh_view();
-    });
-}
+});
 
 hf_control.refresh_left_column = function()
 {
