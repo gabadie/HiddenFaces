@@ -135,29 +135,31 @@ hf_control.onload = function()
     // set up the page content's DOM element
     hf_control.domPageContainer = document.body;
 
-    var user_cookie = hf.get_cookie(hf_control.userCookieName);
+    hf_ui.init(function(){
+        var user_cookie = hf.get_cookie(hf_control.userCookieName);
 
-    if (user_cookie == null)
-    {
-        hf_control.signed_out.view('/');
-
-        return;
-    }
-
-    hf_service.login_user_cookie(user_cookie, function(user_hash){
-        var viewUrl = hf_control.current_view_url();
-
-        if (user_hash == null)
+        if (user_cookie == null)
         {
-            /*
-             * looks like the connection has failed with this cookie. So we drop
-             * it and load the signed out view '/'
-             */
-            hf.delete_cookie(hf_control.userCookieName);
-            hf_control.signed_out.view(viewUrl);
+            hf_control.signed_out.view('/');
+
             return;
         }
 
-        hf_control.signed_in.view(viewUrl);
+        hf_service.login_user_cookie(user_cookie, function(user_hash){
+            var viewUrl = hf_control.current_view_url();
+
+            if (user_hash == null)
+            {
+                /*
+                 * looks like the connection has failed with this cookie. So we drop
+                 * it and load the signed out view '/'
+                 */
+                hf.delete_cookie(hf_control.userCookieName);
+                hf_control.signed_out.view(viewUrl);
+                return;
+            }
+
+            hf_control.signed_in.view(viewUrl);
+        });
     });
 }
