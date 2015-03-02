@@ -2,12 +2,66 @@
 <html>
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
 
-    <link rel="stylesheet" href="static/main.css" type="text/css">
+    <!-- jQuery v3.3.2 -->
+    <script src="static/lib/jquery-v2.1.3.js"></script>
 
-    <script src="static/main.js"></script>
+    <!-- Bootstrap v3.3.2 -->
+    <link rel="stylesheet" href="static/lib/bootstrap-v3.3.2/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="static/lib/bootstrap-v3.3.2/css/bootstrap-theme.min.css"/>
+    <script src="static/lib/bootstrap-v3.3.2/js/bootstrap.min.js"></script>
 
-    <title>HiddenFaces</title>
-    <body>
-        Hello World.
+    <!-- HandleBars v3.0.0 -->
+    <script src="static/lib/handlebars-v3.0.0.js"> </script>
+
+    <!-- SJCL -->
+    <script src="static/lib/sjcl.js"> </script>
+
+    <!-- jsencrypt -->
+    <script src="static/lib/jsencrypt.min.js"> </script>
+
+    <!-- HiddenFaces -->
+    <link rel="stylesheet" href="static/css/hf_main.css" type="text/css"/>
+    <link rel="stylesheet" href="static/css/hf_layout.css" type="text/css"/>
+    <link rel="stylesheet" href="static/css/hf_page.css" type="text/css"/>
+    <script src="static/js/utils.js"></script>
+    <script src="static/js/hf.js"></script>
+    <script src="static/js/hf_com.js"></script>
+    <script src="static/js/hf_service_common.js"></script>
+    <script src="static/js/hf_service_user.js"></script>
+    <script src="static/js/hf_service_notification.js"></script>
+    <script src="static/js/hf_service_keykeeper.js"></script>
+    <script src="static/js/hf_service_thread.js"></script>
+    <script src="static/js/hf_ui.js"></script>
+    <script src="static/js/hf_ui_helper.js"></script>
+    <script src="static/js/hf_control.js"></script>
+    <script src="static/js/hf_control_public.js"></script>
+    <script src="static/js/hf_control_private.js"></script>
+    <script src="static/js/hf_control_topbar.js"></script>
+    <script src="static/js/main.js"></script>
+
+    {% if test %}
+    <!-- HiddenFaces Tests -->
+    <link rel="stylesheet" href="static/css/test.css" type="text/css">
+    <script src="static/js/test_utils.js"></script>
+    <script src="static/js/test_hf_core.js"></script>
+    <script src="static/js/test_hf_com.js"></script>
+    <script src="static/js/test_hf_service.js"></script>
+    <script src="static/js/test_hf_ui.js"></script>
+    <script src="static/js/test_hf.js"></script>
+
+    {% endif %}
+
+    {% if test %}
+    <title>HiddenFaces Testing</title>
+    <body onload="test_hf.onload();">
+        <div id="test_output"></div>
+        <div id="test_sandbox_element"></div>
+        <div id="test_hf_page_container"></div>
     </body>
+
+    {% else %}
+    <title>HiddenFaces</title>
+    <body onload="hf_control.onload();"></body>
+
+    {% endif %}
 </html>

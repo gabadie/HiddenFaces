@@ -1,0 +1,130 @@
+
+/* ------------------------------------------------------------- Page top bar */
+
+#hf_page_top_bar
+{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+#hf_page_top_bar, #hf_page_top_bar .hf_sublist
+{
+    background: #61513C;
+    color: #FFF9F1;
+}
+
+#hf_page_top_bar ul
+{
+    cursor: pointer;
+}
+
+#hf_page_top_bar li
+{
+    position: relative;
+    display: inline-block;
+    list-style-type: none;
+}
+
+#hf_page_top_bar a
+{
+    padding: 8px 20px;
+    display: block;
+    font-weight: bolder;
+    color: #FFF9F1;
+}
+
+#hf_page_top_bar a:hover
+{
+    background: #574123;
+    text-decoration: none;
+}
+
+#hf_page_top_bar li .hf_sublist
+{
+    display: none;
+    position: absolute;
+    top: 35px;
+    left: 0px;
+    z-index: 10;
+    padding: 3px 0;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius:  3px;
+    min-width: 150px;
+}
+
+#hf_page_top_bar li:hover .hf_sublist
+{
+    display: block;
+}
+
+#hf_page_top_bar li:hover .hf_sublist a
+{
+    font-weight: normal;
+    padding: 2px 20px;
+    width: 100%;
+}
+
+
+/* -------------------------------------------------------------- Page middle */
+
+#hf_page_middle
+{
+    padding-top: 40px;
+}
+
+
+/* -------------------------------------------------------------- Page bottom */
+
+#hf_page_bottom
+{
+    padding: 40px 0 200px 0;
+    width: 100%;
+    text-align: center;
+    border-top: 1px solid {{theme.color.reversed_background}};
+}
+
+
+/* --------------------------------------------------------- Page left column */
+
+#hf_page_left_column
+{
+    width: 250px;
+}
+
+#hf_page_left_column .hf_layout_cell
+{
+    padding: 3px 0 10px 0;
+}
+
+#hf_page_left_column .hf_title
+{
+    padding: 4px 20px;
+    width: 100%;
+    display: block;
+    font-weight: bolder;
+}
+
+#hf_page_left_column .hf_list_item
+{
+    padding: 2px 30px;
+    width: 100%;
+    display: block;
+}
+
+#hf_page_left_column a
+{
+    cursor: pointer;
+}
+
+#hf_page_left_column a:nth-child(even)
+{
+    background: #FFFBF5;
+}
+
+#hf_page_left_column a:hover
+{
+    background: #61513C;
+    color: #FFF9F1;
+}

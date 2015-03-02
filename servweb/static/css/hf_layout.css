@@ -1,0 +1,42 @@
+
+/* ----------------------------------------------------------- Generic layout */
+
+.hf_layout_page_width
+{
+    margin: 0 auto;
+    width: 1000px;
+}
+
+.hf_layout_cell
+{
+    background: #FFFFFF;
+    border: 1px solid #EEEEEE;
+    border-radius: 3px;
+    margin: 10px 5px;
+}
+
+.hf_layout_expand
+{
+    width: 100%;
+}
+
+.hf_layout_cell .hf_author
+{
+    padding: 20px 30px 10px 30px;
+}
+
+.hf_layout_cell .hf_post
+{
+    padding: 0 50px 20px 50px;
+}
+
+.hf_layout_cell .hf_user_link
+{
+    font-weight: bolder;
+}
+
+.hf_layout_cell .hf_action_bar
+{
+    width: 100%;
+    padding: 10px 20px 20px 20px;
+}
