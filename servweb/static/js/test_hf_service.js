@@ -682,7 +682,20 @@ test_hf_service.append_post_to_threads = function()
     test_utils.assert_success(3);
 }
 
+// ------------------------------------------------- 
+test_hf_service.is_valide_chunk = function()
+{
+    var user_profile0 = test_hf_service.john_smith_profile();
+    var user_hash0 = hf_service.create_user(user_profile0);
 
+    hf_service.login_user(user_profile0);
+    var valide_chunk  = hf_service.is_valide_chunk(hf_service.user_private_chunk);
+    test_utils.assert(valide_chunk==true, "valide_chunk must be true");
+
+    valide_chunk = hf_service.is_valide_chunk();
+    test_utils.assert(valide_chunk==false,"valide chunk must be false");
+    test_utils.assert_success(2);
+}
 // ------------------------------------------------- SERVICE's TESTS ENTRY POINT
 
 test_hf_service.main = function()
@@ -711,4 +724,7 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.post_message, 'test_hf_service.post_message');
     test_utils.run(test_hf_service.create_thread, 'test_hf_service.create_thread');
     test_utils.run(test_hf_service.append_post_to_threads, 'test_hf_service.append_post_to_threads');
+
+    //
+    test_utils.run(test_hf_service.is_valide_chunk,"test_hf_service.is_valide_chunk");
 }
