@@ -79,7 +79,6 @@ test_hf_service.user_example_post = function(user_hash)
     }
 }
 
-
 // ---------------------------------------------------------- USER ACCOUNT TESTS
 
 test_hf_service.create_account = function()
@@ -683,18 +682,50 @@ test_hf_service.append_post_to_threads = function()
 }
 
 // ------------------------------------------------- 
-test_hf_service.is_valide_chunk = function()
+test_hf_service.is_valide_chunk = function() 
 {
+    // private chunk
     var user_profile0 = test_hf_service.john_smith_profile();
     var user_hash0 = hf_service.create_user(user_profile0);
 
-    hf_service.login_user(user_profile0);
-    var valide_chunk  = hf_service.is_valide_chunk(hf_service.user_private_chunk);
-    test_utils.assert(valide_chunk==true, "valide_chunk must be true");
+    hf_service.login_user(user_profile0, null);
 
-    valide_chunk = hf_service.is_valide_chunk();
-    test_utils.assert(valide_chunk==false,"valide chunk must be false");
-    test_utils.assert_success(2);
+    var user_private_chunk = hf_service.user_private_chunk;
+    var is_valide = hf_service.is_valide_chunk(user_private_chunk);
+    test_utils.assert(is_valide == true, "private chunk must be well formated");
+
+    var public_chunk = {
+        '__meta': {
+            'type':         '/user/public_chunk',
+            'user_hash':    user_private_chunk['__meta']['user_hash'],
+            'chunk_name':   user_private_chunk['__meta']['user_hash']
+        },
+        'profile': {
+            'first_name':   user_private_chunk['profile']['first_name'],
+            'last_name':    user_private_chunk['profile']['last_name'],
+            'email':        ''
+        },
+        'system': {
+            'protected_chunk': {
+                'name':         user_private_chunk['system']['protected_chunk']['name'],
+                'public_key':   user_private_chunk['system']['protected_chunk']['public_key']
+            }
+        }
+    };
+
+    is_valide = hf_service.is_valide_chunk(public_chunk);
+    test_utils.assert(is_valide == true, "public chunk is well formated");
+
+    public_chunk['__meta']['type'] = 'fake_chunk';
+
+    is_valide = hf_service.is_valide_chunk(public_chunk);
+    test_utils.assert(is_valide == false, "there is no chunk type fake_chunk");
+
+    var is_valide = hf_service.is_valide_chunk(user_private_chunk);
+    test_utils.assert(is_valide == true, "private chunk must be well formated");    
+    test_utils.assert(Object.keys(hf_service.chunkTypeRegistry).length == 2, "chunkTypeRegistry has good nb of element");
+
+    test_utils.assert_success(5);
 }
 // ------------------------------------------------- SERVICE's TESTS ENTRY POINT
 

@@ -29,22 +29,6 @@ hf_service.user_hash = function()
 }
 
 /*
- * verify 
- * @params <chunk_content>: chunk of user
- * 
- * @return: true if ['_meta']['type'] equals '/user/private_chunk'
- */
-hf_service.is_valide_chunk = function(chunk_content) 
-{
-    if (!hf_service.is_connected()) 
-    {
-        return false;
-    }
-
-    return (chunk_content!=null)?chunk_content['__meta']['type'] === '/user/private_chunk':false;
-}
-
-/*
  * Gets user's chunks owner id
  */
 hf_service.user_chunks_owner = function()
