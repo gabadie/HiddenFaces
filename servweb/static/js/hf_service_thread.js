@@ -30,7 +30,9 @@ hf_service.create_thread = function(user_hash, public_append, public_thread, cal
                 'symetric_key':   symetric_key
             };
 
-            callback(thread_info);
+            if(callback){
+                callback(thread_info);
+            }
         }
     );
 }
@@ -63,7 +65,9 @@ hf_service.create_post = function(user_hash, post_content,callback)
                 'symetric_key':   symetric_key
             };
 
-            callback(post_info);
+            if (callback){
+                callback(post_info);
+            }
         }
     );
 }
@@ -76,15 +80,17 @@ hf_service.append_post_to_threads = function(post_info, threads_list,callback)
 
     var stringified_post_info = JSON.stringify(post_info);
 
+    var transaction = new hf_com.Transaction();
+
     for (var i = 0; i < threads_list.length; i++)
     {
         assert(typeof threads_list[i]['thread_chunk_name'] == "string");
         assert(typeof threads_list[i]['symetric_key'] == "string");
-        hf_com.append_data_chunk(
+        transaction.extend_data_chunk(
             threads_list[i]['thread_chunk_name'],
             hf_service.user_chunks_owner(),
             threads_list[i]['symetric_key'],
-            stringified_post_info,
+            [stringified_post_info],
             function(json_message) {
                 if (json_message['status'] != 'ok')
                 {
@@ -94,11 +100,21 @@ hf_service.append_post_to_threads = function(post_info, threads_list,callback)
                         threads_list[i]['thread_chunk_name'] +
                         ') failed'
                     );
-                    callback(false);
                     return;
                 }
             }
         );
     }
-    callback(true);
+    transaction.commit(function(json_message){
+        if (json_message['status'] != 'ok')
+        {
+            alert('append post to thread has failed');
+            return;
+        }
+
+        if (callback)
+        {
+            callback(true);
+        }
+    });
 }
