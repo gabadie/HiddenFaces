@@ -719,6 +719,48 @@ test_hf_service.append_post_to_threads = function()
     test_utils.assert_success(8);
 }
 
+test_hf_service.list_posts_thread = function()
+{
+    var user_profile = test_hf_service.john_smith_profile();
+    hf_service.create_user(user_profile);
+
+    var owner_hash = hf.generate_hash("cWDb8suW3i");
+
+    //user connexion
+    hf_service.login_user(user_profile, null);
+    test_utils.assert(hf_service.is_connected(), 'should be connected after');
+
+    var thread1_info = null;
+
+    //threads list creation
+    hf_service.create_thread(owner_hash,true,true,function(thread_info){
+            test_utils.assert(thread_info['status'] == "ok");
+            thread1_info = thread_info;
+        });
+
+    test_utils.assert(thread1_info != null);
+    var threads_list = [thread1_info];
+
+    //posts creation directly appended to threads
+    var post_content = test_hf_service.user_example_post();
+    hf_service.create_post(post_content,threads_list, function(success){
+            test_utils.assert(success);
+        });
+    hf_service.create_post("fake_post",threads_list, function(success){
+            test_utils.assert(success);
+        });
+
+    //get list of posts
+    hf_service.list_posts(
+        thread1_info['thread_chunk_name'],
+        thread1_info['symetric_key'],function(resolved_posts){
+            test_utils.assert(resolved_posts != null);
+            test_utils.assert(resolved_posts.length == 2);
+        });
+
+    test_utils.assert_success(7);
+}
+
 
 // ------------------------------------------------- SERVICE's TESTS ENTRY POINT
 
@@ -748,4 +790,5 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.post_message, 'test_hf_service.post_message');
     test_utils.run(test_hf_service.create_thread, 'test_hf_service.create_thread');
     test_utils.run(test_hf_service.append_post_to_threads, 'test_hf_service.append_post_to_threads');
+    test_utils.run(test_hf_service.list_posts_thread, 'test_hf_service.list_posts_thread');
 }
