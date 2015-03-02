@@ -8,6 +8,11 @@ var test_utils = {};
  */
 test_utils.run = function(testFunction, testName)
 {
+    if (!test_utils.should_run(testName))
+    {
+        return;
+    }
+
     test_utils.testId += 1;
     test_utils.domOutput.innerHTML += '<div class="test_suite" id="testId' + test_utils.testId + '"></div>';
     test_utils.testCount = 0;
@@ -119,6 +124,23 @@ test_utils.refresh = function()
             '</div>'
         );
     }
+}
+
+/*
+ * Tests we should run this test
+ */
+test_utils.should_run = function(testName)
+{
+    var href = window.location.href.split('#');
+
+    if (href.length == 1)
+    {
+        return true;
+    }
+
+    assert(href.length == 2);
+
+    return testName.slice(0, href[1].length) == href[1];
 }
 
 /*
