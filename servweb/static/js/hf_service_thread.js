@@ -72,10 +72,10 @@ hf_service.create_post = function(post_content,threads_list,callback)
         '__meta': {
             'type': '/post',
             'author_user_hash': user_hash,
-            'part_hash' = part_hash
+            'part_hash' : part_hash
         },
         'content': post_content
-    }
+    };
     
     var post_chunk_name =
         hf.generate_hash('ERmO4vptXigWBnDUjnEN\n');
@@ -104,7 +104,7 @@ hf_service.create_post = function(post_content,threads_list,callback)
             };
 
             //chunk certification
-            hf_service.certify(hf_service.user_private_chunk, post_chunk_name, part_hash, hf.hash(stringified_post_content), function(success){
+            hf_service.certify(hf_service.user_private_chunk, post_chunk_name, part_hash, hf.hash(stringified_post_content[0]), function(success){
                 if(!success)
                     callback(null);
             });
@@ -209,6 +209,9 @@ hf_service.list_posts = function(thread_name,callback)
             var list_resolved_posts = [];
             var iteration = 0;
 
+            if(list_posts_info.length == 0)
+                callback(list_resolved_posts);
+            
             for(var i = 0; i < list_posts_info.length; i++) {
                 var post_info_json = JSON.parse(list_posts_info[i]);
 
@@ -234,7 +237,6 @@ hf_service.list_posts = function(thread_name,callback)
                     }
                 );
             }
-            callback(list_resolved_posts);
         }
     );
 }

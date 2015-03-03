@@ -857,7 +857,7 @@ test_hf_service.list_circles = function()
     test_utils.assert_success(5);
 }
 
-// ------------------------------------------------- REGISTRY TESTES
+// ------------------------------------------------- REGISTRY TESTS
 
 test_hf_service.is_valide_chunk = function() 
 {
