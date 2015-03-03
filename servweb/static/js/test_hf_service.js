@@ -667,12 +667,14 @@ test_hf_service.create_thread = function()
     hf_service.login_user(user_profile, null);
     test_utils.assert(hf_service.is_connected(), 'should be connected after');
 
-    hf_service.create_thread(owner_hash,true,true,function(thread_name)
+    hf_service.create_thread(owner_hash,true,true,function(thread_info)
         {
-            test_utils.assert(thread_name != null);
+            test_utils.assert(thread_info['status'] == "ok");
+            test_utils.assert(typeof thread_info['thread_chunk_name'] == "string");
+            test_utils.assert(typeof thread_info['symetric_key'] == "string");
         });
 
-    test_utils.assert_success(2);
+    test_utils.assert_success(4);
 }
 
 test_hf_service.append_post_to_threads = function()
@@ -686,22 +688,22 @@ test_hf_service.append_post_to_threads = function()
     hf_service.login_user(user_profile, null);
     test_utils.assert(hf_service.is_connected(), 'should be connected after');
 
-    var thread1_name = null;
-    var thread2_name = null;
+    var thread1_info = null;
+    var thread2_info = null;
 
     //threads list creation
-    hf_service.create_thread(owner_hash,true,false,function(thread_name){
-            test_utils.assert(thread_name != null);
-            thread1_name = thread_name;
+    hf_service.create_thread(owner_hash,true,false,function(thread_info){
+            test_utils.assert(thread_info['status'] == "ok");
+            thread1_info = thread_info;
         });
-    hf_service.create_thread(owner_hash,true,true,function(thread_name){
-            test_utils.assert(thread_name != null);
-            thread2_name = thread_name;
+    hf_service.create_thread(owner_hash,true,true,function(thread_info){
+            test_utils.assert(thread_info['status'] == "ok");
+            thread2_info = thread_info;
         });
 
-    test_utils.assert(thread1_name != null);
-    test_utils.assert(thread2_name != null);
-    var threads_list = [thread1_name,thread2_name];
+    test_utils.assert(thread1_info != null);
+    test_utils.assert(thread2_info != null);
+    var threads_list = [thread1_info,thread2_info];
 
     //post creation directly appended to threads
     var post_content = test_hf_service.user_example_post();
@@ -711,15 +713,15 @@ test_hf_service.append_post_to_threads = function()
 
     //verification threads' content
     hf_com.get_data_chunk(
-            thread1_name,
-            hf_service.get_decryption_key(hf_service.user_private_chunk, thread1_name),
+            thread1_info['thread_chunk_name'],
+            thread1_info['symetric_key'],
             function(json_message){
                 test_utils.assert(json_message['chunk_content'].length == 1);
             }
         );
     hf_com.get_data_chunk(
-            thread2_name,
-            hf_service.get_decryption_key(hf_service.user_private_chunk, thread2_name),
+            thread1_info['thread_chunk_name'],
+            thread1_info['symetric_key'],
             function(json_message){
                 test_utils.assert(json_message['chunk_content'].length == 1);
             }
@@ -739,16 +741,16 @@ test_hf_service.list_posts_thread = function()
     hf_service.login_user(user_profile, null);
     test_utils.assert(hf_service.is_connected(), 'should be connected after');
 
-    var thread1_name = null;
+    var thread1_info = null;
 
     //threads list creation
-    hf_service.create_thread(owner_hash,true,false,function(thread_name){
-            test_utils.assert(thread_name != null);
-            thread1_name = thread_name;
+    hf_service.create_thread(owner_hash,true,true,function(thread_info){
+            test_utils.assert(thread_info['status'] == "ok");
+            thread1_info = thread_info;
         });
 
-    test_utils.assert(thread1_name != null);
-    var threads_list = [thread1_name];
+    test_utils.assert(thread1_info != null);
+    var threads_list = [thread1_info];
 
     //posts creation directly appended to threads
     var post_content = test_hf_service.user_example_post();
@@ -761,7 +763,8 @@ test_hf_service.list_posts_thread = function()
 
     //get list of posts
     hf_service.list_posts(
-        thread1_name,function(resolved_posts){
+        thread1_info['thread_chunk_name'],
+        thread1_info['symetric_key'],function(resolved_posts){
             test_utils.assert(resolved_posts != null);
             test_utils.assert(resolved_posts.length == 2);
         });
