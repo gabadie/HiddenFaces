@@ -45,6 +45,22 @@ hf_control.signed_in.route('/', function(){
 });
 
 
+// -------------------------------------------------------------- CIRCLES' VIEWS
+
+hf_control.signed_in.route('/circles', function(){
+    hf_service.list_circles(function(circles_list){
+        var template_context = {
+            'circles': circles_list
+        };
+
+        document.getElementById('hf_page_main_content').innerHTML = hf_ui.template(
+            "list_circles.html",
+            template_context
+        );
+    });
+});
+
+
 // -------------------------------------------------------- NOTIFICATIONS' VIEWS
 
 hf_control.signed_in.route('/notifications', function(){
@@ -63,27 +79,28 @@ hf_control.signed_in.route('/notifications', function(){
 
 hf_control.refresh_left_column = function()
 {
-    hf_ui.apply_template(
-        "list_left_column.html",
-        {
+    hf_service.list_circles(function(circles_list){
+        var template_context = {
             'title': 'Circles',
-            'cells': [
-                {
-                    'name': 'Familly',
-                    'view_path': '/circle/1'
-                },
-                {
-                    'name': 'Friends',
-                    'view_path': '/circle/2'
-                },
-                {
-                    'name': 'INSA',
-                    'view_path': '/circle/3'
-                }
-            ]
-        },
-        document.getElementById('hf_left_column_circles')
-    );
+            'title_view_path': '/circles',
+            'cells': []
+        };
+
+        for (var i = 0; i < circles_list.length; i++)
+        {
+            var circle_cell = {
+                'name':         circles_list[i]['name'],
+                'view_path':    '/circle/' + circles_list[i]['thread_chunk_name']
+            };
+
+            template_context['cells'].push(circle_cell);
+        }
+
+        document.getElementById('hf_left_column_circles').innerHTML = hf_ui.template(
+            "list_left_column.html",
+            template_context
+        );
+    });
 
     hf_ui.apply_template(
         "list_left_column.html",

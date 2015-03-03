@@ -20,6 +20,36 @@
     width: 100%;
 }
 
+.hf_layout_cell .hf_padding
+{
+    padding: 20px 30px;
+    font-size: 20px;
+}
+
+.hf_layout_cell form
+{
+    padding: 20px;
+    border: 1px solid #EEEEEE;
+    background-color: #F7F7F7;
+    width: 100%;
+}
+
+.hf_layout_cell form table td
+{
+    padding: 5px;
+}
+
+.hf_layout_cell form table input
+{
+    width: 100%;
+}
+
+.hf_layout_cell .hf_title
+{
+    padding: 10px 0;
+    font-size: 20px;
+}
+
 .hf_layout_cell .hf_author
 {
     padding: 20px 30px 10px 30px;
@@ -39,4 +69,11 @@
 {
     width: 100%;
     padding: 10px 20px 20px 20px;
+}
+
+.hf_layout_cell .hf_empty
+{
+    width: 100%;
+    text-align: center;
+    padding: 40px 0 120px 0;
 }
