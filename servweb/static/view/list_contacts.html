@@ -1,0 +1,9 @@
+<div class="hf_list_contacts_header">
+    <h1>List des contacts</h1>
+</div>
+
+{{#each contacts}}
+    {{#hf_cell}}
+        {{#hf_user_link this}}{{/hf_user_link}}
+    {{/hf_cell}}
+{{/each}}

@@ -61,6 +61,22 @@ hf_control.signed_in.route('/notifications', function(){
     });
 });
 
+// ------------------------------------------------------ CONTACTS' VIEWS
+hf_control.signed_in.route('/contacts', function () {
+    hf_service.list_contacts(function(list_contacts) {
+        console.log(list_contacts);
+        var params = {
+            'contacts': list_contacts
+        };
+
+        hf_ui.apply_template(
+            'list_contacts.html',
+            params,
+            document.getElementById('hf_page_main_content')
+        );
+    });
+});
+
 hf_control.refresh_left_column = function()
 {
     hf_ui.apply_template(
