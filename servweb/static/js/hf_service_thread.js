@@ -104,7 +104,7 @@ hf_service.create_post = function(post_content,threads_list,callback)
             };
 
             if(threads_list){
-                hf_service.append_post_to_threads(post_info, threads_list,callback);
+                hf_service.append_post_to_threads(post_chunk_name,symetric_key, threads_list,callback);
             }else if (callback){
                 callback(post_info);
             }
@@ -117,22 +117,29 @@ hf_service.create_post = function(post_content,threads_list,callback)
  *
  * @param <post_name>: the name of the post
  * @param <post_key> : the decryption key of the post
- * @param <threads_list>: list the threads the post will be posted to
+ * @param <threads_list>: list the threads the post will be posted to. A thread must contain fields
+            {
+                'thread_chunk_name':,
+                'symetric_key':
+            }; 
  * @param <callback>: the function called once the response has arrived with parameter 
             = true if the append had succeded
             = false otherwise
  */
-hf_service.append_post_to_threads = function(post_info, threads_list,callback)
+hf_service.append_post_to_threads = function(post_name, post_key, threads_list,callback)
 {
-    //TODO : split post_info  into two parameters
-    assert(typeof post_info['post_chunk_name'] == "string");
-    assert(typeof post_info['symetric_key'] == "string");
+    assert(typeof post_name == "string");
+    assert(typeof post_key == "string");
     assert(threads_list instanceof Array, "threads_list must be an Array in hf_service.append_post_to_threads");
     assert(typeof threads_list[0] !== 'undefined', "threads_list is empty in hf_service.append_post_to_threads")
 
-    var stringified_post_info = JSON.stringify(post_info);
-
     var transaction = new hf_com.Transaction();
+
+    var post_info = {
+        "post_chunk_name" : post_name,
+        "symetric_key" : post_key
+    };
+    var stringified_post_info = JSON.stringify(post_info);
 
     for (var i = 0; i < threads_list.length; i++)
     {
@@ -147,13 +154,13 @@ hf_service.append_post_to_threads = function(post_info, threads_list,callback)
             function(json_message) {
                 if (json_message['status'] != 'ok')
                 {
-                    allert(
+                    alert(
                         'hf_service.append_post_to_threads(' +
                         stringified_post_info + ' , ' +
                         threads_list[i]['thread_chunk_name'] +
                         ') failed'
                     );
-                    return;
+                    callback(false);
                 }
             }
         );
@@ -162,7 +169,7 @@ hf_service.append_post_to_threads = function(post_info, threads_list,callback)
         if (json_message['status'] != 'ok')
         {
             alert('append post to thread has failed');
-            return;
+            callback(false);
         }
 
         if (callback)
@@ -182,7 +189,6 @@ hf_service.append_post_to_threads = function(post_info, threads_list,callback)
 hf_service.list_posts = function(thread_name,thread_key,callback)
 {
     //TODO : find thread_key in key keeper
-    //TODO : callback when all get_data_chunk callbacks have been called
     assert(hf_service.is_connected());
     assert(hf.is_function(callback));
     assert(typeof thread_name == 'string');
@@ -199,32 +205,32 @@ hf_service.list_posts = function(thread_name,thread_key,callback)
     assert(list_posts_info != null);
 
     var list_resolved_posts = [];
+    var iteration = 0;
     for(var i = 0; i < list_posts_info.length; i++) {
         var post_info_json = JSON.parse(list_posts_info[i]);
-        var post_content = null;
 
         hf_com.get_data_chunk(
             post_info_json['post_chunk_name'],
             post_info_json['symetric_key'],
             function(json_message){
                 if(json_message){
-                    post_content = JSON.parse(json_message['chunk_content']);
-                }else{
-                    callback(null);
+
+                    var post_content = JSON.parse(json_message['chunk_content']);
+
+                    hf_service.resolve_post_author(post_content, function(resolved_post){
+                        if(resolved_post){
+                            list_resolved_posts.push(resolved_post);
+                        }
+                    });
                 }
+
+                iteration++;
+
+                if(iteration == list_posts_info.length)
+                    callback(list_resolved_posts);
             }
         );
-        assert(post_content != null);
-
-        hf_service.resolve_post_author(post_content, function(resolved_post){
-            if(resolved_post){
-                list_resolved_posts.push(resolved_post);
-            }else{
-                callback(null);
-            }
-        });
     }
-    callback(list_resolved_posts);
 }
 
 
