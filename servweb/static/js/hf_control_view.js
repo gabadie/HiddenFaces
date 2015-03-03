@@ -50,8 +50,17 @@ hf_control.signed_in.route('/', function(){
 hf_control.signed_in.route('/circles', function(){
     hf_service.list_circles(function(circles_list){
         var template_context = {
-            'circles': circles_list
+            'circles': []
         };
+
+        for(var i = 0; i < circles_list.length; i++)
+        {
+            var cell = {
+                'name': circles_list[i]['name'],
+                'view_path': '/circle/' + circles_list[i]['thread_chunk_name']
+            };
+            template_context['circles'].push(cell);
+        }
 
         document.getElementById('hf_page_main_content').innerHTML = hf_ui.template(
             "list_circles.html",
