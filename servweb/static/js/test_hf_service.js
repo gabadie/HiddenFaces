@@ -681,7 +681,7 @@ test_hf_service.append_post_to_threads = function()
     var thread2_info = null;
 
     //threads list creation
-    hf_service.create_thread(owner_hash,true,true,function(thread_info){
+    hf_service.create_thread(owner_hash,true,false,function(thread_info){
             test_utils.assert(thread_info['status'] == "ok");
             thread1_info = thread_info;
         });

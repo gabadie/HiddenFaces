@@ -41,7 +41,7 @@ hf_service.create_thread = function(owner_hash, public_append, public_thread, ca
                 'thread_chunk_name':   thread_chunk_name,
                 'symetric_key':   symetric_key
             };
-
+            hf_service.store_key(hf_service.user_private_chunk,thread_chunk_name,symetric_key);
             if(callback){
                 callback(thread_info);
             }
