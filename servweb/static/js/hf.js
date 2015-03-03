@@ -187,8 +187,11 @@ hf.delete_cookie = function(name)
     hf.create_cookie(name, "", -1);
 }
 
-
-
+/*
+ * Converts from a given string to date
+ *
+ * @param <stringDate>: string which will be converted
+ */
 hf.string_to_date = function(stringDate)
 {
     var thisDate = stringDate;
@@ -199,15 +202,20 @@ hf.string_to_date = function(stringDate)
     return jDate;
 }
 
+/*
+ * Gets today's date and return a string date
+ */
 hf.get_date_time = function()
 {
     var now  = new Date();
 
     return hf.date_to_string(now);
-
-
 }
-
+/*
+ * Converts from date to string
+ *
+ * @param<date>: the date which will be converted
+ */
 hf.date_to_string = function(date)
 {
 
@@ -238,6 +246,11 @@ hf.date_to_string = function(date)
     return string_date_time;
 
 }
+
+/*
+ * Generates full date of the day
+ *
+ */
 
 hf.generate_full_date = function()
 {
