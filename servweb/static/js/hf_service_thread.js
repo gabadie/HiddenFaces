@@ -186,9 +186,10 @@ hf_service.append_post_to_threads = function(post_name, post_key, threads_list,c
 }
 
 /*
- * List of the posts of a thread
+ * Gets list of the resolved posts of a thread
  * @param <thread_name> : thread's name
- * @param <callback>: the function called once the response has arrived
+ * @param <callback>: the function called once the response has arrived with parameter the list
+            of the resolved posts
  *      
  */
 hf_service.list_posts = function(thread_name,callback)
@@ -233,6 +234,7 @@ hf_service.list_posts = function(thread_name,callback)
                     }
                 );
             }
+            callback(list_resolved_posts);
         }
     );
 }
