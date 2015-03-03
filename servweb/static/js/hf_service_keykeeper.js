@@ -38,9 +38,9 @@ hf_service.store_key = function(repository_chunk, chunk_name, chunk_key)
         };
     }
 
-    if (hf_com.is_AES_key(chunk_key))
+    if (hf_com.is_AES_key(chunk_key) || chunk_key == '')
     {
-        assert(hf_com.is_AES_key(chunk_key));
+        assert(hf_com.is_AES_key(chunk_key) || chunk_key == '');
 
         keykeeper[chunk_name]['symetric'] = chunk_key;
         keykeeper[chunk_name]['public'] = '';
