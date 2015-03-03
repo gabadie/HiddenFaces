@@ -553,29 +553,24 @@ hf_service.create_circle = function(circle_name, callback)
 
     var circle_hash = null;
 
-    hf_service.create_thread(hf_service.user_chunks_owner(), false, false, function(thread_info){
-        assert(thread_info['status'] == 'ok');
-
-        var thread_chunk_name = thread_info['thread_chunk_name'];
-        var thread_chunk_key = thread_info['symetric_key'];
+    hf_service.create_thread(hf_service.user_chunks_owner(), false, false, function(thread_name){
+        assert(typeof thread_name == 'string');
 
         var circle_infos = {
             'name':                 circle_name,
             'contacts':             [],
-            'thread_chunk_name':    thread_chunk_name
+            'thread_chunk_name':    thread_name
         };
 
         var user_private_chunk = hf_service.user_private_chunk;
 
-        user_private_chunk['circles'][thread_chunk_name] = circle_infos;
-
-        hf_service.store_key(user_private_chunk, thread_chunk_name, thread_chunk_key);
+        user_private_chunk['circles'][thread_name] = circle_infos;
 
         hf_service.save_user_chunks(function(){
             callback(true);
         });
 
-        circle_hash = thread_chunk_name;
+        circle_hash = thread_name;
     });
 
     /*
