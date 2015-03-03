@@ -4,7 +4,7 @@
  * @param <owner_hash>: the hash of the owner of the thread
  * @param <public_append>: if anyone can append content on the threads
  * @param <public_thread> : if the thread is private or not
- * @param <callback>: the function called once the response has arrived with parameter 
+ * @param <callback>: the function called once the response has arrived with parameter
             {
                 'status':,
                 'thread_chunk_name':,
@@ -41,7 +41,7 @@ hf_service.create_thread = function(owner_hash, public_append, public_thread, ca
                 'thread_chunk_name':   thread_chunk_name,
                 'symetric_key':   symetric_key
             };
-            
+
             if(callback){
                 callback(thread_info);
             }
@@ -54,7 +54,7 @@ hf_service.create_thread = function(owner_hash, public_append, public_thread, ca
  *
  * @param <post_content>: the content of the post
  * @param <threads_list>: list the threads the post will be posted to (= null if unspecified)
- * @param <callback>: the function called once the response has arrived with parameter 
+ * @param <callback>: the function called once the response has arrived with parameter
             {
                 'status':,
                 'post_chunk_name':,
@@ -64,7 +64,7 @@ hf_service.create_thread = function(owner_hash, public_append, public_thread, ca
 hf_service.create_post = function(post_content,threads_list,callback)
 {
     assert(typeof post_content == 'string', "post_content must be a string in hf_service.create_post");
-    
+
     var owner_hash = hf_service.user_chunks_owner();
     var user_hash = hf_service.user_hash();
     var part_hash = hf.generate_hash('uGzvkgD6lr6WlMTbvhWK\n');
@@ -76,7 +76,7 @@ hf_service.create_post = function(post_content,threads_list,callback)
         },
         'content': post_content
     };
-    
+
     var post_chunk_name =
         hf.generate_hash('ERmO4vptXigWBnDUjnEN\n');
     var stringified_post_content = [JSON.stringify(post_chunk_content)];
@@ -98,7 +98,7 @@ hf_service.create_post = function(post_content,threads_list,callback)
             }
 
             var post_info = {
-                'status' :  json_message['status'], 
+                'status' :  json_message['status'],
                 'post_chunk_name':   post_chunk_name,
                 'symetric_key':   symetric_key
             };
@@ -127,8 +127,8 @@ hf_service.create_post = function(post_content,threads_list,callback)
             {
                 'thread_chunk_name':,
                 'symetric_key':
-            }; 
- * @param <callback>: the function called once the response has arrived with parameter 
+            };
+ * @param <callback>: the function called once the response has arrived with parameter
             = true if the append had succeded
             = false otherwise
  */
@@ -156,19 +156,7 @@ hf_service.append_post_to_threads = function(post_name, post_key, threads_list,c
             threads_list[i]['thread_chunk_name'],
             hf_service.user_chunks_owner(),
             threads_list[i]['symetric_key'],
-            [stringified_post_info],
-            function(json_message) {
-                if (json_message['status'] != 'ok')
-                {
-                    alert(
-                        'hf_service.append_post_to_threads(' +
-                        stringified_post_info + ' , ' +
-                        threads_list[i]['thread_chunk_name'] +
-                        ') failed'
-                    );
-                    callback(false);
-                }
-            }
+            [stringified_post_info]
         );
     }
     transaction.commit(function(json_message){

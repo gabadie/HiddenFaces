@@ -186,3 +186,78 @@ hf.delete_cookie = function(name)
 {
     hf.create_cookie(name, "", -1);
 }
+
+/*
+ * Converts from a given string to date
+ *
+ * @param <stringDate>: string which will be converted
+ */
+hf.string_to_date = function(stringDate)
+{
+    var thisDate = stringDate;
+    //alert(thisDate);
+    var thisDateT = thisDate.substr(0, 10) + "T" + thisDate.substr(11, 8);
+   // alert(thisDateT);
+    var jDate = new Date(thisDateT);
+    return jDate;
+}
+
+/*
+ * Gets today's date and return a string date
+ */
+hf.get_date_time = function()
+{
+    var now  = new Date();
+
+    return hf.date_to_string(now);
+}
+/*
+ * Converts from date to string
+ *
+ * @param<date>: the date which will be converted
+ */
+hf.date_to_string = function(date)
+{
+
+    var year    = date.getFullYear();
+    var month   = date.getMonth()+1;
+    var day     = date.getDate();
+    var hour    = date.getHours();
+    var minute  = date.getMinutes();
+    var second  = date.getSeconds();
+
+    if(month.toString().length == 1) {
+        var month = '0'+month;
+    }
+    if(day.toString().length == 1) {
+        var day = '0'+day;
+    }
+    if(hour.toString().length == 1) {
+        var hour = '0'+hour;
+    }
+    if(minute.toString().length == 1) {
+        var minute = '0'+minute;
+    }
+    if(second.toString().length == 1) {
+        var second = '0'+second;
+    }
+
+    var string_date_time = year+'-'+month+'-'+day+' '+hour+':'+minute+':'+second;
+    return string_date_time;
+
+}
+
+/*
+ * Generates full date of the day
+ *
+ */
+
+hf.generate_full_date = function()
+{
+    var string_date = hf.get_date_time();
+    var date = hf.string_to_date(string_date);
+    var date_timeStamp = date.getTime();
+    var full_date = Date.create(date_timeStamp).toString().substr(0,21);
+    return full_date;
+
+}
