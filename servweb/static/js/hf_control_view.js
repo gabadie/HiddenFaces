@@ -80,7 +80,6 @@ hf_control.signed_in.route('/notifications', function(){
 // ------------------------------------------------------ CONTACTS' VIEWS
 hf_control.signed_in.route('/contacts', function () {
     hf_service.list_contacts(function(list_contacts) {
-        console.log(list_contacts);
         var params = {
             'contacts': list_contacts
         };

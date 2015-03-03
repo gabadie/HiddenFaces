@@ -1,6 +1,15 @@
 
 /* ----------------------------------------------------------- Generic layout */
 
+hr{
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;
+    padding: 0;
+}
+
 .hf_layout_page_width
 {
     margin: 0 auto;
@@ -23,7 +32,6 @@
 .hf_layout_cell .hf_padding
 {
     padding: 20px 30px;
-    font-size: 20px;
 }
 
 .hf_layout_cell form
@@ -76,4 +84,8 @@
     width: 100%;
     text-align: center;
     padding: 40px 0 120px 0;
+}
+
+.hf_contact {
+    padding: 0px 0px 0px 30px;
 }
