@@ -178,7 +178,7 @@ test_hf_com.test_encrypt_AES = function() {
 }
 
 test_hf_com.test_decrypt_AES = function() {
-    var key = "AES \n mypassword";
+    var key = hf_com.generate_AES_key('');
     var data = "data to encrypt";
 
     var encrypted_data = sjcl.encrypt(hf_com.get_key(key), data);

@@ -386,7 +386,11 @@ hf_com.delete_data_chunk = function(chunk_name, access_as, callback)
  */
 hf_com.generate_AES_key = function(salt)
 {
-    return 'AES\n' + hf.generate_hash(salt);
+    var key = 'AES\n' + hf.generate_hash(salt);
+
+    assert(hf_com.is_AES_key(key));
+
+    return key;
 }
 
 /*
