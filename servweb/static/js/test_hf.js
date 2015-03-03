@@ -104,3 +104,6 @@ test_hf.onload = function()
 
     hf_control.domPageContainer.innerHTML = '<a href="./">GOTO LOGIN</a>';
 }
+
+
+
