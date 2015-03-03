@@ -104,6 +104,7 @@
     width: 100%;
     display: block;
     font-weight: bolder;
+    font-size: inherit;
 }
 
 #hf_page_left_column .hf_list_item
@@ -127,4 +128,11 @@
 {
     background: #61513C;
     color: #FFF9F1;
+}
+
+#hf_page_left_column .hf_empty
+{
+    width: 100%;
+    text-align: center;
+    padding: 20px 0 60px 0;
 }

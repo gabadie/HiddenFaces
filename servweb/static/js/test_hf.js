@@ -40,9 +40,18 @@ test_hf.populate_db = function()
         user_hash[i] = hf_service.create_user(user_profile[i], function(user_hash){
             test_utils.assert(user_hash != null, 'failed to create profile ' + i);
         });
+
+        hf_service.login_user(user_profile[i]);
+        hf_service.create_circle('Family', function(success){
+            test_utils.assert(success == true, 'failed to create profile ' + i + '\'s family circle');
+        });
+        hf_service.create_circle('Friends', function(success){
+            test_utils.assert(success == true, 'failed to create profile ' + i + '\'s friends circle');
+        });
+        hf_service.disconnect();
     }
 
-    test_utils.success('user created');
+    test_utils.assert_success(profile_count * 3);
 
     // ---------------------------------------------------------- SENDS MESSAGES
     var message_count = 100;
@@ -70,7 +79,7 @@ test_hf.populate_db = function()
         hf_service.disconnect();
     }
 
-    test_utils.success('messages sent');
+    test_utils.assert_success(message_count);
 }
 
 
