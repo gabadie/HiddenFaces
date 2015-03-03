@@ -748,6 +748,8 @@ test_hf_service.list_posts_thread = function()
             test_utils.assert(thread_info['status'] == "ok");
             thread1_info = thread_info;
         });
+    //store key
+    hf_service.store_key(hf_service.user_private_chunk, thread1_info['thread_chunk_name'], thread1_info['symetric_key']);
 
     test_utils.assert(thread1_info != null);
     var threads_list = [thread1_info];
@@ -764,7 +766,7 @@ test_hf_service.list_posts_thread = function()
     //get list of posts
     hf_service.list_posts(
         thread1_info['thread_chunk_name'],
-        thread1_info['symetric_key'],function(resolved_posts){
+        function(resolved_posts){
             test_utils.assert(resolved_posts != null);
             test_utils.assert(resolved_posts.length == 2);
         });

@@ -41,7 +41,7 @@ hf_service.create_thread = function(owner_hash, public_append, public_thread, ca
                 'thread_chunk_name':   thread_chunk_name,
                 'symetric_key':   symetric_key
             };
-            hf_service.store_key(hf_service.user_private_chunk,thread_chunk_name,symetric_key);
+            
             if(callback){
                 callback(thread_info);
             }
@@ -182,55 +182,53 @@ hf_service.append_post_to_threads = function(post_name, post_key, threads_list,c
 /*
  * List of the posts of a thread
  * @param <thread_name> : thread's name
- * @param <thread_key> : thread's decryption key
  * @param <callback>: the function called once the response has arrived
  *      
  */
-hf_service.list_posts = function(thread_name,thread_key,callback)
+hf_service.list_posts = function(thread_name,callback)
 {
-    //TODO : find thread_key in key keeper
     assert(hf_service.is_connected());
     assert(hf.is_function(callback));
     assert(typeof thread_name == 'string');
-    assert(typeof thread_key == 'string');
 
-    var list_posts_info = null;
+    var thread_key = hf_service.get_decryption_key(hf_service.user_private_chunk, thread_name);
+
     hf_com.get_data_chunk(
-            thread_name,
-            thread_key,
-            function(json_message){
-                list_posts_info = json_message['chunk_content'];
-            }
-        );
-    assert(list_posts_info != null);
+        thread_name,
+        thread_key,
+        function(thread){
 
-    var list_resolved_posts = [];
-    var iteration = 0;
-    for(var i = 0; i < list_posts_info.length; i++) {
-        var post_info_json = JSON.parse(list_posts_info[i]);
+            var list_posts_info = thread['chunk_content'];
+            var list_resolved_posts = [];
+            var iteration = 0;
 
-        hf_com.get_data_chunk(
-            post_info_json['post_chunk_name'],
-            post_info_json['symetric_key'],
-            function(json_message){
-                if(json_message){
+            for(var i = 0; i < list_posts_info.length; i++) {
+                var post_info_json = JSON.parse(list_posts_info[i]);
 
-                    var post_content = JSON.parse(json_message['chunk_content']);
+                hf_com.get_data_chunk(
+                    post_info_json['post_chunk_name'],
+                    post_info_json['symetric_key'],
+                    function(json_message){
+                        if(json_message){
 
-                    hf_service.resolve_post_author(post_content, function(resolved_post){
-                        if(resolved_post){
-                            list_resolved_posts.push(resolved_post);
+                            var post_content = JSON.parse(json_message['chunk_content']);
+
+                            hf_service.resolve_post_author(post_content, function(resolved_post){
+                                if(resolved_post){
+                                    list_resolved_posts.push(resolved_post);
+                                }
+                            });
                         }
-                    });
-                }
 
-                iteration++;
+                        iteration++;
 
-                if(iteration == list_posts_info.length)
-                    callback(list_resolved_posts);
+                        if(iteration == list_posts_info.length)
+                            callback(list_resolved_posts);
+                    }
+                );
             }
-        );
-    }
+        }
+    );
 }
 
 
