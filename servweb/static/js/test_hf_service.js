@@ -1123,6 +1123,50 @@ test_hf_service.is_valide_public_chunk = function()
 
     test_utils.assert_success(3);
 }
+// -------------------------------------------------------------------------- CHUNKS CERTIFICATION
+test_hf_service.verify_post_certification = function() 
+{   
+    var user_profile = test_hf_service.john_smith_profile();
+    hf_service.create_user(user_profile);
+
+    //user connexion
+    hf_service.login_user(user_profile, null);
+    test_utils.assert(hf_service.is_connected(), 'should be connected after');
+
+    //post creation
+    var post_content = test_hf_service.user_example_post();
+    var post_chunk_name = null;
+    var post_chunk_key = null;
+    hf_service.create_post(post_content, null,function(post_info){
+            test_utils.assert(post_info['status'] == "ok");
+            post_chunk_name = post_info['post_chunk_name'];
+            post_chunk_key = post_info['symetric_key'];
+        });
+    test_utils.assert(post_chunk_key != null);
+    test_utils.assert(post_chunk_name != null);
+
+    //verification
+    var certificate_repository = hf_service.user_private_chunk;
+    var post_list_content = null;
+    hf_com.get_data_chunk(
+        post_chunk_name,
+        post_chunk_key,
+        function(json_message){
+            post_list_content = json_message['chunk_content'];
+        }
+    );
+    test_utils.assert(post_list_content != null); 
+
+    for(var i = 0; i < post_list_content.length; i++){
+        var element_json = JSON.parse(post_list_content[i]);
+        hf_service.verify_certification(certificate_repository, post_chunk_name, element_json['__meta']['part_hash'], hf.hash(post_list_content[i]), function(success){
+            test_utils.assert(success == true, "chunk verification failed");
+        });
+    }
+    
+    test_utils.assert_success(5 + post_list_content.length);
+}
+
 // ------------------------------------------------- SERVICE's TESTS ENTRY POINT
 
 test_hf_service.main = function()
@@ -1165,4 +1209,7 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.is_valide_system,'test_hf_service.is_valide_system');
     test_utils.run(test_hf_service.is_valide_private_chunk,'test_hf_service.is_valide_private_chunk');
     test_utils.run(test_hf_service.is_valide_public_chunk,'test_hf_service.is_valide_public_chunk');
+
+    //CHUNKS VERIFICATION
+    test_utils.run(test_hf_service.verify_post_certification,'test_hf_service.verify_certification');
 }
