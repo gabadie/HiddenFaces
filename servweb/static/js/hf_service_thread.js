@@ -67,11 +67,12 @@ hf_service.create_post = function(post_content,threads_list,callback)
     
     var owner_hash = hf_service.user_chunks_owner();
     var user_hash = hf_service.user_hash();
-
+    var part_hash = hf.generate_hash('uGzvkgD6lr6WlMTbvhWK\n');
     var post_chunk_content = {
         '__meta': {
             'type': '/post',
-            'author_user_hash': user_hash
+            'author_user_hash': user_hash,
+            'part_hash' = part_hash
         },
         'content': post_content
     }
@@ -80,8 +81,7 @@ hf_service.create_post = function(post_content,threads_list,callback)
         hf.generate_hash('ERmO4vptXigWBnDUjnEN\n');
     var stringified_post_content = [JSON.stringify(post_chunk_content)];
 
-    var salt = 'uhgGFoMBXi';
-    var symetric_key = hf_com.generate_AES_key(salt);
+    var symetric_key = hf_com.generate_AES_key('uhgGFoMBXi');
 
     // Creates the thread's chunk
     hf_com.create_data_chunk(
@@ -94,7 +94,7 @@ hf_service.create_post = function(post_content,threads_list,callback)
             if (json_message['status'] != 'ok')
             {
                 allert("post creation has failed");
-                return;
+                callback(null);
             }
 
             var post_info = {
@@ -102,6 +102,12 @@ hf_service.create_post = function(post_content,threads_list,callback)
                 'post_chunk_name':   post_chunk_name,
                 'symetric_key':   symetric_key
             };
+
+            //chunk certification
+            hf_service.certify(hf_service.user_private_chunk, post_chunk_name, part_hash, hf.hash(stringified_post_content), function(success){
+                if(!success)
+                    callback(null);
+            });
 
             if(threads_list){
                 hf_service.append_post_to_threads(post_chunk_name,symetric_key, threads_list,callback);

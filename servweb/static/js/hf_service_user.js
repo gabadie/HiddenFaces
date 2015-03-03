@@ -145,7 +145,7 @@ hf_service.create_user = function(user_profile, callback)
                 },
                 'chunks_owner':  chunks_owner
             },
-
+            'certifications' : [],
             /*
              * pending notifications that have already been fetched but don't have
              * automated process and are waiting for the user to be processed.
@@ -236,7 +236,8 @@ hf_service.export_user_public_chunk = function(user_private_chunk)
                 'name':         user_private_chunk['system']['protected_chunk']['name'],
                 'public_key':   user_private_chunk['system']['protected_chunk']['public_key']
             }
-        }
+        },
+        'certifications' : user_private_chunk['certifications']
     };
 
     return public_chunk;
