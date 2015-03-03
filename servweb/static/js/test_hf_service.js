@@ -588,6 +588,17 @@ test_hf_service.keys_repository = function()
         hf_service.get_decryption_key(fake_chunk, chunk_name[3]) == test_hf_com.fake_RSA_private_key(3),
         'invalid chunk_name[3]\'s decryption key'
     );
+
+    hf_service.store_key(fake_chunk, chunk_name[3], '');
+
+    test_utils.assert(
+        hf_service.get_encryption_key(fake_chunk, chunk_name[3]) == '',
+        'chunk_name[3]\'s encryption key should be an empty string'
+    );
+    test_utils.assert(
+        hf_service.get_decryption_key(fake_chunk, chunk_name[3]) == '',
+        'chunk_name[3]\'s decryption key should be an empty string'
+    );
 }
 
 test_hf_service.send_chunks_keys = function()
