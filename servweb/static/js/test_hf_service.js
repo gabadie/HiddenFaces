@@ -854,12 +854,19 @@ test_hf_service.list_circles = function()
         test_utils.assert(circles_list.length == 2, 'circles list should have 2 circles');
     });
 
-    test_utils.assert_success(5);
+    hf_service.disconnect();
+    hf_service.login_user(user_profile0);
+
+    hf_service.list_circles(function(circles_list){
+        test_utils.assert(circles_list.length == 2, 'circles list should still have 2 circles');
+    });
+
+    test_utils.assert_success(6);
 }
 
 // ------------------------------------------------- REGISTRY TESTES
 
-test_hf_service.is_valide_chunk = function() 
+test_hf_service.is_valide_chunk = function()
 {
     //__meta is absent
     var private_chunk = {};
@@ -872,13 +879,13 @@ test_hf_service.is_valide_chunk = function()
 
     // meta type is not in registry
     private_chunk['__meta']['type'] = '/user/some_chunk';
-    valide = hf_service.is_valide_chunk(private_chunk); 
-    test_utils.assert(valide == false, "private_chunk['__meta'] is wrong");   
-   
+    valide = hf_service.is_valide_chunk(private_chunk);
+    test_utils.assert(valide == false, "private_chunk['__meta'] is wrong");
+
     test_utils.assert_success(3);
 }
 
-test_hf_service.is_valide_profile = function() 
+test_hf_service.is_valide_profile = function()
 {
     var chunk_profile = {};
 
@@ -907,12 +914,12 @@ test_hf_service.is_valide_profile = function()
     test_utils.assert(valide == false, 'private chunk_profile has no key');
 
     // ------------- Test for private chunk -------------------
-    // empty email 
+    // empty email
     chunk_profile['email'] = '';
     valide = hf_service.is_valide_private_profile(chunk_profile);
     test_utils.assert(valide == false, 'private chunk_profile has empty key');
 
-    // well formatted 
+    // well formatted
     chunk_profile['email'] = 'john@smith.com';
     valide = hf_service.is_valide_private_profile(chunk_profile);
     test_utils.assert(valide == true, 'private chunk_profile is well formatted');
@@ -933,7 +940,7 @@ test_hf_service.is_valide_meta = function()
     chunk_meta['user_hash'] = 'abcd';
     valide = hf_service.is_valide_meta(chunk_meta);
     test_utils.assert(valide == false, 'chunk_meta has no chunk_name tag');
-    
+
     // chunk_meta has user_hash and chunk_name but wrong format (not hash)
     var random_chunk_name = hf.generate_hash('randomsalt');
     chunk_meta['chunk_name'] = 'abcd';
@@ -941,7 +948,7 @@ test_hf_service.is_valide_meta = function()
     test_utils.assert(valide == false, 'chunk_meta has 2 wrong hashes');
 
     // chunk_meta's chunk_name is not hash
-    chunk_meta['user_hash'] = random_user_hash;    
+    chunk_meta['user_hash'] = random_user_hash;
     valide = hf_service.is_valide_meta(chunk_meta);
     test_utils.assert(valide == false, 'chunk_meta has chunk_name wrong hash');
     valide = hf_service.is_valide_private_meta(chunk_meta);
@@ -952,7 +959,7 @@ test_hf_service.is_valide_meta = function()
     valide = hf_service.is_valide_meta(chunk_meta);
     test_utils.assert(valide == true, 'chunk_meta is well formatted');
 
-    // private chunk meta test, there is no key 
+    // private chunk meta test, there is no key
     valide = hf_service.is_valide_private_meta(chunk_meta);
     test_utils.assert(valide == false, 'private_chunk_meta has no key tag');
 
@@ -969,7 +976,7 @@ test_hf_service.is_valide_meta = function()
     test_utils.assert_success(9);
 }
 
-test_hf_service.is_valide_system = function() 
+test_hf_service.is_valide_system = function()
 {
     var chunk_system = {};
 
@@ -986,7 +993,7 @@ test_hf_service.is_valide_system = function()
     chunk_system['protected_chunk']['name'] = '';
     valide = hf_service.is_valide_system(chunk_system);
     test_utils.assert(valide == false, 'chunk_system["protected_chunk"] has no public_key');
-    
+
     // empty values
     chunk_system['protected_chunk']['public_key'] = '';
     valide = hf_service.is_valide_system(chunk_system);
@@ -1000,7 +1007,7 @@ test_hf_service.is_valide_system = function()
     // name is'n hash
     chunk_system['protected_chunk']['public_key'] = 'RSA_public_key';
     valide = hf_service.is_valide_system(chunk_system);
-    test_utils.assert(valide == false, 'name is not hash');    
+    test_utils.assert(valide == false, 'name is not hash');
 
     // commun party is well formatted
     chunk_system['protected_chunk']['name'] = hf.generate_hash('randomhash');
@@ -1025,13 +1032,13 @@ test_hf_service.is_valide_system = function()
     test_utils.assert_success(10);
 }
 
-test_hf_service.is_valide_private_chunk = function() 
+test_hf_service.is_valide_private_chunk = function()
 {
     var user_profile0 = test_hf_service.john_smith_profile();
     var user_hash0 = hf_service.create_user(user_profile0);
 
     hf_service.login_user(user_profile0, null);
-   
+
 
     var private_chunk = {
             '__meta': {
@@ -1053,12 +1060,12 @@ test_hf_service.is_valide_private_chunk = function()
                 },
                 'chunks_owner':  'chunks_owner'
             }
-        };    
-    
-     
+        };
+
+
     test_utils.assert(hf_service.is_valide_private_chunk(private_chunk) == false, 'private chunk misses a lots');
 
-    var user_private_chunk = hf_service.user_private_chunk; 
+    var user_private_chunk = hf_service.user_private_chunk;
     private_chunk['__meta']['user_hash'] = user_private_chunk['__meta']['user_hash'];
     private_chunk['__meta']['chunk_name'] = user_private_chunk['__meta']['chunk_name'];
     private_chunk['notifications'] = user_private_chunk['notifications'];
@@ -1068,10 +1075,10 @@ test_hf_service.is_valide_private_chunk = function()
 
     test_utils.assert(hf_service.is_valide_private_chunk(private_chunk) == false, 'private profile is wrong');
 
-    private_chunk['profile']['email'] = user_private_chunk['profile']['email'];    
+    private_chunk['profile']['email'] = user_private_chunk['profile']['email'];
     test_utils.assert(hf_service.is_valide_private_chunk(private_chunk) == false, 'private system is wrong');
 
-    private_chunk['system']['protected_chunk']['name'] = user_private_chunk['system']['protected_chunk']['name'];    
+    private_chunk['system']['protected_chunk']['name'] = user_private_chunk['system']['protected_chunk']['name'];
     test_utils.assert(hf_service.is_valide_private_chunk(private_chunk) == false, 'private chunks chunks_owner is wrong');
 
     private_chunk['system']['chunks_owner'] = user_private_chunk['system']['chunks_owner'];
@@ -1081,8 +1088,8 @@ test_hf_service.is_valide_private_chunk = function()
     test_utils.assert_success(5);
 }
 
-test_hf_service.is_valide_public_chunk = function() 
-{   
+test_hf_service.is_valide_public_chunk = function()
+{
     var user_profile0 = test_hf_service.john_smith_profile();
     var user_hash0 = hf_service.create_user(user_profile0);
 
@@ -1096,11 +1103,11 @@ test_hf_service.is_valide_public_chunk = function()
             'user_hash':    user_private_chunk['__meta']['user_hash'],
             'chunk_name':   user_private_chunk['__meta']['user_hash']
         }
-        
-    };    
+
+    };
 
     var is_valide = hf_service.is_validate_public_chunk(public_chunk);
-    test_utils.assert(is_valide == false, 'public chunk has no profile && system');   
+    test_utils.assert(is_valide == false, 'public chunk has no profile && system');
 
     public_chunk['profile'] =  {
             'first_name':   user_private_chunk['profile']['first_name'],
@@ -1109,7 +1116,7 @@ test_hf_service.is_valide_public_chunk = function()
         };
 
     is_valide = hf_service.is_validate_public_chunk(public_chunk);
-    test_utils.assert(is_valide == false, 'public chunk has no system');   
+    test_utils.assert(is_valide == false, 'public chunk has no system');
 
     public_chunk['system'] =  {
             'protected_chunk': {
@@ -1119,7 +1126,7 @@ test_hf_service.is_valide_public_chunk = function()
         };
 
     is_valide = hf_service.is_validate_public_chunk(public_chunk);
-    test_utils.assert(is_valide == true, 'public chunk is well formatted');   
+    test_utils.assert(is_valide == true, 'public chunk is well formatted');
 
     test_utils.assert_success(3);
 }

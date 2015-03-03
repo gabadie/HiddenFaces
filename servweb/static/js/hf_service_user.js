@@ -152,9 +152,13 @@ hf_service.create_user = function(user_profile, callback)
              */
             'notifications': [ ],
 
-            'contacts': {
-            },
-            'circles': []
+            'contacts': {},
+
+            /*
+             * user's circles are agregations for contacts so that he can post
+             * message to only some of his friends.
+             */
+            'circles': {}
         };
 
         hf_service.init_key_repository(private_chunk);
