@@ -826,6 +826,36 @@ test_hf_service.add_contact_to_circle = function()
     test_utils.assert_success(4);
 }
 
+test_hf_service.list_circles = function()
+{
+    var user_profile0 = test_hf_service.john_smith_profile();
+
+    hf_service.create_user(user_profile0);
+    hf_service.login_user(user_profile0);
+
+    hf_service.list_circles(function(circles_list){
+        test_utils.assert(circles_list.length == 0, 'circles list should not have any circle');
+    });
+
+    hf_service.create_circle('INSA Lyon', function(success) {
+        test_utils.assert(success == true, 'hf_service.create_circle() 1 has failed');
+    });
+
+    hf_service.list_circles(function(circles_list){
+        test_utils.assert(circles_list.length == 1, 'circles list should have 1 circle');
+    });
+
+    hf_service.create_circle('IF Promoyion 2015', function(success) {
+        test_utils.assert(success == true, 'hf_service.create_circle() 2 has failed');
+    });
+
+    hf_service.list_circles(function(circles_list){
+        test_utils.assert(circles_list.length == 2, 'circles list should have 2 circles');
+    });
+
+    test_utils.assert_success(5);
+}
+
 
 // ------------------------------------------------- SERVICE's TESTS ENTRY POINT
 
@@ -860,4 +890,5 @@ test_hf_service.main = function()
     // CIRCLES
     test_utils.run(test_hf_service.create_circle, 'test_hf_service.create_circle');
     test_utils.run(test_hf_service.add_contact_to_circle, 'test_hf_service.add_contact_to_circle');
+    test_utils.run(test_hf_service.list_circles, 'test_hf_service.list_circles');
 }

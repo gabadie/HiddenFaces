@@ -630,3 +630,24 @@ hf_service.add_contact_to_circle = function(contact_user_hash, circle_hash, call
         callback(true); // TODO: send keys
     });
 }
+
+/*
+ * Lists circle's infos
+ * @param <callback>: the function called once the response has arrived
+ *      @param <circles_list>: the circle info list
+ *      function my_callback(circles_list)
+ */
+hf_service.list_circles = function(callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf.is_function(callback));
+
+    var circles_list = [];
+
+    for (var circle_hash in hf_service.user_private_chunk['circles'])
+    {
+        circles_list.push(hf.clone(hf_service.user_private_chunk['circles'][circle_hash]));
+    }
+
+    callback(circles_list);
+}
