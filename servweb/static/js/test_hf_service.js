@@ -317,6 +317,65 @@ test_hf_service.list_contacts = function()
     test_utils.assert_success(2);
 }
 
+test_hf_service.send_chunks_infos_to_contacts = function()
+{
+    //create all users
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+
+    var user_hash0 = hf_service.create_user(user_profile0);
+    var user_hash1 = hf_service.create_user(user_profile1);
+
+    var chunks_infos = [
+        {
+            'name': hf.hash('chunk0'),
+            'type': '/thread',
+            'symetric_key': 'AES\nhello'
+        },
+        {
+            'name': hf.hash('chunk1'),
+            'type': '/thread',
+            'symetric_key': 'AES\nworld'
+        }
+    ];
+
+    hf_service.login_user(user_profile1);
+    hf_service.add_contact(user_hash0);
+    hf_service.disconnect();
+
+    hf_service.login_user(user_profile0);
+    hf_service.add_contact(user_hash1);
+    hf_service.send_chunks_infos_to_contacts([user_hash1], chunks_infos, function(success){
+        test_utils.assert(success == true, 'notification pushed with success')
+    });
+    hf_service.disconnect();
+
+    hf_service.login_user(user_profile1);
+    hf_service.pull_fresh_notifications();
+
+    test_utils.assert(
+        hf_service.user_private_chunk['contacts'][user_hash0]['threads'].indexOf(chunks_infos[0]['name']) >= 0,
+        'chunk0 should be listed in user 0\'s threads'
+    );
+
+    test_utils.assert(
+        hf_service.user_private_chunk['contacts'][user_hash0]['threads'].indexOf(chunks_infos[1]['name']) >= 0,
+        'chunk1 should be listed in user 0\'s threads'
+    );
+
+    test_utils.assert(
+        hf_service.get_encryption_key(hf_service.user_private_chunk, chunks_infos[0]['name']) == chunks_infos[0]['symetric_key'],
+        'chunk0 should be listed in user 0\'s threads'
+    );
+
+    test_utils.assert(
+        hf_service.get_encryption_key(hf_service.user_private_chunk, chunks_infos[1]['name']) == chunks_infos[1]['symetric_key'],
+        'chunk1 should be listed in user 0\'s threads'
+    );
+
+    test_utils.assert_success(5);
+}
+
 
 // --------------------------------------------------------- NOTIFICATIONS TESTS
 
@@ -626,38 +685,6 @@ test_hf_service.keys_repository = function()
     test_utils.assert(
         hf_service.get_decryption_key(fake_chunk, chunk_name[3]) == '',
         'chunk_name[3]\'s decryption key should be an empty string'
-    );
-}
-
-test_hf_service.send_chunks_keys = function()
-{
-    var chunks_names = [
-        hf.hash('chunk0'),
-        hf.hash('chunk1')
-    ];
-
-    var chunks_keys = {};
-    chunks_keys[chunks_names[0]] = 'AES\nhello';
-    chunks_keys[chunks_names[1]] = 'AES\nworld';
-
-    test_hf_service.notification_automation_util(function(user_hash){
-        hf_service.send_chunks_keys([user_hash], chunks_keys, function(success){
-            test_utils.assert(success == true, 'notification push with success')
-        });
-
-        test_utils.assert_success(1);
-
-        return 0;
-    });
-
-    test_utils.assert(
-        hf_service.get_encryption_key(hf_service.user_private_chunk, chunks_names[0]) == chunks_keys[chunks_names[0]],
-        'invalid chunk_name[0]\'s encryption key'
-    );
-
-    test_utils.assert(
-        hf_service.get_encryption_key(hf_service.user_private_chunk, chunks_names[1]) == chunks_keys[chunks_names[1]],
-        'invalid chunk_name[1]\'s encryption key'
     );
 }
 
@@ -1228,10 +1255,10 @@ test_hf_service.verify_append_posts_certification = function()
 
                             //verify current user has the certification for the post's append
                             hf_service.verify_certification(
-                                hf_service.user_private_chunk, 
-                                threads_list[i]['thread_chunk_name'], 
-                                post_part_hash, 
-                                hf.hash(thread_list_posts[j]), 
+                                hf_service.user_private_chunk,
+                                threads_list[i]['thread_chunk_name'],
+                                post_part_hash,
+                                hf.hash(thread_list_posts[j]),
                                 function(success){
                                     test_utils.assert(success == true, "Cannot verify certification post-thread")
                                 });
@@ -1252,9 +1279,6 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.get_user_public_chunk, 'test_hf_service.get_user_public_chunk');
     test_utils.run(test_hf_service.login_user, 'test_hf_service.login_user');
     test_utils.run(test_hf_service.save_user_chunks, 'test_hf_service.save_user_chunks');
-    test_utils.run(test_hf_service.add_contact, "test_hf_service.add_contact");
-    test_utils.run(test_hf_service.is_contact, "test_hf_service.is_contact");
-    test_utils.run(test_hf_service.list_contacts,"test_hf_service.list_contacts");
 
     // NOTIFICATIONS TESTS
     test_utils.run(test_hf_service.push_notification, 'test_hf_service.push_notification');
@@ -1262,10 +1286,15 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.list_notifications, 'test_hf_service.list_notifications');
     test_utils.run(test_hf_service.delete_notification, 'test_hf_service.delete_notification');
     test_utils.run(test_hf_service.send_message, "test_hf_service.send_message");
+    test_utils.run(test_hf_service.send_chunks_infos_to_contacts, 'test_hf_service.send_chunks_infos_to_contacts');
 
     // KEYKEEPER TESTS
     test_utils.run(test_hf_service.keys_repository, 'test_hf_service.keys_repository');
-    test_utils.run(test_hf_service.send_chunks_keys, 'test_hf_service.send_chunks_keys');
+
+    // CONTACTS TESTS
+    test_utils.run(test_hf_service.add_contact, "test_hf_service.add_contact");
+    test_utils.run(test_hf_service.is_contact, "test_hf_service.is_contact");
+    test_utils.run(test_hf_service.list_contacts,"test_hf_service.list_contacts");
 
     // THREADS & POSTS TESTS
     test_utils.run(test_hf_service.post_message, 'test_hf_service.post_message');
