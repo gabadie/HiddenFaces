@@ -112,6 +112,7 @@
     padding: 2px 30px;
     width: 100%;
     display: block;
+    border: none;
 }
 
 #hf_page_left_column a
