@@ -1131,6 +1131,39 @@ test_hf_service.is_valide_public_chunk = function()
     test_utils.assert_success(3);
 }
 // -------------------------------------------------------------------------- CHUNKS CERTIFICATION
+
+test_hf_service.verify_certification = function() 
+{   
+    var user_profile = test_hf_service.john_smith_profile();
+    hf_service.create_user(user_profile);
+
+    //user connexion
+    hf_service.login_user(user_profile, null);
+    test_utils.assert(hf_service.is_connected(), 'should be connected after');
+
+    var certificate_repository = hf_service.user_private_chunk;
+    var data_chunk_name = hf.generate_hash('YSDYgVMcLGCDdnmQc6F7');
+    var data_chunk_part1 = hf.generate_hash('ASlWSclt2P3dkES3uI7f');
+    var data_chunk_part2 = hf.generate_hash('XLVO5Awki99QCRHXigBF');
+    var data_hash1 = hf.generate_hash('jKWngYuo0FitkO1gEUPK');
+    var data_hash2 = hf.generate_hash('z4w60VarHonFH9oQhr44');
+
+    hf_service.certify(certificate_repository, data_chunk_name, data_chunk_part1, data_hash1, function(success){
+        test_utils.assert(success == true,"Cannot certify data_chunk_part1 in test_hf_service.verify_certification");
+    });
+    hf_service.certify(certificate_repository, data_chunk_name, data_chunk_part2, data_hash2, function(success){
+        test_utils.assert(success == true,"Cannot certify data_chunk_part2 in test_hf_service.verify_certification");
+    });
+    
+    hf_service.verify_certification(certificate_repository, data_chunk_name, data_chunk_part1, data_hash1, function(success){
+        test_utils.assert(success == true,"data_chunk_part1 has no certification in test_hf_service.verify_certification");
+    });
+    hf_service.verify_certification(certificate_repository, data_chunk_name, data_chunk_part2, data_hash2, function(success){
+        test_utils.assert(success == true,"data_chunk_part2 has no certification in test_hf_service.verify_certification");
+    });
+    test_utils.assert_success(5);
+}
+
 test_hf_service.verify_post_certification = function() 
 {   
     var user_profile = test_hf_service.john_smith_profile();
@@ -1218,5 +1251,6 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.is_valide_public_chunk,'test_hf_service.is_valide_public_chunk');
 
     //CHUNKS VERIFICATION
-    test_utils.run(test_hf_service.verify_post_certification,'test_hf_service.verify_certification');
+    test_utils.run(test_hf_service.verify_certification, 'test_hf_service.verify_certification');
+    test_utils.run(test_hf_service.verify_post_certification,'test_hf_service.verify_post_certification');
 }
