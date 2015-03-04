@@ -163,7 +163,7 @@ hf_control.signed_in.route('/profile', function (){
         };
 
         hf_ui.apply_template(
-            'contact_name.html',
+            'user_profile.html',
             params,
             document.getElementById('hf_page_main_content')
         );
