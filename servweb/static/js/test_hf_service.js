@@ -827,14 +827,12 @@ test_hf_service.merge_posts_lists = function()
 
     test_utils.assert(posts.length == 4, 'invalid posts.length (duplicated ?)');
 
-    console.info(posts[0]['content']);
     for (var i = 1; i < posts.length; i++)
     {
         test_utils.assert(
             posts[i - 1]['date'] > posts[i]['date'],
             posts[i]['content'] + ' should be bebore ' + posts[i - 1]['content']
         );
-        console.info(posts[i]['content']);
     }
 }
 

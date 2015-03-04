@@ -105,8 +105,6 @@ test_hf_populate.add_users_contact = function()
             break;
         }
 
-        console.info(from);
-
         hf_service.add_contact(test_hf_populate.user_hash[to], function(success){
             test_utils.assert(success == true, 'user ' + from + ' could add user ' + to + ' as a contact');
         });
