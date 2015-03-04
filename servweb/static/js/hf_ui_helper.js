@@ -40,6 +40,19 @@ Handlebars.registerHelper('hf_user_add_contact', function(user_public_chunk, opt
     return out;
 });
 
+Handlebars.registerHelper('hf_add_contact_to_circle', function(circle_contacts_hashes, contact, circle_hash){
+
+    if ((contact['__meta']['user_hash'] in circle_contacts_hashes))
+        return '';
+
+    var out = '<button ';
+    out += 'class="btn btn-default"';
+    out += 'onclick="return hf_control.add_contact_to_circle(\''+contact['__meta']['user_hash'], circle_hash+'\');"';
+    out += '>Add to circle </button>';
+
+    return out;
+});
+
 Handlebars.registerHelper('hf_chunk', function(chunk, options){
     var template_name = chunk['__meta']['type'].substring(1) + '.html';
 

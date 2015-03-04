@@ -1,0 +1,11 @@
+{{#hf_cell}}
+    <div class="hf_contact_name">
+        {{name}}
+    </div>
+    {{#each contacts}}
+        <div class="hf_contact">{{#hf_user_link this}}{{/hf_user_link}}</div>
+        <div class="hf_action_bar" align="right">{{{hf_add_contact_to_circle ../circle_contacts_hash this ../circle_hash}}}</div>
+    {{else}}
+        <div class="hf_empty">Empty contact.</div>
+    {{/each}}
+{{/hf_cell}}

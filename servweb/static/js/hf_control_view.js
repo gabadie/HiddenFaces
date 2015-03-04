@@ -71,17 +71,47 @@ hf_control.signed_in.route('/circles', function(){
 
 hf_control.signed_in.route('/circle/', function() {
     var viewUrl = hf_control.current_view_url();
+    var arrs = viewUrl.split("/");
     var thread_chunk_name = viewUrl.split("/")[2];
+    if (arrs.length >= 4)
+    {
+        if(arrs[3] == 'contacts')
+        {
+            hf_service.find_circle_by_hash(thread_chunk_name, function(circle)
+            {
+                var params = {
+                    'circle_hash': thread_chunk_name,
+                    'name': circle['name'],
+                    'contacts': [],
+                    'circle_contacts_hash': circle['contacts']
+                }
 
-    var params = {
-        'name': thread_chunk_name
-     };
+                hf_service.list_contacts(function(list_contacts)
+                {
+                    params['contacts'] = list_contacts;
 
-    hf_ui.apply_template(
-        'contact_name.html',
-        params,
-        document.getElementById('hf_page_main_content')
-    );
+                    hf_ui.apply_template(
+                        'list_contacts_circle.html',
+                        params,
+                        document.getElementById('hf_page_main_content')
+                    );
+                });
+            });
+        }
+    }
+    else
+    {
+        hf_service.find_circle_by_hash(thread_chunk_name, function(circle){
+            var params = {
+                'name':circle['name']
+            }
+            hf_ui.apply_template(
+                'contact_name.html',
+                params,
+                document.getElementById('hf_page_main_content')
+            );
+        });
+    }
 });
 
 

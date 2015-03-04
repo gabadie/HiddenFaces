@@ -10,6 +10,13 @@ hf_control.add_contact = function(user_hash)
     });
 }
 
+hf_control.add_contact_to_circle = function(contact_user_hash, circle_hash)
+{
+    hf_service.add_contact_to_circle(contact_user_hash, circle_hash, function(success){
+        assert(success);
+        hf_control.refresh_view();
+    });
+}
 
 // --------------------------------------------------------------------- LOG IN/OUT
 
