@@ -11,6 +11,7 @@ hf_control.signed_out = new hf_control.ViewRouter();
  */
 hf_control.signed_in = new hf_control.ViewRouter(function(callback){
     assert(hf_service.is_connected());
+    assert(hf.is_function(callback));
 
     var template_params = {
         'private_chunk': hf_service.user_private_chunk
