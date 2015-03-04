@@ -50,14 +50,38 @@ hf_control.signed_in.route('/', function(){
 hf_control.signed_in.route('/circles', function(){
     hf_service.list_circles(function(circles_list){
         var template_context = {
-            'circles': circles_list
+            'circles': []
         };
+
+        for(var i = 0; i < circles_list.length; i++)
+        {
+            var cell = {
+                'name': circles_list[i]['name'],
+                'view_path': '/circle/' + circles_list[i]['thread_chunk_name']
+            };
+            template_context['circles'].push(cell);
+        }
 
         document.getElementById('hf_page_main_content').innerHTML = hf_ui.template(
             "list_circles.html",
             template_context
         );
     });
+});
+
+hf_control.signed_in.route('/circle/', function() {
+    var viewUrl = hf_control.current_view_url();
+    var thread_chunk_name = viewUrl.split("/")[2];
+
+    var params = {
+        'name': thread_chunk_name
+     };
+
+    hf_ui.apply_template(
+        'contact_name.html',
+        params,
+        document.getElementById('hf_page_main_content')
+    );
 });
 
 
@@ -92,6 +116,26 @@ hf_control.signed_in.route('/contacts', function () {
     });
 });
 
+// ------------------------------------------------------ CONSULT A CONTACT OR CIRCLE
+
+hf_control.signed_in.route('/profile', function (){
+    var viewUrl = hf_control.current_view_url();
+    var user_hash_public = viewUrl.split("/")[2];
+    hf_service.get_user_public_chunk(user_hash_public, function(public_chunk) {
+        var params = {
+            'name': public_chunk['profile']['first_name'] + ' ' + public_chunk['profile']['last_name']
+        };
+
+        hf_ui.apply_template(
+            'contact_name.html',
+            params,
+            document.getElementById('hf_page_main_content')
+        );
+
+    });
+});
+
+// ------------------------------------------------------ LEFT MENU
 hf_control.refresh_left_column = function()
 {
     hf_service.list_circles(function(circles_list){
