@@ -1183,8 +1183,10 @@ test_hf_service.verify_post_certification = function()
 
 test_hf_service.verify_append_posts_certification = function()
 {
+    //get list threads example
     var threads_list = test_utils.threads_example();
 
+    //append posts to threads
     var post_content = test_hf_service.user_example_post();
     hf_service.create_post(post_content,threads_list, function(success){
             test_utils.assert(success);
@@ -1193,7 +1195,10 @@ test_hf_service.verify_append_posts_certification = function()
             test_utils.assert(success);
         });
 
+    //loop over threads
     for(var i = 0; i < threads_list.length; i++){
+
+        //get thread
         hf_com.get_data_chunk(
             threads_list[i]['thread_chunk_name'],
             threads_list[i]['symetric_key'],
@@ -1202,12 +1207,15 @@ test_hf_service.verify_append_posts_certification = function()
                 test_utils.assert('chunk_content' in json_message);
                 thread_list_posts = json_message['chunk_content'];
 
+                //loop over thread's posts
                 for(var j = 0; j < thread_list_posts.length; j++){
 
+                    //get post informations
                     var json_post_info = JSON.parse(thread_list_posts[j]);
                     test_utils.assert("post_chunk_name" in json_post_info);
                     test_utils.assert("symetric_key" in json_post_info);
 
+                    //get post content
                     hf_com.get_data_chunk(
                         json_post_info['post_chunk_name'],
                         json_post_info['symetric_key'],
@@ -1216,9 +1224,11 @@ test_hf_service.verify_append_posts_certification = function()
                             test_utils.assert(json_message['chunk_content'][0] !== 'undefined');
                             var element_json = JSON.parse(json_message['chunk_content'][0]);
 
+                            //get post's part_hash
                             test_utils.assert(element_json['__meta']['type'] == '/post');
                             var post_part_hash = element_json['__meta']['part_hash'];
 
+                            //verify current user has the certification for the post's append
                             hf_service.verify_certification(
                                 hf_service.user_private_chunk, 
                                 threads_list[i]['thread_chunk_name'], 
