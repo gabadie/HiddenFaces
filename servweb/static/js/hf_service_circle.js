@@ -155,3 +155,4 @@ hf_service.list_circles = function(callback)
 
     callback(circles_list);
 }
+
