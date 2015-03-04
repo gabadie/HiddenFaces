@@ -827,6 +827,49 @@ test_hf_service.add_contact_to_circle = function()
     test_utils.assert_success(4);
 }
 
+test_hf_service.is_contact_into_circle = function()
+{
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+    var user_profile2 = test_hf_service.john_smith_profile(2);
+
+    var user_hash0 = hf_service.create_user(user_profile0);
+    var user_hash1 = hf_service.create_user(user_profile1);
+    var user_hash2 = hf_service.create_user(user_profile2);
+
+    hf_service.login_user(user_profile0);
+    hf_service.add_contact(user_hash1);
+    hf_service.add_contact(user_hash2);
+
+    var circle_hash = hf_service.create_circle('Friends', function(success) {
+        test_utils.assert(success == true, 'hf_service.create_circle() has failed');
+    });
+
+    test_utils.assert(
+        hf_service.is_contact_into_circle(user_hash1, circle_hash) == false,
+        'user 1 should not be a contact of user 0'
+    );
+    test_utils.assert(
+        hf_service.is_contact_into_circle(user_hash2, circle_hash) == false,
+        'user 2 should not be a contact of user 0'
+    );
+
+    hf_service.add_contact_to_circle(user_hash1, circle_hash, function(success){
+        test_utils.assert(success == true, 'adding user 1 into circle should success');
+    });
+
+    test_utils.assert(
+        hf_service.is_contact_into_circle(user_hash1, circle_hash) == true,
+        'user 1 should be a contact of user 0'
+    );
+    test_utils.assert(
+        hf_service.is_contact_into_circle(user_hash2, circle_hash) == false,
+        'user 2 should still not to be a contact of user 0'
+    );
+
+    test_utils.assert_success(6);
+}
+
 test_hf_service.list_circles = function()
 {
     var user_profile0 = test_hf_service.john_smith_profile();
@@ -1131,8 +1174,8 @@ test_hf_service.is_valide_public_chunk = function()
     test_utils.assert_success(3);
 }
 // -------------------------------------------------------------------------- CHUNKS CERTIFICATION
-test_hf_service.verify_post_certification = function() 
-{   
+test_hf_service.verify_post_certification = function()
+{
     var user_profile = test_hf_service.john_smith_profile();
     hf_service.create_user(user_profile);
 
@@ -1162,7 +1205,7 @@ test_hf_service.verify_post_certification = function()
             post_list_content = json_message['chunk_content'];
         }
     );
-    test_utils.assert(post_list_content != null); 
+    test_utils.assert(post_list_content != null);
 
     for(var i = 0; i < post_list_content.length; i++){
         var element_json = JSON.parse(post_list_content[i]);
@@ -1170,7 +1213,7 @@ test_hf_service.verify_post_certification = function()
             test_utils.assert(success == true, "chunk verification failed");
         });
     }
-    
+
     test_utils.assert_success(5 + post_list_content.length);
 }
 
@@ -1207,6 +1250,7 @@ test_hf_service.main = function()
     // CIRCLES
     test_utils.run(test_hf_service.create_circle, 'test_hf_service.create_circle');
     test_utils.run(test_hf_service.add_contact_to_circle, 'test_hf_service.add_contact_to_circle');
+    test_utils.run(test_hf_service.is_contact_into_circle, 'test_hf_service.is_contact_into_circle');
     test_utils.run(test_hf_service.list_circles, 'test_hf_service.list_circles');
 
     // REGISTRY TESTES

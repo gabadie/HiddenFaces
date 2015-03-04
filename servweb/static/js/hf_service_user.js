@@ -638,6 +638,28 @@ hf_service.add_contact_to_circle = function(contact_user_hash, circle_hash, call
 }
 
 /*
+ * @param <contact_user_hash>: contact's user hash
+ * @param <circle_hash>: circle's hash
+ *
+ * @returns true or false accordingly
+ */
+hf_service.is_contact_into_circle = function(contact_user_hash, circle_hash)
+{
+    assert(hf_service.is_connected());
+    assert(hf_service.is_contact(contact_user_hash));
+    assert(hf_service.is_circle_hash(circle_hash));
+
+    var circle_infos = hf_service.user_private_chunk['circles'][circle_hash];
+    var contact_infos = hf_service.user_private_chunk['contacts'][contact_user_hash];
+
+    var result = circle_infos['contacts'].indexOf(contact_user_hash) >= 0;
+
+    assert((contact_infos['circles'].indexOf(circle_hash) >= 0) == result);
+
+    return result;
+}
+
+/*
  * Lists circle's infos
  * @param <callback>: the function called once the response has arrived
  *      @param <circles_list>: the circle info list
