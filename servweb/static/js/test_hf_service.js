@@ -1169,14 +1169,12 @@ test_hf_service.verify_post_certification = function()
     );
     test_utils.assert(post_list_content != null);
 
-    for(var i = 0; i < post_list_content.length; i++){
-        var element_json = JSON.parse(post_list_content[i]);
-        hf_service.verify_certification(certificate_repository, post_chunk_name, element_json['__meta']['part_hash'], hf.hash(post_list_content[i]), function(success){
-            test_utils.assert(success == true, "chunk verification failed");
-        });
-    }
+    var element_json = JSON.parse(post_list_content[0]);
+    hf_service.verify_certification(certificate_repository, post_chunk_name, element_json['__meta']['part_hash'], hf.hash(post_list_content[0]), function(success){
+        test_utils.assert(success == true, "chunk verification failed");
+    });
 
-    test_utils.assert_success(5 + post_list_content.length);
+    test_utils.assert_success(6);
 }
 
 test_hf_service.verify_append_posts_certification = function()

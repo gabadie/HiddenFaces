@@ -117,7 +117,8 @@ hf_com.Transaction = function()
             if (status != 200)
             {
                 alert(status);
-                callback(null);
+                if (callback != null)
+                    callback(null);
                 return;
             }
 
