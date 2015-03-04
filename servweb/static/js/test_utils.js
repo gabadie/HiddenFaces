@@ -124,6 +124,8 @@ test_utils.refresh = function()
             '</div>'
         );
     }
+
+    domElem.scrollIntoView();
 }
 
 /*
