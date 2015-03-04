@@ -15,6 +15,7 @@ hf_service.create_thread = function(owner_hash, public_append, public_thread, ca
 {
     assert(typeof owner_hash == "string", "owner_hash must be a string in hf_service.create_thread");
     assert(hf.is_hash(owner_hash));
+    assert(hf.is_function(callback) || callback == undefined);
     assert(typeof public_append == "boolean", "public_append must be a boolean in hf_service.create_thread");
 
     var part_hash = hf.generate_hash('uGzvkgD6lr6WlMTbvhWK\n');
@@ -45,9 +46,8 @@ hf_service.create_thread = function(owner_hash, public_append, public_thread, ca
                 'symetric_key':   symetric_key
             };
 
-            if(callback){
+            if(callback)
                 callback(thread_info);
-            }
         }
     );
 
@@ -64,7 +64,12 @@ hf_service.create_thread = function(owner_hash, public_append, public_thread, ca
  * Creates a post
  *
  * @param <post_content>: the content of the post
- * @param <threads_list>: list the threads the post will be posted to (= null if unspecified)
+  * @param <threads_list>: (= null if unspecified) list the threads the post will be posted to. 
+  A thread must contain fields
+            {
+                'thread_chunk_name':,
+                'symetric_key':
+            }; (= null if unspecified)
  * @param <callback>: the function called once the response has arrived with parameter
             {
                 'status':,
@@ -76,6 +81,7 @@ hf_service.create_post = function(post_content,threads_list,callback)
 {
     assert(typeof post_content == 'string', "post_content must be a string in hf_service.create_post");
     assert(hf_service.is_connected());
+    assert(hf.is_function(callback) || callback == undefined);
 
     var owner_hash = hf_service.user_chunks_owner();
     var user_hash = hf_service.user_hash();
@@ -109,7 +115,9 @@ hf_service.create_post = function(post_content,threads_list,callback)
             if (json_message['status'] != 'ok')
             {
                 allert("post creation has failed");
-                callback(null);
+                if(callback)
+                    callback(null);
+                return;
             }
 
             var post_info = {
@@ -159,6 +167,7 @@ hf_service.append_post_to_threads = function(post_name, post_key, threads_list,c
     assert(threads_list instanceof Array, "threads_list must be an Array in hf_service.append_post_to_threads");
     assert(typeof threads_list[0] !== 'undefined', "threads_list is empty in hf_service.append_post_to_threads");
     assert(hf_service.is_connected());
+    assert(hf.is_function(callback) || callback == undefined);
 
     var transaction = new hf_com.Transaction();
 
@@ -224,7 +233,7 @@ hf_service.append_post_to_threads = function(post_name, post_key, threads_list,c
 hf_service.list_posts = function(thread_name,callback)
 {
     assert(hf_service.is_connected());
-    assert(hf.is_function(callback) || callback == null);
+    assert(hf.is_function(callback) || callback == undefined);
     assert(hf.is_hash(thread_name));
 
     var thread_key = hf_service.get_decryption_key(hf_service.user_private_chunk, thread_name);
@@ -234,13 +243,14 @@ hf_service.list_posts = function(thread_name,callback)
     hf_com.get_data_chunk(
         thread_name,
         thread_key,
-        function(thread){
+        function(thread_json_message){
+            assert(thread_json_message['status'] == 'ok');
 
-            var list_posts_info = thread['chunk_content'];
+            var list_posts_info = thread_json_message['chunk_content'];
             var list_resolved_posts = [];
             var iteration = 0;
 
-            if(list_posts_info.length == 0)
+            if(list_posts_info.length == 0 && callback)
                 callback(list_resolved_posts);
 
             for(var i = 0; i < list_posts_info.length; i++) {
@@ -250,16 +260,15 @@ hf_service.list_posts = function(thread_name,callback)
                     post_info_json['post_chunk_name'],
                     post_info_json['symetric_key'],
                     function(json_message){
-                        if(json_message){
+                        assert(json_message['status'] == 'ok');
 
-                            var post_content = JSON.parse(json_message['chunk_content']);
+                        var post_content = JSON.parse(json_message['chunk_content']);
 
-                            hf_service.resolve_post_author(post_content, function(resolved_post){
-                                if(resolved_post){
-                                    list_resolved_posts.push(resolved_post);
-                                }
-                            });
-                        }
+                        hf_service.resolve_post_author(post_content, function(resolved_post){
+                            if(resolved_post){
+                                list_resolved_posts.push(resolved_post);
+                            }
+                        });
 
                         iteration++;
 
@@ -303,6 +312,7 @@ hf_service.list_posts = function(thread_name,callback)
  */
 hf_service.resolve_post_author = function(post_json, callback)
 {
+    assert(hf.is_function(callback));
     hf_service.get_user_public_chunk(
         post_json['__meta']['author_user_hash'],
         function(user_public_chunk)

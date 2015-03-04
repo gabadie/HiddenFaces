@@ -34,10 +34,7 @@ hf_service.create_circle = function(circle_name, callback)
         hf_service.store_key(user_private_chunk, thread_chunk_name, thread_chunk_key);
 
         hf_service.save_user_chunks(function(success){
-            if(success)
-                callback(true);
-            else
-                callback(false);
+            callback(success)
         });
 
         circle_hash = thread_chunk_name;
@@ -74,6 +71,7 @@ hf_service.add_contact_to_circle = function(contact_user_hash, circle_hash, call
     assert(hf_service.is_connected());
     assert(hf_service.is_contact(contact_user_hash));
     assert(hf_service.is_circle_hash(circle_hash));
+    assert(hf.is_function(callback) || callback == undefined);
 
     var circle_infos = hf_service.user_private_chunk['circles'][circle_hash];
     var contact_infos = hf_service.user_private_chunk['contacts'][contact_user_hash];
@@ -82,7 +80,8 @@ hf_service.add_contact_to_circle = function(contact_user_hash, circle_hash, call
     {
         assert(contact_infos['circles'].indexOf(circle_hash) >= 0);
 
-        callback(false);
+        if (callback)
+            callback(false);
         return;
     }
 
@@ -92,12 +91,10 @@ hf_service.add_contact_to_circle = function(contact_user_hash, circle_hash, call
     contact_infos['circles'].push(circle_hash);
 
     hf_service.save_user_chunks(function(success){
-            if(success)
-                callback(true);
-            else
-                callback(false);
-            //TODO : send key
-        });
+        if(callback)
+            callback(success);
+        //TODO : send key
+    });
 }
 
 /*
@@ -123,6 +120,21 @@ hf_service.is_contact_into_circle = function(contact_user_hash, circle_hash)
 }
 
 /*
+ * @param <circle_hash>: circle's hash
+ * @param <callback>: the function called once the response has arrived
+ *      @param <circle>: resolved circle
+ *      function my_callback(circle)
+ */
+hf_service.get_circle = function(circle_hash, callback)
+{
+    assert(hf_service.is_circle_hash(circle_hash));
+    assert(hf.is_function(callback));
+
+    // TODO: resolve
+    callback(hf_service.user_private_chunk['circles'][circle_hash]);
+}
+
+/*
  * Lists circle's infos
  * @param <callback>: the function called once the response has arrived
  *      @param <circles_list>: the circle info list
@@ -137,6 +149,7 @@ hf_service.list_circles = function(callback)
 
     for (var circle_hash in hf_service.user_private_chunk['circles'])
     {
+        // TODO: resolve
         circles_list.push(hf.clone(hf_service.user_private_chunk['circles'][circle_hash]));
     }
 

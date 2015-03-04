@@ -31,12 +31,10 @@
     <div class="hf_padding">
         <div class="hf_title">Your circles.</div>
         {{#each circles}}
-
             <div class="hf_contact">
                 <a  onclick="return hf_control.view('{{view_path}}');">{{name}}</a>
                 <hr>
             </div>
-            <div type="submit" class="hf_list_item">{{name}}</div>
         {{else}}
             <div class="hf_empty">Empty.</div>
         {{/each}}

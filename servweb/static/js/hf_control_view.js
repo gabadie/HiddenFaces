@@ -11,6 +11,7 @@ hf_control.signed_out = new hf_control.ViewRouter();
  */
 hf_control.signed_in = new hf_control.ViewRouter(function(callback){
     assert(hf_service.is_connected());
+    assert(hf.is_function(callback));
 
     var template_params = {
         'private_chunk': hf_service.user_private_chunk
@@ -77,42 +78,54 @@ hf_control.signed_in.route('/circle/', function() {
     {
         if(arrs[3] == 'contacts')
         {
-            hf_service.find_circle_by_hash(thread_chunk_name, function(circle)
-            {
-                var params = {
-                    'circle_hash': thread_chunk_name,
-                    'name': circle['name'],
-                    'contacts': [],
-                }
-
-                hf_service.list_contacts(function(list_contacts)
-                {
-                    params['contacts'] = list_contacts;
-
-                    hf_ui.apply_template(
-                        'list_contacts_circle.html',
-                        params,
-                        document.getElementById('hf_page_main_content')
-                    );
-                });
-            });
+            hf_control.contacts_circle(thread_chunk_name);
         }
     }
     else
     {
-        hf_service.find_circle_by_hash(thread_chunk_name, function(circle){
-            var params = {
-                'name':circle['name']
-            }
-            hf_ui.apply_template(
-                'contact_name.html',
-                params,
-                document.getElementById('hf_page_main_content')
-            );
-        });
+        hf_control.circle_posts(thread_chunk_name);
     }
 });
 
+hf_control.circle_posts = function(thread_chunk_name)
+{
+    hf_control.view_threads([thread_chunk_name], function(posts_html){
+        hf_service.get_circle(thread_chunk_name, function(circle){
+            var circle_header_html = hf_ui.template('circle_header.html', circle);
+
+            document.getElementById('hf_page_main_content').innerHTML = (
+                circle_header_html + posts_html
+            );
+        });
+    });
+}
+
+hf_control.contacts_circle = function(thread_chunk_name)
+{
+    hf_service.find_circle_by_hash(thread_chunk_name, function(circle)
+    {
+        var params = {
+            'circle_hash': thread_chunk_name,
+            'contacts': []
+        }
+
+        hf_service.list_contacts(function(list_contacts)
+        {
+            params['contacts'] = list_contacts;
+
+            var circle_header_html = hf_ui.template('circle_header.html', circle);
+
+            var list_contacts = hf_ui.template(
+                'list_contacts_circle.html',params
+            );
+
+            document.getElementById('hf_page_main_content').innerHTML = (
+                circle_header_html + list_contacts
+            );
+        });
+    });
+
+}
 
 // -------------------------------------------------------- NOTIFICATIONS' VIEWS
 
@@ -164,7 +177,44 @@ hf_control.signed_in.route('/profile', function (){
     });
 });
 
+
 // ------------------------------------------------------ LEFT MENU
+
+/*
+ * @param <callback>: the callback once the html is fully computed
+ *      @param <posts_html>: html of threads' posts
+ *      function my_callback(posts_html)
+ */
+hf_control.view_threads = function(threads_names, callback)
+{
+    assert(threads_names.length != 0);
+
+    posts_lists = [];
+
+    for (var i = 0; i < threads_names.length; i++)
+    {
+        hf_service.list_posts(threads_names[i], function(posts_list){
+            posts_lists.push(posts_list);
+
+            if (posts_lists.length == threads_names.length)
+            {
+                posts_list = hf_service.merge_posts_lists(posts_lists);
+
+                var template_context = {
+                    'chunks': posts_list
+                };
+
+                var posts_html = hf_ui.template('list_chunks.html', template_context);
+
+                callback(posts_html);
+            }
+        });
+    }
+}
+
+
+// ------------------------------------------------------ LEFT MENU
+
 hf_control.refresh_left_column = function()
 {
     var left_column = document.getElementById('hf_page_left_column');

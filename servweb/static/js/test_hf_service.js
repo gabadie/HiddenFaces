@@ -826,14 +826,12 @@ test_hf_service.merge_posts_lists = function()
 
     test_utils.assert(posts.length == 4, 'invalid posts.length (duplicated ?)');
 
-    console.info(posts[0]['content']);
     for (var i = 1; i < posts.length; i++)
     {
         test_utils.assert(
             posts[i - 1]['date'] > posts[i]['date'],
             posts[i]['content'] + ' should be bebore ' + posts[i - 1]['content']
         );
-        console.info(posts[i]['content']);
     }
 }
 
@@ -1106,8 +1104,8 @@ test_hf_service.is_valide_public_chunk = function()
 }
 // -------------------------------------------------------------------------- CHUNKS CERTIFICATION
 
-test_hf_service.verify_certification = function() 
-{   
+test_hf_service.verify_certification = function()
+{
     var user_profile = test_hf_service.john_smith_profile();
     hf_service.create_user(user_profile);
 
@@ -1128,7 +1126,7 @@ test_hf_service.verify_certification = function()
     hf_service.certify(certificate_repository, data_chunk_name, data_chunk_part2, data_hash2, function(success){
         test_utils.assert(success == true,"Cannot certify data_chunk_part2 in test_hf_service.verify_certification");
     });
-    
+
     hf_service.verify_certification(certificate_repository, data_chunk_name, data_chunk_part1, data_hash1, function(success){
         test_utils.assert(success == true,"data_chunk_part1 has no certification in test_hf_service.verify_certification");
     });
@@ -1138,8 +1136,8 @@ test_hf_service.verify_certification = function()
     test_utils.assert_success(5);
 }
 
-test_hf_service.verify_post_certification = function() 
-{   
+test_hf_service.verify_post_certification = function()
+{
     var user_profile = test_hf_service.john_smith_profile();
     hf_service.create_user(user_profile);
 
