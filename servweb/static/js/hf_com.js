@@ -117,6 +117,7 @@ hf_com.Transaction = function()
             if (status != 200)
             {
                 alert(status);
+                callback(null);
                 return;
             }
 
@@ -347,6 +348,8 @@ hf_com.get_data_chunk = function(chunk_name, decryption_key, callback)
         if (status != 200)
         {
             alert(status);
+            if(callback)
+                callback(null);
             return;
         }
 
@@ -408,6 +411,8 @@ hf_com.generate_RSA_key = function(callback)
         if(status != 200)
         {
             alert(status);
+            if(callback)
+                callback(null);
             return;
         }
 
