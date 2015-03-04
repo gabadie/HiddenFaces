@@ -88,7 +88,27 @@ hr{
 
 .hf_contact
 {
+    width: 100%;
+    display: table;
+    overflow: auto;
     padding: 0px 0px 0px 30px;
+}
+
+.hf_contact div
+{
+    display: inline-block;
+}
+
+.hf_contact_btn
+{
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.btn btn-default
+{
+    display: block;
+    vertical-align: middle;
 }
 
 .hf_contact_name

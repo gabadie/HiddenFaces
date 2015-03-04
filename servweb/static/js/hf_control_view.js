@@ -102,29 +102,23 @@ hf_control.circle_posts = function(thread_chunk_name)
 
 hf_control.contacts_circle = function(thread_chunk_name)
 {
-    hf_service.find_circle_by_hash(thread_chunk_name, function(circle)
+    hf_service.get_circle(thread_chunk_name, function(circle)
     {
-        var params = {
-            'circle_hash': thread_chunk_name,
-            'contacts': []
-        }
-
         hf_service.list_contacts(function(list_contacts)
         {
-            params['contacts'] = list_contacts;
+            var params = {
+                'circle_hash': thread_chunk_name,
+                'contacts': list_contacts
+            }
 
             var circle_header_html = hf_ui.template('circle_header.html', circle);
-
-            var list_contacts = hf_ui.template(
-                'list_contacts_circle.html',params
-            );
+            var list_contacts = hf_ui.template('list_contacts_circle.html',params);
 
             document.getElementById('hf_page_main_content').innerHTML = (
                 circle_header_html + list_contacts
             );
         });
     });
-
 }
 
 // -------------------------------------------------------- NOTIFICATIONS' VIEWS

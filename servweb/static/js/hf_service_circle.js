@@ -156,17 +156,3 @@ hf_service.list_circles = function(callback)
     callback(circles_list);
 }
 
-hf_service.find_circle_by_hash = function(circle_hash, callback)
-{
-    assert(hf_service.is_circle_hash(circle_hash));
-    hf_service.list_circles(function(circles_list){
-        for(var i = 0; i < circles_list.length; i++)
-        {
-            var hash = circles_list[i]['thread_chunk_name'];
-            if(hash === circle_hash)
-            {
-                callback(circles_list[i]);
-            }
-        }
-    });
-}

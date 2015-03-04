@@ -45,10 +45,10 @@ Handlebars.registerHelper('hf_add_contact_to_circle', function(contact, circle_h
     if (hf_service.is_contact_into_circle(contact['__meta']['user_hash'], circle_hash))
         return '';
 
-    var out = '<div style="float: right;"> <button ';
-    out += 'class="btn btn-default" ';
+    var out = '<button ';
+    out += 'class="btn btn-default" style="float:right;" ';
     out += 'onclick="return hf_control.add_contact_to_circle(\''+contact['__meta']['user_hash']+ '\',\'' + circle_hash+'\');"';
-    out += '>Add to circle </button></div>';
+    out += '>Add to circle </button>';
 
     return out;
 });
