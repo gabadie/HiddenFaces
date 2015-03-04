@@ -58,9 +58,3 @@ Handlebars.registerHelper('hf_chunk', function(chunk, options){
 
     return hf_ui.template(template_name, this);
 });
-
-Handlebars.registerHelper('hf_circle_header', function(circle_hash){
-    var out = '';
-    out += '<button class="btn btn-default" style="float:right;" onclick="return hf_control.view(\'/circle/'+circle_hash+'/contacts\');">Show contacts</button>';
-    return out;
-});
