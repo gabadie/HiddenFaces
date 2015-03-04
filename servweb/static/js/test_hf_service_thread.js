@@ -31,12 +31,11 @@ test_hf_service.create_thread = function()
     hf_service.login_user(user_profile, null);
     test_utils.assert(hf_service.is_connected(), 'should be connected after');
 
-    hf_service.create_thread(owner_hash,true,true,function(thread_info)
-        {
-            test_utils.assert(thread_info['status'] == "ok");
-            test_utils.assert(typeof thread_info['thread_chunk_name'] == "string");
-            test_utils.assert(typeof thread_info['symetric_key'] == "string");
-        });
+    hf_service.create_thread(owner_hash,true,true,function(thread_info){
+        test_utils.assert(thread_info['status'] == "ok");
+        test_utils.assert(typeof thread_info['thread_chunk_name'] == "string");
+        test_utils.assert(typeof thread_info['symetric_key'] == "string");
+    });
 
     test_utils.assert_success(4);
 }
