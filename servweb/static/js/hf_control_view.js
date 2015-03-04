@@ -83,7 +83,6 @@ hf_control.signed_in.route('/circle/', function() {
                     'circle_hash': thread_chunk_name,
                     'name': circle['name'],
                     'contacts': [],
-                    'circle_contacts_hash': circle['contacts']
                 }
 
                 hf_service.list_contacts(function(list_contacts)
@@ -168,6 +167,14 @@ hf_control.signed_in.route('/profile', function (){
 // ------------------------------------------------------ LEFT MENU
 hf_control.refresh_left_column = function()
 {
+    var left_column = document.getElementById('hf_page_left_column');
+
+    if( left_column == null )
+    {
+        return;
+    }
+
+
     hf_service.list_circles(function(circles_list){
         var template_context = {
             'title': 'Circles',

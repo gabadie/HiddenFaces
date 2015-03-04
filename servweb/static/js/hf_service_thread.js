@@ -17,6 +17,9 @@ hf_service.create_thread = function(owner_hash, public_append, public_thread, ca
     assert(hf.is_hash(owner_hash));
     assert(typeof public_append == "boolean", "public_append must be a boolean in hf_service.create_thread");
 
+    var part_hash = hf.generate_hash('uGzvkgD6lr6WlMTbvhWK\n');
+    var user_hash = hf_service.user_hash();
+
     var thread_content = [];
     var thread_chunk_name =
         hf.generate_hash('C3jsud4AZkDpd7IKEtEH\n');
@@ -47,6 +50,14 @@ hf_service.create_thread = function(owner_hash, public_append, public_thread, ca
             }
         }
     );
+
+    /*
+     * For testing conveniency, we return the thread name
+     */
+    return {
+        'thread_chunk_name': thread_chunk_name,
+        'symetric_key': symetric_key
+    };
 }
 
 /*
@@ -64,26 +75,30 @@ hf_service.create_thread = function(owner_hash, public_append, public_thread, ca
 hf_service.create_post = function(post_content,threads_list,callback)
 {
     assert(typeof post_content == 'string', "post_content must be a string in hf_service.create_post");
+    assert(hf_service.is_connected());
 
     var owner_hash = hf_service.user_chunks_owner();
     var user_hash = hf_service.user_hash();
+
     var part_hash = hf.generate_hash('uGzvkgD6lr6WlMTbvhWK\n');
+    var post_chunk_name =
+        hf.generate_hash('ERmO4vptXigWBnDUjnEN\n');
     var post_chunk_content = {
         '__meta': {
             'type': '/post',
-            'author_user_hash': user_hash,
-            'part_hash' : part_hash
+            'chunk_name': post_chunk_name,
+            'part_hash' : part_hash,
+            'author_user_hash': user_hash
         },
+        'date': hf.get_date_time(),
         'content': post_content
     };
 
-    var post_chunk_name =
-        hf.generate_hash('ERmO4vptXigWBnDUjnEN\n');
     var stringified_post_content = [JSON.stringify(post_chunk_content)];
 
     var symetric_key = hf_com.generate_AES_key('uhgGFoMBXi');
 
-    // Creates the thread's chunk
+    // Creates the post's chunk
     hf_com.create_data_chunk(
         post_chunk_name,
         owner_hash,
@@ -104,16 +119,21 @@ hf_service.create_post = function(post_content,threads_list,callback)
             };
 
             //chunk certification
-            hf_service.certify(hf_service.user_private_chunk, post_chunk_name, part_hash, hf.hash(stringified_post_content[0]), function(success){
-                if(!success)
-                    callback(null);
-            });
-
-            if(threads_list){
-                hf_service.append_post_to_threads(post_chunk_name,symetric_key, threads_list,callback);
-            }else if (callback){
-                callback(post_info);
-            }
+            hf_service.certify(hf_service.user_private_chunk, 
+                post_chunk_name, 
+                part_hash, 
+                hf.hash(stringified_post_content[0]), 
+                function(success){
+                    if(success){
+                        if(threads_list){
+                            hf_service.append_post_to_threads(post_chunk_name,symetric_key, threads_list,callback);
+                        }else if (callback){
+                            callback(post_info);
+                        }
+                    }else if(callback){
+                        callback(null);
+                    }
+                });
         }
     );
 }
@@ -137,7 +157,8 @@ hf_service.append_post_to_threads = function(post_name, post_key, threads_list,c
     assert(typeof post_name == "string");
     assert(typeof post_key == "string");
     assert(threads_list instanceof Array, "threads_list must be an Array in hf_service.append_post_to_threads");
-    assert(typeof threads_list[0] !== 'undefined', "threads_list is empty in hf_service.append_post_to_threads")
+    assert(typeof threads_list[0] !== 'undefined', "threads_list is empty in hf_service.append_post_to_threads");
+    assert(hf_service.is_connected());
 
     var transaction = new hf_com.Transaction();
 
@@ -147,30 +168,50 @@ hf_service.append_post_to_threads = function(post_name, post_key, threads_list,c
     };
     var stringified_post_info = JSON.stringify(post_info);
 
-    for (var i = 0; i < threads_list.length; i++)
-    {
-        assert(typeof threads_list[i]['thread_chunk_name'] == "string");
-        assert(typeof threads_list[i]['symetric_key'] == "string");
+    hf_com.get_data_chunk(
+        post_name,
+        post_key,
+        function(json_message){
+            assert(json_message['chunk_content'][0] !== 'undefined');
+            var element_json = JSON.parse(json_message['chunk_content'][0]);
 
-        transaction.extend_data_chunk(
-            threads_list[i]['thread_chunk_name'],
-            hf_service.user_chunks_owner(),
-            threads_list[i]['symetric_key'],
-            [stringified_post_info]
-        );
-    }
-    transaction.commit(function(json_message){
-        if (json_message['status'] != 'ok')
-        {
-            alert('append post to thread has failed');
-            callback(false);
-        }
+            assert(element_json['__meta']['type'] == '/post');
+            var post_part_hash = element_json['__meta']['part_hash'];
 
-        if (callback)
-        {
-            callback(true);
+            for (var i = 0; i < threads_list.length; i++)
+            {
+                assert(typeof threads_list[i]['thread_chunk_name'] == "string");
+                assert(typeof threads_list[i]['symetric_key'] == "string");
+
+                transaction.extend_data_chunk(
+                    threads_list[i]['thread_chunk_name'],
+                    hf_service.user_chunks_owner(),
+                    threads_list[i]['symetric_key'],
+                    [stringified_post_info]
+                );
+
+                hf_service.certify(hf_service.user_private_chunk, 
+                    threads_list[i]['thread_chunk_name'], 
+                    post_part_hash, 
+                    hf.hash(stringified_post_info), 
+                    function(success){
+                        if(!success){
+                            if(callback)
+                                callback(false);
+                            return;
+                        }
+                    });
+            }
+            transaction.commit(function(json_message){
+                if (json_message['status'] != 'ok'){
+                    if(callback)
+                        callback(false);
+                }else if (callback){
+                    callback(true);
+                }
+            });
         }
-    });
+    );
 }
 
 /*
@@ -178,15 +219,17 @@ hf_service.append_post_to_threads = function(post_name, post_key, threads_list,c
  * @param <thread_name> : thread's name
  * @param <callback>: the function called once the response has arrived with parameter the list
             of the resolved posts
- *      
+ *
  */
 hf_service.list_posts = function(thread_name,callback)
 {
     assert(hf_service.is_connected());
-    assert(hf.is_function(callback));
-    assert(typeof thread_name == 'string');
+    assert(hf.is_function(callback) || callback == null);
+    assert(hf.is_hash(thread_name));
 
     var thread_key = hf_service.get_decryption_key(hf_service.user_private_chunk, thread_name);
+
+    var list_posts = null;
 
     hf_com.get_data_chunk(
         thread_name,
@@ -199,7 +242,7 @@ hf_service.list_posts = function(thread_name,callback)
 
             if(list_posts_info.length == 0)
                 callback(list_resolved_posts);
-            
+
             for(var i = 0; i < list_posts_info.length; i++) {
                 var post_info_json = JSON.parse(list_posts_info[i]);
 
@@ -221,14 +264,38 @@ hf_service.list_posts = function(thread_name,callback)
                         iteration++;
 
                         if(iteration == list_posts_info.length)
-                            callback(list_resolved_posts);
+                        {
+                            list_resolved_posts.sort(function(post_a, post_b){
+                                if (post_a['date'] > post_b['date'])
+                                {
+                                    return -1;
+                                }
+                                else if (post_a['date'] < post_b['date'])
+                                {
+                                    return 1;
+                                }
+
+                                return 0;
+                            });
+
+                            if (callback)
+                            {
+                                callback(list_resolved_posts);
+                            }
+
+                            list_posts = list_resolved_posts;
+                        }
                     }
                 );
             }
         }
     );
-}
 
+    /*
+     * For testing conveniency, we return the thread name
+     */
+    return list_posts;
+}
 
 /*
  * Generic post resolver adding the ['author'] key fetched from the
@@ -252,4 +319,77 @@ hf_service.resolve_post_author = function(post_json, callback)
             callback(post);
         }
     );
+}
+
+/*
+ * Merges differents posts lists into one, removing duplicated and keeping
+ * the date order.
+ *
+ * @param <posts_lists>: the lists of posts lists
+ * @returns a lists of cloned posts
+ */
+hf_service.merge_posts_lists = function(posts_lists)
+{
+    var posts_list = [];
+    var lists_cursors = [];
+    var posts_hash_listed = new Set();
+
+    for (var i = 0; i < posts_lists.length; i++)
+    {
+        lists_cursors.push(0);
+    }
+
+    while (true)
+    {
+        var most_recent_list_id = 0;
+        var most_recent_post = null;
+
+        for (var i = 0; i < posts_lists.length; i++)
+        {
+            var post = null;
+
+            while (true)
+            {
+                var lists_cursor = lists_cursors[i];
+
+                post = null;
+
+                if (lists_cursor == posts_lists[i].length)
+                {
+                    break;
+                }
+
+                post = posts_lists[i][lists_cursor];
+
+                if (!posts_hash_listed.has(post['__meta']['chunk_name']))
+                {
+                    break;
+                }
+
+                lists_cursors[i]++;
+            }
+
+            if (post == null)
+            {
+                continue;
+            }
+            else if (most_recent_post == null || post['date'] > most_recent_post['date'])
+            {
+                most_recent_post = post;
+                most_recent_list_id = i;
+            }
+        }
+
+        if (most_recent_post == null)
+        {
+            break;
+        }
+
+        posts_list.push(hf.clone(most_recent_post));
+        posts_hash_listed.add(most_recent_post['__meta']['chunk_name']);
+
+        lists_cursors[most_recent_list_id]++;
+    }
+
+    return posts_list;
 }

@@ -2,7 +2,7 @@
 {{#hf_cell}}
     <div class="hf_padding">
         <div class="hf_title">Add a new circle.</div>
-        <form onsubmit="return false;">
+        <form onsubmit="hf_control.create_circle(this);return false;">
             <table width="100%">
                 <tr>
                     <td>
@@ -18,7 +18,7 @@
                             type="submit"
                             class="btn btn-default"
                             name="submit"
-                            value="Add"
+                            value="Create"
                         />
                     </td>
                 </tr>
@@ -31,10 +31,12 @@
     <div class="hf_padding">
         <div class="hf_title">Your circles.</div>
         {{#each circles}}
+
             <div class="hf_contact">
                 <a  onclick="return hf_control.view('{{view_path}}');">{{name}}</a>
                 <hr>
             </div>
+            <div type="submit" class="hf_list_item">{{name}}</div>
         {{else}}
             <div class="hf_empty">Empty.</div>
         {{/each}}

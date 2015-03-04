@@ -126,3 +126,23 @@ hf_control.signed_out.sign_up = function(domElem)
     hf_control.signed_out.view('/');
 }
 
+// --------------------------------------------------------------------- Circles
+
+hf_control.create_circle = function(domElem)
+{
+    var user_circle = hf.inputs_to_json(domElem);
+    if(user_circle['circle_name'] == '')
+        {
+            alert('circle name required');
+            return;
+        }
+
+    hf_service.create_circle(user_circle['name'], function(success){
+        assert(success);
+
+        hf_control.refresh_view();
+    });
+
+}
+
+
