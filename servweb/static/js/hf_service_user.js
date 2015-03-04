@@ -500,10 +500,7 @@ hf_service.add_contact = function(user_hash, callback)
         {
             if (callback)
             {
-                if(success)
-                    callback(true);
-                else
-                    callback(false);
+                callback(success);
             }
         });
     });
