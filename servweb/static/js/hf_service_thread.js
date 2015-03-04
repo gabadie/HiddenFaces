@@ -141,7 +141,8 @@ hf_service.create_post = function(post_content,threads_list,callback)
                     }else if(callback){
                         callback(null);
                     }
-                });
+                }
+            );
         }
     );
 }
@@ -209,7 +210,8 @@ hf_service.append_post_to_threads = function(post_name, post_key, threads_list,c
                                 callback(false);
                             return;
                         }
-                    });
+                    }
+                );
             }
             transaction.commit(function(json_message){
                 if (json_message['status'] != 'ok'){
@@ -222,7 +224,66 @@ hf_service.append_post_to_threads = function(post_name, post_key, threads_list,c
         }
     );
 }
+/*
+ * Appends a comment to the specified post
+ * @param <post_chunk_name> : the name of the post the comment will be appended to
+ * @param <post_chunk_key> : the encryption key of the post the comment will be appended to
+ * @param <comment> : the comment to be appended
+ * @param <callback>: the function called once the response has arrived
+ *      @param <success>: true or false
+ *      function my_callback(success)
+ */
+hf_service.comment_post = function(post_chunk_name,post_chunk_key,comment,callback)
+{
+    assert(hf.is_hash(post_chunk_name));
+    assert(typeof comment == 'string');
+    assert(hf_com.is_AES_key(post_chunk_key));
+    assert(hf.is_function(callback) || callback == undefined);
 
+    var transaction = new hf_com.Transaction();
+
+    var part_hash = hf.generate_hash('tZsSPDK94TJZhhGHF2j8\n');
+    var user_hash = hf_service.user_hash();
+    var comment_json = {
+        '__meta': {
+            'type': '/comment',
+            'part_hash' : part_hash,
+            'author_user_hash': user_hash
+        },
+        'date': hf.get_date_time(),
+        'content': comment
+    };
+    var stringified_comment = JSON.stringify(comment_json);
+
+    transaction.extend_data_chunk(
+        post_chunk_name,
+        hf_service.user_chunks_owner(),
+        post_chunk_key,
+        [stringified_comment]
+    );
+
+    hf_service.certify(hf_service.user_private_chunk, 
+        post_chunk_name, 
+        part_hash, 
+        hf.hash(stringified_comment), 
+        function(success){
+            if(!success){
+                if(callback)
+                    callback(false);
+                return;
+            }
+        }
+    );
+
+    transaction.commit(function(json_message){
+        if (json_message['status'] != 'ok'){
+            if(callback)
+                callback(false);
+        }else if (callback){
+            callback(true);
+        }
+    });
+}
 /*
  * Gets list of the resolved posts of a thread
  * @param <thread_name> : thread's name
