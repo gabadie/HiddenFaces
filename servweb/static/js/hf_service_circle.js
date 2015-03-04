@@ -71,6 +71,7 @@ hf_service.add_contact_to_circle = function(contact_user_hash, circle_hash, call
     assert(hf_service.is_connected());
     assert(hf_service.is_contact(contact_user_hash));
     assert(hf_service.is_circle_hash(circle_hash));
+    assert(hf.is_function(callback) || callback == undefined);
 
     var circle_infos = hf_service.user_private_chunk['circles'][circle_hash];
     var contact_infos = hf_service.user_private_chunk['contacts'][contact_user_hash];

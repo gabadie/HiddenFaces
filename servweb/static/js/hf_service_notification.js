@@ -78,6 +78,7 @@ hf_service.push_notification = function(user_hash, notification_json, callback)
                         JSON.stringify(notification_json) +
                         ') failed'
                     );
+                    callback(false);
                     return;
                 }
 
@@ -116,8 +117,8 @@ hf_service.delete_notification = function(notification_hash, callback)
 
         notifications_json.splice(i, 1);
 
-        hf_service.save_user_chunks(function(){
-            callback(true);
+        hf_service.save_user_chunks(function(success){
+            callback(success);
         });
 
         return;
@@ -157,7 +158,7 @@ hf_service.pull_fresh_notifications = function(callback)
     transaction.commit(function(json_message){
         if (json_message['status'] != 'ok')
         {
-            ssert(hf.is_function(callback));
+            assert(hf.is_function(callback));
             callback(false);
             return;
         }
@@ -291,6 +292,8 @@ hf_service.list_notifications = function(callback)
  */
 hf_service.resolve_notification_author = function(notification_json, callback)
 {
+    assert(hf.is_function(callback));
+    
     hf_service.get_user_public_chunk(
         notification_json['__meta']['author_user_hash'],
         function(user_public_chunk)
