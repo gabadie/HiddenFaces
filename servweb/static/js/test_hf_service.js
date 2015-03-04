@@ -495,6 +495,8 @@ test_hf_service.notification_automation_sanity = function()
                     notification_json['__meta']['author_user_hash'] == original_notification['__meta']['author_user_hash'],
                     'corrupted notification author'
                 );
+
+                return 'discard';
             },
             resolve: null
         });

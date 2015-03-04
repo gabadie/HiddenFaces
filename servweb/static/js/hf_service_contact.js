@@ -111,7 +111,11 @@ hf_service.define_notification('/notification/contact_chunks_infos', {
     automation: function(notification_json)
     {
         assert(hf_service.is_connected());
-        assert(hf_service.is_contact(notification_json['__meta']['author_user_hash'])); // TODO
+
+        if (!hf_service.is_contact(notification_json['__meta']['author_user_hash']))
+        {
+            return 'continue';
+        }
 
         var user_private_chunk = hf_service.user_private_chunk;
         var chunks_infos = notification_json['chunks'];
@@ -141,9 +145,9 @@ hf_service.define_notification('/notification/contact_chunks_infos', {
             hf_service.store_key(user_private_chunk, chunk_infos['name'], chunk_infos['symetric_key']);
         }
 
-        hf_service.save_user_chunks();
+        return 'discard';
     },
-    resolve: null //TODO: if we didn't add as contact
+    resolve: hf_service.resolve_notification_author
 });
 
 /*

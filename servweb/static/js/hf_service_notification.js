@@ -164,7 +164,6 @@ hf_service.pull_fresh_notifications = function(callback)
         }
 
         var notifications_json = json_message['chunk'][protected_chunk_name];
-        var needChunkSave = false;
 
         for (var i = 0; i < notifications_json.length; i++)
         {
@@ -195,16 +194,21 @@ hf_service.pull_fresh_notifications = function(callback)
             {
                 assert(hf.is_function(notificationAutomation));
 
-                notificationAutomation(notification_json);
+                status = notificationAutomation(notification_json);
 
-                continue;
+                assert(typeof status == 'string');
+
+                if (status == 'discard')
+                {
+                    continue;
+                }
+
+                assert(status == 'continue');
             }
 
             /*
              * We store this notification into the user's private chunk
              */
-            needChunkSave = true;
-
             notification_json['__meta']['hash'] = hf.generate_hash(
                 JSON.stringify(notification_json)
             );
@@ -212,11 +216,8 @@ hf_service.pull_fresh_notifications = function(callback)
             hf_service.user_private_chunk['notifications'].push(notification_json);
         }
 
-        if (needChunkSave)
+        if (notifications_json.length > 0)
         {
-            assert(notifications_json.length > 0);
-            assert(hf_service.user_private_chunk['notifications'].length > 0);
-
             hf_service.save_user_chunks();
         }
 
@@ -293,7 +294,7 @@ hf_service.list_notifications = function(callback)
 hf_service.resolve_notification_author = function(notification_json, callback)
 {
     assert(hf.is_function(callback));
-    
+
     hf_service.get_user_public_chunk(
         notification_json['__meta']['author_user_hash'],
         function(user_public_chunk)
