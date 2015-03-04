@@ -1,6 +1,24 @@
 
 var hf = {};
 
+
+/*
+ * Sleeps the thread for a fixe amount of time.
+ *
+ * @param <milliseconds>: the number of milliseconds to sleep
+ */
+hf.sleep = function(milliseconds)
+{
+    var date = new Date();
+    var curDate = null;
+
+    do
+    {
+        curDate = new Date();
+    }
+    while ((curDate - date) < milliseconds);
+}
+
 /*
  * Tests if a function
  */

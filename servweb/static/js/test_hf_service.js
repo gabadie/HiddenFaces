@@ -758,6 +758,9 @@ test_hf_service.list_posts_thread = function()
     hf_service.create_post(post_content,threads_list, function(success){
             test_utils.assert(success);
         });
+
+    hf.sleep(2 * 1000);
+
     hf_service.create_post("fake_post",threads_list, function(success){
             test_utils.assert(success);
         });
@@ -768,9 +771,71 @@ test_hf_service.list_posts_thread = function()
         function(resolved_posts){
             test_utils.assert(resolved_posts != null);
             test_utils.assert(resolved_posts.length == 2);
+
+            test_utils.assert(resolved_posts[0]['date'] > resolved_posts[1]['date']);
         });
 
-    test_utils.assert_success(7);
+    test_utils.assert_success(8);
+}
+
+test_hf_service.merge_posts_lists = function()
+{
+    var user_profile = test_hf_service.john_smith_profile();
+
+    var owner_hash = hf.generate_hash("cWDb8suW3i");
+
+    hf_service.create_user(user_profile);
+    hf_service.login_user(user_profile);
+
+    var thread0 = hf_service.create_thread(owner_hash, true, true);
+    var thread1 = hf_service.create_thread(owner_hash, true, true);
+    var thread2 = hf_service.create_thread(owner_hash, true, true);
+
+    hf_service.create_post("fake_post 1", [thread0], function(success){
+        test_utils.assert(success);
+    });
+
+    hf.sleep(2 * 1000);
+
+    hf_service.create_post("fake_post 2", [thread1, thread2], function(success){
+        test_utils.assert(success);
+    });
+
+    hf.sleep(2 * 1000);
+
+    hf_service.create_post("fake_post 3", [thread2], function(success){
+        test_utils.assert(success);
+    });
+
+    hf.sleep(2 * 1000);
+
+    hf_service.create_post("fake_post 4", [thread0, thread1], function(success){
+        test_utils.assert(success);
+    });
+
+    test_utils.assert_success(4);
+
+    var thread0_posts = hf_service.list_posts(thread0['thread_chunk_name']);
+    var thread1_posts = hf_service.list_posts(thread1['thread_chunk_name']);
+    var thread2_posts = hf_service.list_posts(thread2['thread_chunk_name']);
+
+    var posts = hf_service.merge_posts_lists([
+        thread0_posts,
+        thread1_posts,
+        thread2_posts
+    ]);
+
+    test_utils.assert(posts.length == 4, 'invalid posts.length (duplicated ?)');
+
+    console.info(posts[0]['content']);
+    for (var i = 1; i < posts.length; i++)
+    {
+        test_utils.assert(
+            posts[i - 1]['date'] > posts[i]['date'],
+            posts[i]['content'] + ' should be bebore ' + posts[i - 1]['content']
+        );
+        console.info(posts[i]['content']);
+    }
 }
 
 
@@ -1146,6 +1211,7 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.create_thread, 'test_hf_service.create_thread');
     test_utils.run(test_hf_service.append_post_to_threads, 'test_hf_service.append_post_to_threads');
     test_utils.run(test_hf_service.list_posts_thread, 'test_hf_service.list_posts_thread');
+    test_utils.run(test_hf_service.merge_posts_lists, 'test_hf_service.merge_posts_lists');
 
     // CIRCLES
     test_utils.run(test_hf_service.create_circle, 'test_hf_service.create_circle');
