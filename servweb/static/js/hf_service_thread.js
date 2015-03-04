@@ -253,12 +253,26 @@ hf_service.comment_post = function(post_chunk_name,post_chunk_key,comment,callba
         'date': hf.get_date_time(),
         'content': comment
     };
+    var stringified_comment = JSON.stringify(comment_json);
 
     transaction.extend_data_chunk(
         post_chunk_name,
         hf_service.user_chunks_owner(),
         post_chunk_key,
-        [JSON.stringify(comment_json)]
+        [stringified_comment]
+    );
+
+    hf_service.certify(hf_service.user_private_chunk, 
+        post_chunk_name, 
+        part_hash, 
+        hf.hash(stringified_comment), 
+        function(success){
+            if(!success){
+                if(callback)
+                    callback(false);
+                return;
+            }
+        }
     );
 
     transaction.commit(function(json_message){
