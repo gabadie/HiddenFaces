@@ -120,6 +120,21 @@ hf_service.is_contact_into_circle = function(contact_user_hash, circle_hash)
 }
 
 /*
+ * @param <circle_hash>: circle's hash
+ * @param <callback>: the function called once the response has arrived
+ *      @param <circle>: resolved circle
+ *      function my_callback(circle)
+ */
+hf_service.get_circle = function(circle_hash, callback)
+{
+    assert(hf_service.is_circle_hash(circle_hash));
+    assert(hf.is_function(callback));
+
+    // TODO: resolve
+    callback(hf_service.user_private_chunk['circles'][circle_hash]);
+}
+
+/*
  * Lists circle's infos
  * @param <callback>: the function called once the response has arrived
  *      @param <circles_list>: the circle info list
@@ -134,6 +149,7 @@ hf_service.list_circles = function(callback)
 
     for (var circle_hash in hf_service.user_private_chunk['circles'])
     {
+        // TODO: resolve
         circles_list.push(hf.clone(hf_service.user_private_chunk['circles'][circle_hash]));
     }
 

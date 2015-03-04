@@ -72,9 +72,17 @@ hf_control.signed_in.route('/circles', function(){
 
 hf_control.signed_in.route('/circle/', function() {
     var viewUrl = hf_control.current_view_url();
-    var thread_chunk_name = viewUrl.split("/")[2];
+    var circle_hash = viewUrl.split("/")[2];
 
-    hf_control.view_threads([thread_chunk_name]);
+    hf_control.view_threads([circle_hash], function(posts_html){
+        hf_service.get_circle(circle_hash, function(circle){
+            var circle_header_html = hf_ui.template('circle_header.html', circle);
+
+            document.getElementById('hf_page_main_content').innerHTML = (
+                circle_header_html + posts_html
+            );
+        });
+    });
 });
 
 
@@ -131,7 +139,12 @@ hf_control.signed_in.route('/profile', function (){
 
 // ------------------------------------------------------ LEFT MENU
 
-hf_control.view_threads = function(threads_names)
+/*
+ * @param <callback>: the callback once the html is fully computed
+ *      @param <posts_html>: html of threads' posts
+ *      function my_callback(posts_html)
+ */
+hf_control.view_threads = function(threads_names, callback)
 {
     assert(threads_names.length != 0);
 
@@ -152,7 +165,7 @@ hf_control.view_threads = function(threads_names)
 
                 var posts_html = hf_ui.template('list_chunks.html', template_context);
 
-                document.getElementById('hf_page_main_content').innerHTML = posts_html;
+                callback(posts_html);
             }
         });
     }
