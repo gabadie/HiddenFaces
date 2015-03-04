@@ -6,7 +6,7 @@ var test_utils = {};
  * @param <testFunction>: the test suite's function to call
  * @param <testName>: the test suite's name
  */
-test_utils.run = function(testFunction, testName)
+test_utils.run = function(testFunction, testName, doNotDropDataBase)
 {
     if (!test_utils.should_run(testName))
     {
@@ -22,7 +22,11 @@ test_utils.run = function(testFunction, testName)
     test_utils.refresh();
 
     // run the test function on a clean database
-    test_utils.drop_database();
+    if (!doNotDropDataBase)
+    {
+        test_utils.drop_database();
+    }
+
     test_utils.domSandboxElem.innerHTML = '';
 
     testFunction();
