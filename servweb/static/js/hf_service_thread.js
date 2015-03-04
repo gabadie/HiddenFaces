@@ -160,9 +160,9 @@ hf_service.append_post_to_threads = function(post_name, post_key, threads_list,c
         post_key,
         function(json_message){
             assert(json_message['chunk_content'][0] !== 'undefined');
-            
-            var post_list_content = json_message['chunk_content'][0];
-            var element_json = JSON.parse(post_list_content);
+            var element_json = JSON.parse(json_message['chunk_content'][0]);
+
+            assert(element_json['__meta']['type'] == '/post');
             var post_part_hash = element_json['__meta']['part_hash'];
 
             for (var i = 0; i < threads_list.length; i++)
@@ -180,11 +180,11 @@ hf_service.append_post_to_threads = function(post_name, post_key, threads_list,c
                 hf_service.certify(hf_service.user_private_chunk, 
                     threads_list[i]['thread_chunk_name'], 
                     post_part_hash, 
-                    hf.hash(post_list_content), 
+                    hf.hash(stringified_post_info), 
                     function(success){
-
-                        if(!success && callback){
-                            callback(false);
+                        if(!success){
+                            if(callback)
+                                callback(false);
                             return;
                         }
                     });
