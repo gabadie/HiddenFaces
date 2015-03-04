@@ -210,7 +210,8 @@ hf_service.append_post_to_threads = function(post_name, post_key, threads_list,c
                                 callback(false);
                             return;
                         }
-                    });
+                    }
+                );
             }
             transaction.commit(function(json_message){
                 if (json_message['status'] != 'ok'){
@@ -241,11 +242,23 @@ hf_service.comment_post = function(post_chunk_name,post_chunk_key,comment,callba
 
     var transaction = new hf_com.Transaction();
 
+    var part_hash = hf.generate_hash('tZsSPDK94TJZhhGHF2j8\n');
+    var user_hash = hf_service.user_hash();
+    var comment_json = {
+        '__meta': {
+            'type': '/comment',
+            'part_hash' : part_hash,
+            'author_user_hash': user_hash
+        },
+        'date': hf.get_date_time(),
+        'content': comment
+    };
+
     transaction.extend_data_chunk(
         post_chunk_name,
         hf_service.user_chunks_owner(),
         post_chunk_key,
-        comment
+        [JSON.stringify(comment_json)]
     );
 
     transaction.commit(function(json_message){
