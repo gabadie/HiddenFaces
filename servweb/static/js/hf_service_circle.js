@@ -34,10 +34,7 @@ hf_service.create_circle = function(circle_name, callback)
         hf_service.store_key(user_private_chunk, thread_chunk_name, thread_chunk_key);
 
         hf_service.save_user_chunks(function(success){
-            if(success)
-                callback(true);
-            else
-                callback(false);
+            callback(success)
         });
 
         circle_hash = thread_chunk_name;
@@ -82,7 +79,8 @@ hf_service.add_contact_to_circle = function(contact_user_hash, circle_hash, call
     {
         assert(contact_infos['circles'].indexOf(circle_hash) >= 0);
 
-        callback(false);
+        if (callback)
+            callback(false);
         return;
     }
 
@@ -92,12 +90,10 @@ hf_service.add_contact_to_circle = function(contact_user_hash, circle_hash, call
     contact_infos['circles'].push(circle_hash);
 
     hf_service.save_user_chunks(function(success){
-            if(success)
-                callback(true);
-            else
-                callback(false);
-            //TODO : send key
-        });
+        if(callback)
+            callback(success);
+        //TODO : send key
+    });
 }
 
 /*
