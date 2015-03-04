@@ -17,6 +17,9 @@ hf_service.create_thread = function(owner_hash, public_append, public_thread, ca
     assert(hf.is_hash(owner_hash));
     assert(typeof public_append == "boolean", "public_append must be a boolean in hf_service.create_thread");
 
+    var part_hash = hf.generate_hash('uGzvkgD6lr6WlMTbvhWK\n');
+    var user_hash = hf_service.user_hash();
+
     var thread_content = [];
     var thread_chunk_name =
         hf.generate_hash('C3jsud4AZkDpd7IKEtEH\n');
@@ -83,7 +86,7 @@ hf_service.create_post = function(post_content,threads_list,callback)
 
     var symetric_key = hf_com.generate_AES_key('uhgGFoMBXi');
 
-    // Creates the thread's chunk
+    // Creates the post's chunk
     hf_com.create_data_chunk(
         post_chunk_name,
         owner_hash,
@@ -104,17 +107,21 @@ hf_service.create_post = function(post_content,threads_list,callback)
             };
 
             //chunk certification
-            hf_service.certify(hf_service.user_private_chunk, post_chunk_name, part_hash, hf.hash(stringified_post_content[0]), function(success){
-                if(success){
-                    if(threads_list){
-                        hf_service.append_post_to_threads(post_chunk_name,symetric_key, threads_list,callback);
-                    }else if (callback){
-                        callback(post_info);
+            hf_service.certify(hf_service.user_private_chunk, 
+                post_chunk_name, 
+                part_hash, 
+                hf.hash(stringified_post_content[0]), 
+                function(success){
+                    if(success){
+                        if(threads_list){
+                            hf_service.append_post_to_threads(post_chunk_name,symetric_key, threads_list,callback);
+                        }else if (callback){
+                            callback(post_info);
+                        }
+                    }else if(callback){
+                        callback(null);
                     }
-                }else if(callback){
-                    callback(null);
-                }
-            });
+                });
         }
     );
 }
@@ -148,30 +155,50 @@ hf_service.append_post_to_threads = function(post_name, post_key, threads_list,c
     };
     var stringified_post_info = JSON.stringify(post_info);
 
-    for (var i = 0; i < threads_list.length; i++)
-    {
-        assert(typeof threads_list[i]['thread_chunk_name'] == "string");
-        assert(typeof threads_list[i]['symetric_key'] == "string");
+    hf_com.get_data_chunk(
+        post_name,
+        post_key,
+        function(json_message){
+            assert(json_message['chunk_content'][0] !== 'undefined');
+            
+            var post_list_content = json_message['chunk_content'][0];
+            var element_json = JSON.parse(post_list_content);
+            var post_part_hash = element_json['__meta']['part_hash'];
 
-        transaction.extend_data_chunk(
-            threads_list[i]['thread_chunk_name'],
-            hf_service.user_chunks_owner(),
-            threads_list[i]['symetric_key'],
-            [stringified_post_info]
-        );
-    }
-    transaction.commit(function(json_message){
-        if (json_message['status'] != 'ok')
-        {
-            alert('append post to thread has failed');
-            callback(false);
-        }
+            for (var i = 0; i < threads_list.length; i++)
+            {
+                assert(typeof threads_list[i]['thread_chunk_name'] == "string");
+                assert(typeof threads_list[i]['symetric_key'] == "string");
 
-        if (callback)
-        {
-            callback(true);
+                transaction.extend_data_chunk(
+                    threads_list[i]['thread_chunk_name'],
+                    hf_service.user_chunks_owner(),
+                    threads_list[i]['symetric_key'],
+                    [stringified_post_info]
+                );
+
+                hf_service.certify(hf_service.user_private_chunk, 
+                    threads_list[i]['thread_chunk_name'], 
+                    post_part_hash, 
+                    hf.hash(post_list_content), 
+                    function(success){
+
+                        if(!success && callback){
+                            callback(false);
+                            return;
+                        }
+                    });
+            }
+            transaction.commit(function(json_message){
+                if (json_message['status'] != 'ok'){
+                    if(callback)
+                        callback(false);
+                }else if (callback){
+                    callback(true);
+                }
+            });
         }
-    });
+    );
 }
 
 /*
