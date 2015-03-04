@@ -243,9 +243,10 @@ hf_service.list_posts = function(thread_name,callback)
     hf_com.get_data_chunk(
         thread_name,
         thread_key,
-        function(thread){
+        function(thread_json_message){
+            assert(thread_json_message['status'] == 'ok');
 
-            var list_posts_info = thread['chunk_content'];
+            var list_posts_info = thread_json_message['chunk_content'];
             var list_resolved_posts = [];
             var iteration = 0;
 
@@ -259,16 +260,15 @@ hf_service.list_posts = function(thread_name,callback)
                     post_info_json['post_chunk_name'],
                     post_info_json['symetric_key'],
                     function(json_message){
-                        if(json_message){
+                        assert(json_message['status'] == 'ok');
 
-                            var post_content = JSON.parse(json_message['chunk_content']);
+                        var post_content = JSON.parse(json_message['chunk_content']);
 
-                            hf_service.resolve_post_author(post_content, function(resolved_post){
-                                if(resolved_post){
-                                    list_resolved_posts.push(resolved_post);
-                                }
-                            });
-                        }
+                        hf_service.resolve_post_author(post_content, function(resolved_post){
+                            if(resolved_post){
+                                list_resolved_posts.push(resolved_post);
+                            }
+                        });
 
                         iteration++;
 

@@ -73,15 +73,7 @@ hf_control.signed_in.route('/circle/', function() {
     var viewUrl = hf_control.current_view_url();
     var thread_chunk_name = viewUrl.split("/")[2];
 
-    var params = {
-        'name': thread_chunk_name
-     };
-
-    hf_ui.apply_template(
-        'contact_name.html',
-        params,
-        document.getElementById('hf_page_main_content')
-    );
+    hf_control.view_threads([thread_chunk_name]);
 });
 
 
@@ -135,7 +127,39 @@ hf_control.signed_in.route('/profile', function (){
     });
 });
 
+
 // ------------------------------------------------------ LEFT MENU
+
+hf_control.view_threads = function(threads_names)
+{
+    assert(threads_names.length != 0);
+
+    posts_lists = [];
+
+    for (var i = 0; i < threads_names.length; i++)
+    {
+        hf_service.list_posts(threads_names[i], function(posts_list){
+            posts_lists.push(posts_list);
+
+            if (posts_lists.length == threads_names.length)
+            {
+                posts_list = hf_service.merge_posts_lists(posts_lists);
+
+                var template_context = {
+                    'chunks': posts_list
+                };
+
+                var posts_html = hf_ui.template('list_chunks.html', template_context);
+
+                document.getElementById('hf_page_main_content').innerHTML = posts_html;
+            }
+        });
+    }
+}
+
+
+// ------------------------------------------------------ LEFT MENU
+
 hf_control.refresh_left_column = function()
 {
     var left_column = document.getElementById('hf_page_left_column');
