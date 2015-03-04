@@ -26,8 +26,8 @@ hf_service.certify = function(certificate_repository, data_chunk_name, data_chun
  * @param <data_chunk_part>: the hash identifier of the part (can be null?)
  * @param <data_hash>: the hash of the chunk
  * @param <callback>: the function called once the response has arrived
- *      @param <success>: true or false
- *      function my_callback(success)
+ *      @param <certified>: true or false
+ *      function my_callback(certified)
  */
 hf_service.verify_certification = function(certificate_repository, data_chunk_name, data_chunk_part, data_hash, callback){
 	assert('certifications' in certificate_repository);
