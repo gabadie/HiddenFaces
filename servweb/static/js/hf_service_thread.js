@@ -110,6 +110,7 @@ hf_service.create_post = function(post_content,threads_list,callback)
             {
                 allert("post creation has failed");
                 callback(null);
+                return;
             }
 
             var post_info = {
