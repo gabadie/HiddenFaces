@@ -242,7 +242,7 @@ hf_service.export_user_public_chunk = function(user_private_chunk)
                 'public_key':   user_private_chunk['system']['protected_chunk']['public_key']
             }
         },
-        'certifications' : user_private_chunk['certifications']
+        'certifications' : hf.clone(user_private_chunk['certifications'])
     };
 
     return public_chunk;
@@ -425,11 +425,12 @@ hf_service.save_user_chunks = function(callback)
     );
 
     transaction.commit(function(json_message){
-        assert(json_message['status'] == 'ok');
-
         if (callback)
         {
-            callback();
+            if(json_message['status'] == 'ok')
+                callback(true);
+            else
+                callback(false);
         }
     })
 }
@@ -495,11 +496,14 @@ hf_service.add_contact = function(user_hash, callback)
             'circles': []
         };
 
-        hf_service.save_user_chunks(function()
+        hf_service.save_user_chunks(function(success)
         {
             if (callback)
             {
-                callback(true);
+                if(success)
+                    callback(true);
+                else
+                    callback(false);
             }
         });
     });
@@ -577,8 +581,11 @@ hf_service.create_circle = function(circle_name, callback)
 
         hf_service.store_key(user_private_chunk, thread_chunk_name, thread_chunk_key);
 
-        hf_service.save_user_chunks(function(){
-            callback(true);
+        hf_service.save_user_chunks(function(success){
+            if(success)
+                callback(true);
+            else
+                callback(false);
         });
 
         circle_hash = thread_chunk_name;
@@ -632,9 +639,13 @@ hf_service.add_contact_to_circle = function(contact_user_hash, circle_hash, call
     circle_infos['contacts'].push(contact_user_hash);
     contact_infos['circles'].push(circle_hash);
 
-    hf_service.save_user_chunks(function(){
-        callback(true); // TODO: send keys
-    });
+    hf_service.save_user_chunks(function(success){
+            if(success)
+                callback(true);
+            else
+                callback(false);
+            //TODO : send key
+        });
 }
 
 /*
