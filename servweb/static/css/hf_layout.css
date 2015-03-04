@@ -86,6 +86,13 @@ hr{
     padding: 40px 0 120px 0;
 }
 
-.hf_contact {
+.hf_contact
+{
     padding: 0px 0px 0px 30px;
+}
+
+.hf_contact_name
+{
+    font-size: 20px;
+    padding: 0px 10px 10px 0px;
 }
