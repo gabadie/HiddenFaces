@@ -242,7 +242,7 @@ hf_service.export_user_public_chunk = function(user_private_chunk)
                 'public_key':   user_private_chunk['system']['protected_chunk']['public_key']
             }
         },
-        'certifications' : user_private_chunk['certifications']
+        'certifications' : hf.clone(user_private_chunk['certifications'])
     };
 
     return public_chunk;

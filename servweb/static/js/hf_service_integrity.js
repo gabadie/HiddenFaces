@@ -9,15 +9,11 @@
  */
 hf_service.certify = function(certificate_repository, data_chunk_name, data_chunk_part, data_hash, callback){
 	assert('certifications' in certificate_repository);
+	assert(hf.is_hash(data_chunk_name));
 	assert(hf.is_hash(data_chunk_part));
     assert(hf.is_hash(data_hash));
 
-    var certification = {
-    	'data_hash' : data_hash,
-    	'data_chunk_part' : data_chunk_part
-    };
-
-    certificate_repository['certifications'][hf.hash(data_chunk_name)] = certification;
+    certificate_repository['certifications'][hf.hash(data_chunk_name + data_chunk_part)] = data_hash;
 
     hf_service.save_user_chunks(function(){
         callback(true);
@@ -35,12 +31,13 @@ hf_service.certify = function(certificate_repository, data_chunk_name, data_chun
  */
 hf_service.verify_certification = function(certificate_repository, data_chunk_name, data_chunk_part, data_hash, callback){
 	assert('certifications' in certificate_repository);
+    assert(hf.is_hash(data_chunk_name));
+	assert(hf.is_hash(data_chunk_part));
     assert(hf.is_hash(data_hash));
-    assert(hf.is_hash(data_chunk_part));
 
-    var certification = certificate_repository['certifications'][hf.hash(data_chunk_name)];
+    var certification = certificate_repository['certifications'][hf.hash(data_chunk_name + data_chunk_part)];
 
-    if (certification['data_hash'] == data_hash && certification['data_chunk_part'] == data_chunk_part){
+    if (certification == data_hash){
 	    callback(true);
 	}else{
 		callback(false);
