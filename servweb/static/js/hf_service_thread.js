@@ -67,6 +67,7 @@ hf_service.create_thread = function(owner_hash, public_append, public_thread, ca
 hf_service.create_post = function(post_content,threads_list,callback)
 {
     assert(typeof post_content == 'string', "post_content must be a string in hf_service.create_post");
+    assert(hf_service.is_connected());
 
     var owner_hash = hf_service.user_chunks_owner();
     var user_hash = hf_service.user_hash();
@@ -145,7 +146,8 @@ hf_service.append_post_to_threads = function(post_name, post_key, threads_list,c
     assert(typeof post_name == "string");
     assert(typeof post_key == "string");
     assert(threads_list instanceof Array, "threads_list must be an Array in hf_service.append_post_to_threads");
-    assert(typeof threads_list[0] !== 'undefined', "threads_list is empty in hf_service.append_post_to_threads")
+    assert(typeof threads_list[0] !== 'undefined', "threads_list is empty in hf_service.append_post_to_threads");
+    assert(hf_service.is_connected());
 
     var transaction = new hf_com.Transaction();
 
