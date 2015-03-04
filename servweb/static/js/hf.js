@@ -20,6 +20,25 @@ hf.sleep = function(milliseconds)
 }
 
 /*
+ * Lists objects' keys
+ *
+ * @param <obj>: the object to list keys
+ *
+ * @return <obj>'s keys
+ */
+hf.keys = function(obj)
+{
+    var keys = [];
+
+    for (var k in obj)
+    {
+        keys.push(k);
+    }
+
+    return keys;
+}
+
+/*
  * Tests if a function
  */
 hf.is_function = function(fn)
