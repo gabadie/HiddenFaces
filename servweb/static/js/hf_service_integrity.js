@@ -15,8 +15,8 @@ hf_service.certify = function(certificate_repository, data_chunk_name, data_chun
 
     certificate_repository['certifications'][hf.hash(data_chunk_name + data_chunk_part)] = data_hash;
 
-    hf_service.save_user_chunks(function(){
-        callback(true);
+    hf_service.save_user_chunks(function(success){
+        callback(success);
     });
 }
 

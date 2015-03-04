@@ -105,15 +105,16 @@ hf_service.create_post = function(post_content,threads_list,callback)
 
             //chunk certification
             hf_service.certify(hf_service.user_private_chunk, post_chunk_name, part_hash, hf.hash(stringified_post_content[0]), function(success){
-                if(!success)
+                if(success){
+                    if(threads_list){
+                        hf_service.append_post_to_threads(post_chunk_name,symetric_key, threads_list,callback);
+                    }else if (callback){
+                        callback(post_info);
+                    }
+                }else if(callback){
                     callback(null);
+                }
             });
-
-            if(threads_list){
-                hf_service.append_post_to_threads(post_chunk_name,symetric_key, threads_list,callback);
-            }else if (callback){
-                callback(post_info);
-            }
         }
     );
 }

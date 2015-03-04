@@ -425,11 +425,12 @@ hf_service.save_user_chunks = function(callback)
     );
 
     transaction.commit(function(json_message){
-        assert(json_message['status'] == 'ok');
-
         if (callback)
         {
-            callback();
+            if(json_message['status'] == 'ok')
+                callback(true);
+            else
+                callback(false);
         }
     })
 }
