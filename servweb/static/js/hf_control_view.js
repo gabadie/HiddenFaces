@@ -27,11 +27,11 @@ hf_control.signed_in = new hf_control.ViewRouter(function(callback){
 // ------------------------------------------------------------- LOGED OUT VIEWS
 
 hf_control.signed_out.route('/', function(){
-    hf_ui.apply_template("login.html", null, hf_control.domPageContainer);
+    hf_ui.apply_template("form/login.html", null, hf_control.domPageContainer);
 });
 
 hf_control.signed_out.route('/signup/', function(){
-    hf_ui.apply_template("signup.html", null, hf_control.domPageContainer);
+    hf_ui.apply_template("form/signup.html", null, hf_control.domPageContainer);
 });
 
 
