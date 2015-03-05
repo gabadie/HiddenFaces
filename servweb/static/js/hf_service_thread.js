@@ -100,7 +100,7 @@ hf_service.create_post = function(post_content,threads_list,callback)
         'content': post_content
     };
 
-    var stringified_post_content = [JSON.stringify(post_chunk_content)];
+    var stringified_post_content = JSON.stringify(post_chunk_content);
 
     var symetric_key = hf_com.generate_AES_key('uhgGFoMBXi');
 
@@ -109,7 +109,7 @@ hf_service.create_post = function(post_content,threads_list,callback)
         post_chunk_name,
         owner_hash,
         symetric_key,
-        stringified_post_content,
+        [stringified_post_content],
         true,
         function(json_message){
             if (json_message['status'] != 'ok')
@@ -127,10 +127,11 @@ hf_service.create_post = function(post_content,threads_list,callback)
             };
 
             //chunk certification
-            hf_service.certify(hf_service.user_private_chunk, 
+            hf_service.certify(
+                hf_service.user_private_chunk, 
                 post_chunk_name, 
                 part_hash, 
-                hf.hash(stringified_post_content[0]), 
+                hf.hash(stringified_post_content), 
                 function(success){
                     if(success){
                         if(threads_list){
@@ -301,65 +302,63 @@ hf_service.list_posts = function(thread_name,callback)
 
     var list_posts = null;
 
-    hf_com.get_data_chunk(
-        thread_name,
-        thread_key,
-        function(thread_json_message){
-            assert(thread_json_message['status'] == 'ok');
+    hf_com.get_data_chunk(thread_name,thread_key,function(thread_json_message){
+        assert(thread_json_message['status'] == 'ok');
 
-            var list_posts_info = thread_json_message['chunk_content'];
-            var list_resolved_posts = [];
-            var iteration = 0;
+        var list_posts_info = thread_json_message['chunk_content'];
+        var list_resolved_posts = [];
+        var iteration = 0;
 
-            if(list_posts_info.length == 0 && callback)
-                callback(list_resolved_posts);
+        if(list_posts_info.length == 0 && callback)
+            callback(list_resolved_posts);
 
-            for(var i = 0; i < list_posts_info.length; i++) {
-                var post_info_json = JSON.parse(list_posts_info[i]);
+        for(var i = 0; i < list_posts_info.length; i++) {
+            var post_info_json = JSON.parse(list_posts_info[i]);
 
-                hf_com.get_data_chunk(
-                    post_info_json['post_chunk_name'],
-                    post_info_json['symetric_key'],
-                    function(json_message){
-                        assert(json_message['status'] == 'ok');
+            hf_com.get_data_chunk(
+                post_info_json['post_chunk_name'],
+                post_info_json['symetric_key'],
+                function(json_message){
+                    assert(json_message['status'] == 'ok');
 
-                        var post_content = JSON.parse(json_message['chunk_content']);
-
-                        hf_service.resolve_post_author(post_content, function(resolved_post){
+                    hf_service.resolve_post_author(
+                        post_info_json['post_chunk_name'], 
+                        json_message['chunk_content'], 
+                        function(resolved_post){
                             if(resolved_post){
                                 list_resolved_posts.push(resolved_post);
                             }
-                        });
 
-                        iteration++;
+                            iteration++;
 
-                        if(iteration == list_posts_info.length)
-                        {
-                            list_resolved_posts.sort(function(post_a, post_b){
-                                if (post_a['date'] > post_b['date'])
-                                {
-                                    return -1;
-                                }
-                                else if (post_a['date'] < post_b['date'])
-                                {
-                                    return 1;
-                                }
-
-                                return 0;
-                            });
-
-                            if (callback)
+                            if(iteration == list_posts_info.length)
                             {
-                                callback(list_resolved_posts);
-                            }
+                                list_resolved_posts.sort(function(post_a, post_b){
+                                    if (post_a['date'] > post_b['date'])
+                                    {
+                                        return -1;
+                                    }
+                                    else if (post_a['date'] < post_b['date'])
+                                    {
+                                        return 1;
+                                    }
 
-                            list_posts = list_resolved_posts;
+                                    return 0;
+                                });
+
+                                if (callback)
+                                {
+                                    callback(list_resolved_posts);
+                                }
+
+                                list_posts = list_resolved_posts;
+                            }
                         }
-                    }
-                );
-            }
+                    );
+                }
+            );
         }
-    );
+    });
 
     /*
      * For testing conveniency, we return the thread name
@@ -368,28 +367,118 @@ hf_service.list_posts = function(thread_name,callback)
 }
 
 /*
- * Generic post resolver adding the ['author'] key fetched from the
- * ['__meta']['author_user_hash']
+ * Generic comment resolver adding the ['author'] key fetched from the
+ * ['__meta']['author_user_hash'] and verifying its certification
  */
-hf_service.resolve_post_author = function(post_json, callback)
+hf_service.resolve_comment_author = function(post_name,comment_json, callback)
 {
     assert(hf.is_function(callback));
+    assert(hf.is_hash(post_name));
+
     hf_service.get_user_public_chunk(
-        post_json['__meta']['author_user_hash'],
+        comment_json['__meta']['author_user_hash'],
         function(user_public_chunk)
         {
             if (user_public_chunk == null)
             {
                 callback(null);
+                return;
             }
 
-            var post = hf.clone(post_json);
+            hf_service.verify_certification(
+                user_public_chunk,
+                post_name, 
+                comment_json['__meta']['part_hash'], 
+                hf.hash(JSON.stringify(comment_json)), 
+                function(success){
+                    if(!success){ //if the comment is not certified 
+                        callback(null);
+                        return;
+                    }
+                    var comment = hf.clone(comment_json);
+                    comment['author'] = user_public_chunk;
 
-            post['author'] = user_public_chunk;
-
-            callback(post);
+                    callback(comment);
+                }
+            );
         }
     );
+}
+
+/*
+ * Generic post resolver adding the ['author'] key fetched from the
+ * ['__meta']['author_user_hash'] and verifying its certification
+ */
+hf_service.resolve_post_author = function(post_name,post_content, callback)
+{
+    assert(hf.is_function(callback));
+    assert(hf.is_hash(post_name));
+
+    var post_json = JSON.parse(post_content[0]);
+
+    hf_service.get_user_public_chunk(post_json['__meta']['author_user_hash'],function(user_public_chunk){
+        if (user_public_chunk == null)
+        {
+            callback(null);
+            return;
+        }
+
+        //verify post certification
+        hf_service.verify_certification(
+            user_public_chunk, 
+            post_name, 
+            post_json['__meta']['part_hash'], 
+            hf.hash(post_content[0]), 
+            function(success){
+                if(!success){ //if the post is not certified
+                    callback(null);
+                    return;
+                }
+                //post resolution
+                var clone_post = hf.clone(post_json);
+                clone_post['author'] = user_public_chunk;
+                clone_post['comments'] = [];
+
+                //comments resolution
+                var iterations = post_content.length - 1;
+
+                if(iterations == 0)
+                    callback(clone_post);
+
+                for(var i = 1; i < post_content.length; i++){
+
+                    hf_service.resolve_comment_author(
+                        post_name,
+                        JSON.parse(post_content[i]),
+                        function(comment){
+                            if(comment){ //if comment corrupted, it's erased from the view
+                                clone_post['comments'].push(comment);
+                            }
+                            iterations--;
+
+                            if(iterations == 0){
+
+                                clone_post['comments'].sort(function(comment_a, comment_b){
+                                    if (comment_a['date'] > comment_b['date'])
+                                    {
+                                        return -1;
+                                    }
+                                    else if (comment_a['date'] < comment_b['date'])
+                                    {
+                                        return 1;
+                                    }
+
+                                    return 0;
+                                });
+
+                                callback(clone_post);
+                            }
+                        }
+                    );
+                }
+            }
+        );      
+    });
 }
 
 /*
