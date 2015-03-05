@@ -215,3 +215,46 @@ hf_service.send_chunks_infos_to_contacts = function(contacts_hashes, chunks_info
         });
     }
 }
+
+/*
+ * Lists a contact's threads' names
+ *
+ * @param <contact_user_hash>: contact's user hash
+ * @param <callback>: the function called once the response has arrived
+ *      @param <threads_names>: the list of threads names
+ *      function my_callback(threads_names)
+ */
+hf_service.list_contact_threads_names = function(contact_user_hash, callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf_service.is_contact(contact_user_hash));
+    assert(hf.is_function(callback));
+
+    var contacts = hf_service.user_private_chunk['contacts'];
+    var threads_names = hf.clone(contacts[contact_user_hash]['threads']);
+
+    callback(threads_names);
+}
+
+/*
+ * Lists all contact's threads' names
+ *
+ * @param <callback>: the function called once the response has arrived
+ *      @param <threads_names>: the list of threads names
+ *      function my_callback(threads_names)
+ */
+hf_service.list_contacts_threads_names = function(callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf.is_function(callback));
+
+    var threads_names = [];
+    var contacts = hf_service.user_private_chunk['contacts'];
+
+    for (var contact_user_hash in contacts)
+    {
+        threads_names = threads_names.concat(contacts[contact_user_hash]['threads']);
+    }
+
+    callback(threads_names);
+}

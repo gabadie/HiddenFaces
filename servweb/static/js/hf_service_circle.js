@@ -161,6 +161,28 @@ hf_service.list_circles = function(callback)
 }
 
 /*
+ * Lists circle's names
+ * @param <callback>: the function called once the response has arrived
+ *      @param <circles_names>: the circle info list
+ *      function my_callback(circles_names)
+ */
+hf_service.list_circles_names = function(callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf.is_function(callback));
+
+    var circles_names = [];
+
+    for (var circle_hash in hf_service.user_private_chunk['circles'])
+    {
+        circles_names.push(circle_hash);
+    }
+
+    callback(circles_names);
+}
+
+
+/*
  * Lists circle's threads names
  * @param <circle_hash>: circle's hash
  * @param <callback>: the function called once the response has arrived

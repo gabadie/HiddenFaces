@@ -376,6 +376,84 @@ test_hf_service.send_chunks_infos_to_contacts = function()
     test_utils.assert_success(5);
 }
 
+test_hf_service.list_contacts_threads_names = function()
+{
+    //create all users
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+    var user_profile2 = test_hf_service.john_smith_profile(2);
+
+    var user_hash0 = hf_service.create_user(user_profile0);
+    var user_hash1 = hf_service.create_user(user_profile1);
+    var user_hash2 = hf_service.create_user(user_profile2);
+
+    var chunks_infos1 = [
+        {
+            'name': hf.hash('chunk1'),
+            'type': '/thread',
+            'symetric_key': 'AES\nworld'
+        }
+    ];
+
+    var chunks_infos2 = [
+        {
+            'name': hf.hash('chunk0'),
+            'type': '/thread',
+            'symetric_key': 'AES\nhello'
+        },
+        {
+            'name': hf.hash('chunk1'),
+            'type': '/thread',
+            'symetric_key': 'AES\nworld'
+        }
+    ];
+
+    hf_service.login_user(user_profile0);
+    hf_service.add_contact(user_hash1);
+    hf_service.add_contact(user_hash2);
+
+    hf_service.list_contacts_threads_names(function(threads_names){
+        test_utils.assert(threads_names.length == 0, 'should not have threads')
+    });
+
+    hf_service.list_contact_threads_names(user_hash1, function(threads_names){
+        test_utils.assert(threads_names.length == 0, 'user 1 should not have threads')
+    });
+
+    hf_service.list_contact_threads_names(user_hash2, function(threads_names){
+        test_utils.assert(threads_names.length == 0, 'user 1 should not have threads')
+    });
+
+    hf_service.disconnect();
+
+    hf_service.login_user(user_profile1);
+    hf_service.add_contact(user_hash0);
+    hf_service.send_chunks_infos_to_contacts([user_hash0], chunks_infos1, test_utils.callbackSuccess);
+    hf_service.disconnect();
+
+    hf_service.login_user(user_profile2);
+    hf_service.add_contact(user_hash0);
+    hf_service.send_chunks_infos_to_contacts([user_hash0], chunks_infos2, test_utils.callbackSuccess);
+    hf_service.disconnect();
+
+    hf_service.login_user(user_profile0);
+    hf_service.pull_fresh_notifications();
+
+    hf_service.list_contacts_threads_names(function(threads_names){
+        test_utils.assert(threads_names.length == 3, 'should have 3 threads')
+    });
+
+    hf_service.list_contact_threads_names(user_hash1, function(threads_names){
+        test_utils.assert(threads_names.length == 1, 'user 1 should have 1 thread')
+    });
+
+    hf_service.list_contact_threads_names(user_hash2, function(threads_names){
+        test_utils.assert(threads_names.length == 2, 'user 1 should have 2 threads')
+    });
+
+    test_utils.assert_success(8);
+}
+
 
 // ------------------------------------------------------------- KEYKEEPER TESTS
 
@@ -748,6 +826,7 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.add_contact, "test_hf_service.add_contact");
     test_utils.run(test_hf_service.is_contact, "test_hf_service.is_contact");
     test_utils.run(test_hf_service.list_contacts,"test_hf_service.list_contacts");
+    test_utils.run(test_hf_service.list_contacts_threads_names, "test_hf_service.list_contacts_threads_names");
 
     // THREADS & POSTS & COMMENTS TESTS
     test_utils.run(test_hf_service.post_message, 'test_hf_service.post_message');
@@ -762,6 +841,7 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.add_contact_to_circle, 'test_hf_service.add_contact_to_circle');
     test_utils.run(test_hf_service.is_contact_into_circle, 'test_hf_service.is_contact_into_circle');
     test_utils.run(test_hf_service.list_circles, 'test_hf_service.list_circles');
+    test_utils.run(test_hf_service.list_circles_names, 'test_hf_service.list_circles_names');
     test_utils.run(test_hf_service.list_circle_threads_names, 'test_hf_service.list_circle_threads_names');
 
     // REGISTRY TESTES

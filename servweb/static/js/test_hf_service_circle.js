@@ -130,6 +130,29 @@ test_hf_service.list_circles = function()
     test_utils.assert_success(6);
 }
 
+test_hf_service.list_circles_names = function()
+{
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_hash0 = hf_service.create_user(user_profile0);
+
+    hf_service.login_user(user_profile0);
+    hf_service.list_circles_names(function(circles_names){
+        test_utils.assert(circles_names.length == 0, 'should not have any circles names');
+    });
+
+    hf_service.create_circle('Friends', test_utils.callbackSuccess);
+    hf_service.list_circles_names(function(circles_names){
+        test_utils.assert(circles_names.length == 1, 'should not have one circle name');
+    });
+
+    hf_service.create_circle('Family', test_utils.callbackSuccess);
+    hf_service.list_circles_names(function(circles_names){
+        test_utils.assert(circles_names.length == 2, 'should not have two circles names');
+    });
+
+    test_utils.assert_success(5);
+}
+
 test_hf_service.list_circle_threads_names = function()
 {
     var user_profile0 = test_hf_service.john_smith_profile(0);
