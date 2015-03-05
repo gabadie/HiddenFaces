@@ -49,6 +49,14 @@
     font-size: 20px;
 }
 
+.hf_layout_cell .hf_code
+{
+    width: 100%;
+    min-height: 300px;
+    margin: 3px 0;
+    border: none;
+}
+
 .hf_layout_cell .hf_author
 {
     padding: 20px 30px 10px 30px;

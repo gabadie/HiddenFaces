@@ -56,5 +56,14 @@ Handlebars.registerHelper('hf_add_contact_to_circle', function(contact, circle_h
 Handlebars.registerHelper('hf_chunk', function(chunk, options){
     var template_name = chunk['__meta']['type'].substring(1) + '.html';
 
-    return hf_ui.template(template_name, this);
+    if (hf_ui.templatesCaches.has(template_name))
+    {
+        return hf_ui.template(template_name, this);
+    }
+
+    var out = '<textarea class="hf_code">';
+    out += JSON.stringify(this, null, 4);
+    out += '</textarea>'
+
+    return out;
 });
