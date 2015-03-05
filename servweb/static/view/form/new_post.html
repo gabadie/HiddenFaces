@@ -2,13 +2,9 @@
 {{#hf_cell}}
     <div class="hf_padding">
         <div class="hf_title">Write what is on your mind.</div>
-        <form onsubmit="return false;">
+        <form onsubmit="return false;" style="padding: 3px;">
+            <textarea class="form-control" name="content"></textarea>
             <table width="100%">
-                <tr>
-                    <td colspan="2">
-                        <textarea class="form-control" name="content"></textarea>
-                    </td>
-                </tr>
                 <tr>
                     <td>
                         {{#each circles}}
