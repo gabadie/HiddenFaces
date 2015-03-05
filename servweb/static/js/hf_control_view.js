@@ -73,41 +73,43 @@ hf_control.signed_in.route('/circles', function(){
 hf_control.signed_in.route('/circle/', function() {
     var viewUrl = hf_control.current_view_url();
     var arrs = viewUrl.split("/");
-    var thread_chunk_name = viewUrl.split("/")[2];
+    var circle_hash = viewUrl.split("/")[2];
     if (arrs.length >= 4)
     {
         if(arrs[3] == 'contacts')
         {
-            hf_control.contacts_circle(thread_chunk_name);
+            hf_control.circle_contacts(circle_hash);
         }
     }
     else
     {
-        hf_control.circle_posts(thread_chunk_name);
+        hf_control.circle_posts(circle_hash);
     }
 });
 
-hf_control.circle_posts = function(thread_chunk_name)
+hf_control.circle_posts = function(circle_hash)
 {
-    hf_control.view_threads([thread_chunk_name], function(posts_html){
-        hf_service.get_circle(thread_chunk_name, function(circle){
-            var circle_header_html = hf_ui.template('circle_header.html', circle);
+    hf_service.get_circle(circle_hash, function(circle){
+        hf_service.list_circle_threads_names(circle_hash, function(threads_names){
+            hf_control.view_threads(threads_names, function(posts_html){
+                var circle_header_html = hf_ui.template('circle_header.html', circle);
 
-            document.getElementById('hf_page_main_content').innerHTML = (
-                circle_header_html + posts_html
-            );
+                document.getElementById('hf_page_main_content').innerHTML = (
+                    circle_header_html + posts_html
+                );
+            });
         });
     });
 }
 
-hf_control.contacts_circle = function(thread_chunk_name)
+hf_control.circle_contacts = function(circle_hash)
 {
-    hf_service.get_circle(thread_chunk_name, function(circle)
+    hf_service.get_circle(circle_hash, function(circle)
     {
         hf_service.list_contacts(function(list_contacts)
         {
             var params = {
-                'circle_hash': thread_chunk_name,
+                'circle_hash': circle_hash,
                 'contacts': list_contacts
             }
 
