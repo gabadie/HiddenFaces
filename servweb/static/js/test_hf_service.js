@@ -762,6 +762,7 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.add_contact_to_circle, 'test_hf_service.add_contact_to_circle');
     test_utils.run(test_hf_service.is_contact_into_circle, 'test_hf_service.is_contact_into_circle');
     test_utils.run(test_hf_service.list_circles, 'test_hf_service.list_circles');
+    test_utils.run(test_hf_service.list_circle_threads_names, 'test_hf_service.list_circle_threads_names');
 
     // REGISTRY TESTES
     test_utils.run(test_hf_service.is_valide_chunk,"test_hf_service.is_valide_chunk");
