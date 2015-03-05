@@ -29,9 +29,19 @@ test_hf_populate.create_users = function()
 
     test_hf_populate.user_profile[0] = test_hf_service.john_smith_profile(0);
 
+    var generated_profile_ids = [0];
+
     for (var i = 1; i < test_hf_populate.profile_count; i++)
     {
-        var user_profile_id = test_hf_populate.rand() % 256;
+        var user_profile_id = 0;
+
+        while (generated_profile_ids.indexOf(user_profile_id) >= 0)
+        {
+            user_profile_id = test_hf_populate.rand() % 256;
+        }
+
+        generated_profile_ids.push(user_profile_id);
+
         test_hf_populate.user_profile[i] = test_hf_service.john_smith_profile(user_profile_id);
 
         // avoid private chunk colision
