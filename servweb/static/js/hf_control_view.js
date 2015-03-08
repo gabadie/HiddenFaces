@@ -47,8 +47,6 @@ hf_control.signed_in.route('/', function(){
             hf_service.list_contacts_threads_names(function(contacts_threads_names){
                 var threads_names = contacts_threads_names.concat(circles_names);
 
-                assert(threads_names.length = (circles_names.length + contacts_threads_names.length));
-
                 hf_control.view_threads(threads_names, function(posts_html){
                     domElem.innerHTML += posts_html;
                 });
@@ -266,9 +264,17 @@ hf_control.view_new_post = function(current_circle_hash, callback)
  */
 hf_control.view_threads = function(threads_names, callback)
 {
-    assert(threads_names.length != 0);
+    var posts_lists = [];
 
-    posts_lists = [];
+    if(threads_names.length == 0){
+        var template_context = {
+            'chunks': posts_list
+        };
+
+        var posts_html = hf_ui.template('list_chunks.html', template_context);
+
+        callback(posts_html);
+    }
 
     for (var i = 0; i < threads_names.length; i++)
     {

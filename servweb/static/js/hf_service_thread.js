@@ -192,39 +192,45 @@ hf_service.append_post_to_threads = function(post_name, post_key, threads_list,c
             assert(element_json['__meta']['type'] == '/post');
             var post_part_hash = element_json['__meta']['part_hash'];
 
+            var iteration = threads_list.length;
             for (var i = 0; i < threads_list.length; i++)
             {
                 assert(typeof threads_list[i]['thread_chunk_name'] == "string");
                 assert(typeof threads_list[i]['symetric_key'] == "string");
-
-                transaction.extend_data_chunk(
-                    threads_list[i]['thread_chunk_name'],
-                    hf_service.user_chunks_owner(),
-                    threads_list[i]['symetric_key'],
-                    [stringified_post_info]
-                );
 
                 hf_service.certify(hf_service.user_private_chunk, 
                     threads_list[i]['thread_chunk_name'], 
                     post_part_hash, 
                     hf.hash(stringified_post_info), 
                     function(success){
+                        iteration--;
+                        
                         if(!success){
                             if(callback)
                                 callback(false);
+                            console.info('cannot certify post in thread');
                             return;
+                        }
+                        transaction.extend_data_chunk(
+                            threads_list[i]['thread_chunk_name'],
+                            hf_service.user_chunks_owner(),
+                            threads_list[i]['symetric_key'],
+                            [stringified_post_info]
+                        );
+
+                        if(iteration == 0){
+                            transaction.commit(function(json_message){
+                                if (json_message['status'] != 'ok'){
+                                    if(callback)
+                                        callback(null);
+                                }else if (callback){
+                                    callback(post_info);
+                                }
+                            });
                         }
                     }
                 );
             }
-            transaction.commit(function(json_message){
-                if (json_message['status'] != 'ok'){
-                    if(callback)
-                        callback(null);
-                }else if (callback){
-                    callback(post_info);
-                }
-            });
         }
     );
 }
@@ -259,13 +265,6 @@ hf_service.comment_post = function(post_chunk_name,post_chunk_key,comment,callba
     };
     var stringified_comment = JSON.stringify(comment_json);
 
-    transaction.extend_data_chunk(
-        post_chunk_name,
-        hf_service.user_chunks_owner(),
-        post_chunk_key,
-        [stringified_comment]
-    );
-
     hf_service.certify(hf_service.user_private_chunk, 
         post_chunk_name, 
         part_hash, 
@@ -276,17 +275,23 @@ hf_service.comment_post = function(post_chunk_name,post_chunk_key,comment,callba
                     callback(false);
                 return;
             }
+            transaction.extend_data_chunk(
+                post_chunk_name,
+                hf_service.user_chunks_owner(),
+                post_chunk_key,
+                [stringified_comment]
+            );
+
+            transaction.commit(function(json_message){
+                if (json_message['status'] != 'ok'){
+                    if(callback)
+                        callback(false);
+                }else if (callback){
+                    callback(true);
+                }
+            });
         }
     );
-
-    transaction.commit(function(json_message){
-        if (json_message['status'] != 'ok'){
-            if(callback)
-                callback(false);
-        }else if (callback){
-            callback(true);
-        }
-    });
 }
 /*
  * Gets list of the resolved posts of a thread
@@ -312,8 +317,10 @@ hf_service.list_posts = function(thread_name,callback)
         var list_resolved_posts = [];
         var iteration = 0;
 
-        if(list_posts_info.length == 0 && callback)
+        if(list_posts_info.length == 0 && callback){
             callback(list_resolved_posts);
+            return;
+        }
 
         for(var i = 0; i < list_posts_info.length; i++) {
             var post_info_json = JSON.parse(list_posts_info[i]);
@@ -396,6 +403,7 @@ hf_service.resolve_comment_author = function(post_name,comment_json, callback)
                 function(success){
                     if(!success){ //if the comment is not certified 
                         callback(null);
+                        console.info('comment not certified');
                         return;
                     }
                     var comment = hf.clone(comment_json);
@@ -436,6 +444,7 @@ hf_service.resolve_post_author = function(post_name,post_content, callback)
             function(success){
                 if(!success){ //if the post is not certified
                     callback(null);
+                    console.info('post not certified');
                     return;
                 }
                 //post resolution
