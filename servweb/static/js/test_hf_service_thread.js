@@ -215,7 +215,7 @@ test_hf_service.comment_post = function()
                 test_utils.assert(json_message['chunk_content'].length == 3);
 
                 var post_json = JSON.parse(json_message['chunk_content'][0]);
-                test_utils.assert(post_json['__meta']['type'] == '/post');
+                test_utils.assert(post_json['__meta']['type'] == '/thread/post');
 
                 for(var i = 1; i < json_message['chunk_content'].length; i++){
                     var comment_json = JSON.parse(json_message['chunk_content'][i])
@@ -223,7 +223,7 @@ test_hf_service.comment_post = function()
                 }
             }
         );
-    }); 
+    });
 
     test_utils.assert_success(11);
 }
