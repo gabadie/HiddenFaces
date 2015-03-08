@@ -114,7 +114,7 @@ test_utils.create_uncertified_post = function(threads_list)
         hf.generate_hash('ERmO4vptXigWBnDUjnEN\n');
     var post_chunk_content = {
         '__meta': {
-            'type': '/post',
+            'type': '/thread/post',
             'chunk_name': post_chunk_name,
             'part_hash' : part_hash,
             'author_user_hash': user_hash
