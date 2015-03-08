@@ -71,7 +71,7 @@ hf_service.add_contact_to_circle = function(contact_user_hash, circle_hash, call
     assert(hf_service.is_connected());
     assert(hf_service.is_contact(contact_user_hash));
     assert(hf_service.is_circle_hash(circle_hash));
-    assert(hf.is_function(callback) || callback == undefined);
+    assert(hf.is_function(callback));
 
     var circle_infos = hf_service.user_private_chunk['circles'][circle_hash];
     var contact_infos = hf_service.user_private_chunk['contacts'][contact_user_hash];
@@ -91,9 +91,13 @@ hf_service.add_contact_to_circle = function(contact_user_hash, circle_hash, call
     contact_infos['circles'].push(circle_hash);
 
     hf_service.save_user_chunks(function(success){
-        if(callback)
-            callback(success);
-        //TODO : send key
+        var chunk_info = {
+            'name': circle_hash,
+            'type': '/thread',
+            'symetric_key': hf_service.get_decryption_key(hf_service.user_private_chunk, circle_hash)
+        };
+
+        hf_service.send_chunks_infos_to_contacts([contact_user_hash], [chunk_info], callback);
     });
 }
 
@@ -156,3 +160,51 @@ hf_service.list_circles = function(callback)
     callback(circles_list);
 }
 
+/*
+ * Lists circle's names
+ * @param <callback>: the function called once the response has arrived
+ *      @param <circles_names>: the circle info list
+ *      function my_callback(circles_names)
+ */
+hf_service.list_circles_names = function(callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf.is_function(callback));
+
+    var circles_names = [];
+
+    for (var circle_hash in hf_service.user_private_chunk['circles'])
+    {
+        circles_names.push(circle_hash);
+    }
+
+    callback(circles_names);
+}
+
+
+/*
+ * Lists circle's threads names
+ * @param <circle_hash>: circle's hash
+ * @param <callback>: the function called once the response has arrived
+ *      @param <threads_names>: the list of threads names
+ *      function my_callback(threads_names)
+ */
+hf_service.list_circle_threads_names = function(circle_hash, callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf_service.is_circle_hash(circle_hash));
+    assert(hf.is_function(callback));
+
+    var contacts = hf_service.user_private_chunk['contacts'];
+    var circle_contacts_lists = hf_service.user_private_chunk['circles'][circle_hash]['contacts'];
+    var threads_names = [circle_hash];
+
+    for (var i = 0; i < circle_contacts_lists.length; i++)
+    {
+        var contact_user_hash = circle_contacts_lists[i];
+
+        threads_names = threads_names.concat(contacts[contact_user_hash]['threads']);
+    }
+
+    callback(threads_names);
+}

@@ -1,15 +1,6 @@
 
 /* ----------------------------------------------------------- Generic layout */
 
-hr{
-    display: block;
-    height: 1px;
-    border: 0;
-    border-top: 1px solid #ccc;
-    margin: 1em 0;
-    padding: 0;
-}
-
 .hf_layout_page_width
 {
     margin: 0 auto;
@@ -58,6 +49,14 @@ hr{
     font-size: 20px;
 }
 
+.hf_layout_cell .hf_code
+{
+    width: 100%;
+    min-height: 300px;
+    margin: 3px 0;
+    border: none;
+}
+
 .hf_layout_cell .hf_author
 {
     padding: 20px 30px 10px 30px;
@@ -86,14 +85,8 @@ hr{
     padding: 40px 0 120px 0;
 }
 
-.hf_contact
+.hf_layout_cell .hf_list_item
 {
-    padding: 0px 0px 0px 30px;
+    border-top: 1px solid #EEEEEE;
+    padding: 10px 20px;
 }
-
-.hf_contact_name
-{
-    font-size: 20px;
-    padding: 0px 10px 10px 0px;
-}
-

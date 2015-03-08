@@ -1,0 +1,34 @@
+
+{{#hf_cell}}
+    <div class="hf_padding">
+        <div class="hf_title">Write what is on your mind.</div>
+        <form onsubmit="return false;" style="padding: 3px;">
+            <textarea class="form-control" name="content"></textarea>
+            <table width="100%">
+                <tr>
+                    <td>
+                        {{#each circles}}
+                            <div class="checkbox">
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        name="cirlce/{{thread_chunk_name}}"
+                                        value="" />
+                                    {{name}}
+                                </label>
+                            </div>
+                        {{/each}}
+                    </td>
+                    <td width="200px" valign="bottom">
+                        <input
+                            type="submit"
+                            class="btn btn-default"
+                            name="submit"
+                            value="Post"
+                        />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+{{/hf_cell}}

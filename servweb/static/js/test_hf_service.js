@@ -401,238 +401,141 @@ test_hf_service.list_contacts = function()
     test_utils.assert_success(2);
 }
 
-
-// --------------------------------------------------------- NOTIFICATIONS TESTS
-
-hf_service.define_notification('/notification/testing/manual', {
-    automation: null,
-    resolve: hf_service.resolve_notification_author
-});
-
-test_hf_service.push_notification = function()
+test_hf_service.send_chunks_infos_to_contacts = function()
 {
-    var user_profile0 = test_hf_service.john_smith_profile();
-    var user_hash0 = hf_service.create_user(user_profile0);
-
-    hf_service.login_user(user_profile0);
-
-    var notification = {
-        '__meta': {
-            'type': '/notification/testing/manual',
-            'author_user_hash': hf_service.user_hash()
-        },
-        'content': 'Hi John! How are you?'
-    };
-
-    hf_service.get_user_public_chunk(user_hash0, function(user_public_chunk){
-        hf_com.get_data_chunk(
-            user_public_chunk['system']['protected_chunk']['name'],
-            '',
-            function(json_message){
-                test_utils.assert(json_message['chunk_content'].length == 0);
-            }
-        );
-
-        hf_service.push_notification(user_hash0, notification, function(success){
-            test_utils.assert(success == true, 'notification push with success')
-        });
-
-        hf_com.get_data_chunk(
-            user_public_chunk['system']['protected_chunk']['name'],
-            '',
-            function(json_message){
-                test_utils.assert(json_message['chunk_content'].length == 1);
-            }
-        );
-    });
-
-    test_utils.assert_success(3);
-}
-
-test_hf_service.notification_automation_util = function(send_notification_callback)
-{
+    //create all users
     var user_profile0 = test_hf_service.john_smith_profile(0);
     var user_profile1 = test_hf_service.john_smith_profile(1);
 
     var user_hash0 = hf_service.create_user(user_profile0);
     var user_hash1 = hf_service.create_user(user_profile1);
 
-    hf_service.login_user(user_profile0);
-
-    var assert_count = send_notification_callback(user_hash1);
-
-    hf_service.disconnect();
-    hf_service.login_user(user_profile1);
-
-    hf_com.get_data_chunk(
-        hf_service.user_public_chunk()['system']['protected_chunk']['name'],
-        '',
-        function(json_message){
-            test_utils.assert(
-                json_message['chunk_content'].length > 0,
-                'looks like the notification has not been sent to user_profile1'
-            );
+    var chunks_infos = [
+        {
+            'name': hf.hash('chunk0'),
+            'type': '/thread',
+            'symetric_key': 'AES\nhello'
+        },
+        {
+            'name': hf.hash('chunk1'),
+            'type': '/thread',
+            'symetric_key': 'AES\nworld'
         }
-    );
+    ];
 
-    test_utils.assert_success(1);
+    hf_service.login_user(user_profile1);
+    hf_service.add_contact(user_hash0);
+    hf_service.disconnect();
 
+    hf_service.login_user(user_profile0);
+    hf_service.add_contact(user_hash1);
+    hf_service.send_chunks_infos_to_contacts([user_hash1], chunks_infos, function(success){
+        test_utils.assert(success == true, 'notification pushed with success')
+    });
+    hf_service.disconnect();
+
+    hf_service.login_user(user_profile1);
     hf_service.pull_fresh_notifications();
 
-    test_utils.assert_success(assert_count);
-
-    hf_com.get_data_chunk(
-        hf_service.user_public_chunk()['system']['protected_chunk']['name'],
-        '',
-        function(json_message){
-            test_utils.assert(
-                json_message['chunk_content'].length == 0,
-                'hf_service.pull_fresh_notifications() failed should clean the protected chunk'
-            );
-        }
+    test_utils.assert(
+        hf_service.user_private_chunk['contacts'][user_hash0]['threads'].indexOf(chunks_infos[0]['name']) >= 0,
+        'chunk0 should be listed in user 0\'s threads'
     );
 
     test_utils.assert(
-        hf_service.user_private_chunk['notifications'].length == 0,
-        'hf_service.pull_fresh_notifications() should not modify the user\'s private chunk'
+        hf_service.user_private_chunk['contacts'][user_hash0]['threads'].indexOf(chunks_infos[1]['name']) >= 0,
+        'chunk1 should be listed in user 0\'s threads'
     );
 
-    test_utils.assert_success(2);
+    test_utils.assert(
+        hf_service.get_encryption_key(hf_service.user_private_chunk, chunks_infos[0]['name']) == chunks_infos[0]['symetric_key'],
+        'chunk0 should be listed in user 0\'s threads'
+    );
+
+    test_utils.assert(
+        hf_service.get_encryption_key(hf_service.user_private_chunk, chunks_infos[1]['name']) == chunks_infos[1]['symetric_key'],
+        'chunk1 should be listed in user 0\'s threads'
+    );
+
+    test_utils.assert_success(5);
 }
 
-test_hf_service.notification_automation_sanity = function()
+test_hf_service.list_contacts_threads_names = function()
 {
-    test_hf_service.notification_automation_util(function(user_hash){
-        var original_notification = {
-            '__meta': {
-                'type': '/notification/testing/automated',
-                'author_user_hash': hf_service.user_hash()
-            }
-        };
-
-        hf_service.define_notification('/notification/testing/automated', {
-            automation: function(notification_json) {
-                test_utils.assert(
-                    notification_json['__meta']['type'] == '/notification/testing/automated',
-                    'corrupted notification type'
-                );
-                test_utils.assert(
-                    notification_json['__meta']['author_user_hash'] == original_notification['__meta']['author_user_hash'],
-                    'corrupted notification author'
-                );
-            },
-            resolve: null
-        });
-
-        hf_service.push_notification(user_hash, original_notification, function(success){
-            test_utils.assert(success == true, 'notification push with success')
-        });
-
-        test_utils.assert_success(1);
-
-        return 2;
-    });
-}
-
-test_hf_service.list_notifications = function()
-{
-    var user_profile0 = test_hf_service.john_smith_profile(0);
-    var user_hash0 = hf_service.create_user(user_profile0);
-
-    var original_notification = {
-        '__meta': {
-            'type': '/notification/testing/manual',
-            'author_user_hash': user_hash0
-        }
-    };
-
-    hf_service.login_user(user_profile0);
-
-    hf_service.list_notifications(function(notifications_list){
-        test_utils.assert(notifications_list.length == 0, 'should not have any notifications');
-    });
-
-    hf_service.push_notification(user_hash0, original_notification, function(success){
-        test_utils.assert(success == true, 'should push a testing notification');
-    });
-
-    hf_service.push_notification(user_hash0, original_notification, function(success){
-        test_utils.assert(success == true, 'should push another testing notification');
-    });
-
-    hf_service.list_notifications(function(notifications_list){
-        test_utils.assert(notifications_list.length == 2, 'should have two notifications');
-        test_utils.assert('author' in notifications_list[0], 'should have author resolved');
-        test_utils.assert(
-            hf.is_hash(notifications_list[0]['__meta']['hash']),
-            'notification[\'__meta\'][\'hash\'] should be a hash'
-        );
-    });
-
-    test_utils.assert_success(6);
-}
-
-test_hf_service.delete_notification = function()
-{
-    var user_profile0 = test_hf_service.john_smith_profile(0);
-    var user_hash0 = hf_service.create_user(user_profile0);
-
-    var original_notification = {
-        '__meta': {
-            'type': '/notification/testing/manual',
-            'author_user_hash': user_hash0
-        }
-    };
-
-    hf_service.login_user(user_profile0);
-
-    hf_service.delete_notification(hf.generate_hash(''), function(success){
-        test_utils.assert(success == false, 'deleting a non existing notification should fail');
-    });
-
-    hf_service.push_notification(user_hash0, original_notification, function(success){
-        test_utils.assert(success == true, 'should push a testing notification');
-    });
-
-    hf_service.push_notification(user_hash0, original_notification, function(success){
-        test_utils.assert(success == true, 'should push another testing notification');
-    });
-
-    hf_service.list_notifications(function(notifications_list){
-        test_utils.assert(notifications_list.length == 2, 'should have two notifications');
-
-        hf_service.delete_notification(notifications_list[0]['__meta']['hash'], function(success){
-            test_utils.assert(success == true, 'deleting existing notification should success');
-        });
-    });
-
-    hf_service.list_notifications(function(notifications_list){
-        test_utils.assert(notifications_list.length == 1, 'should have one notification');
-    });
-
-    test_utils.assert_success(6);
-}
-
-test_hf_service.send_message = function()
-{
-    var message = 'hello, could you add me as friend, DDD';
+    //create all users
     var user_profile0 = test_hf_service.john_smith_profile(0);
     var user_profile1 = test_hf_service.john_smith_profile(1);
+    var user_profile2 = test_hf_service.john_smith_profile(2);
 
     var user_hash0 = hf_service.create_user(user_profile0);
     var user_hash1 = hf_service.create_user(user_profile1);
+    var user_hash2 = hf_service.create_user(user_profile2);
+
+    var chunks_infos1 = [
+        {
+            'name': hf.hash('chunk1'),
+            'type': '/thread',
+            'symetric_key': 'AES\nworld'
+        }
+    ];
+
+    var chunks_infos2 = [
+        {
+            'name': hf.hash('chunk0'),
+            'type': '/thread',
+            'symetric_key': 'AES\nhello'
+        },
+        {
+            'name': hf.hash('chunk1'),
+            'type': '/thread',
+            'symetric_key': 'AES\nworld'
+        }
+    ];
 
     hf_service.login_user(user_profile0);
+    hf_service.add_contact(user_hash1);
+    hf_service.add_contact(user_hash2);
 
-    hf_service.send_message(user_hash1, message, function(success) {
-        test_utils.assert(success == true, "sent message must have successed");
+    hf_service.list_contacts_threads_names(function(threads_names){
+        test_utils.assert(threads_names.length == 0, 'should not have threads')
     });
 
-    hf_service.send_message(user_hash0, message, function(success) {
-        test_utils.assert(success == false, "sent message must have failed");
+    hf_service.list_contact_threads_names(user_hash1, function(threads_names){
+        test_utils.assert(threads_names.length == 0, 'user 1 should not have threads')
     });
 
-    test_utils.assert_success(2);
+    hf_service.list_contact_threads_names(user_hash2, function(threads_names){
+        test_utils.assert(threads_names.length == 0, 'user 1 should not have threads')
+    });
+
+    hf_service.disconnect();
+
+    hf_service.login_user(user_profile1);
+    hf_service.add_contact(user_hash0);
+    hf_service.send_chunks_infos_to_contacts([user_hash0], chunks_infos1, test_utils.callbackSuccess);
+    hf_service.disconnect();
+
+    hf_service.login_user(user_profile2);
+    hf_service.add_contact(user_hash0);
+    hf_service.send_chunks_infos_to_contacts([user_hash0], chunks_infos2, test_utils.callbackSuccess);
+    hf_service.disconnect();
+
+    hf_service.login_user(user_profile0);
+    hf_service.pull_fresh_notifications();
+
+    hf_service.list_contacts_threads_names(function(threads_names){
+        test_utils.assert(threads_names.length == 3, 'should have 3 threads')
+    });
+
+    hf_service.list_contact_threads_names(user_hash1, function(threads_names){
+        test_utils.assert(threads_names.length == 1, 'user 1 should have 1 thread')
+    });
+
+    hf_service.list_contact_threads_names(user_hash2, function(threads_names){
+        test_utils.assert(threads_names.length == 2, 'user 1 should have 2 threads')
+    });
+
+    test_utils.assert_success(8);
 }
 
 
@@ -713,37 +616,6 @@ test_hf_service.keys_repository = function()
     );
 }
 
-test_hf_service.send_chunks_keys = function()
-{
-    var chunks_names = [
-        hf.hash('chunk0'),
-        hf.hash('chunk1')
-    ];
-
-    var chunks_keys = {};
-    chunks_keys[chunks_names[0]] = 'AES\nhello';
-    chunks_keys[chunks_names[1]] = 'AES\nworld';
-
-    test_hf_service.notification_automation_util(function(user_hash){
-        hf_service.send_chunks_keys([user_hash], chunks_keys, function(success){
-            test_utils.assert(success == true, 'notification push with success')
-        });
-
-        test_utils.assert_success(1);
-
-        return 0;
-    });
-
-    test_utils.assert(
-        hf_service.get_encryption_key(hf_service.user_private_chunk, chunks_names[0]) == chunks_keys[chunks_names[0]],
-        'invalid chunk_name[0]\'s encryption key'
-    );
-
-    test_utils.assert(
-        hf_service.get_encryption_key(hf_service.user_private_chunk, chunks_names[1]) == chunks_keys[chunks_names[1]],
-        'invalid chunk_name[1]\'s encryption key'
-    );
-}
 
 // ------------------------------------------------- REGISTRY TESTS
 
@@ -1012,6 +884,7 @@ test_hf_service.is_valide_public_chunk = function()
     test_utils.assert_success(3);
 }
 
+
 // ------------------------------------------------- SERVICE's TESTS ENTRY POINT
 
 test_hf_service.main = function()
@@ -1021,9 +894,6 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.get_user_public_chunk, 'test_hf_service.get_user_public_chunk');
     test_utils.run(test_hf_service.login_user, 'test_hf_service.login_user');
     test_utils.run(test_hf_service.save_user_chunks, 'test_hf_service.save_user_chunks');
-    test_utils.run(test_hf_service.add_contact, "test_hf_service.add_contact");
-    test_utils.run(test_hf_service.is_contact, "test_hf_service.is_contact");
-    test_utils.run(test_hf_service.list_contacts,"test_hf_service.list_contacts");
 
     // NOTIFICATIONS TESTS
     test_utils.run(test_hf_service.push_notification, 'test_hf_service.push_notification');
@@ -1031,10 +901,16 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.list_notifications, 'test_hf_service.list_notifications');
     test_utils.run(test_hf_service.delete_notification, 'test_hf_service.delete_notification');
     test_utils.run(test_hf_service.send_message, "test_hf_service.send_message");
+    test_utils.run(test_hf_service.send_chunks_infos_to_contacts, 'test_hf_service.send_chunks_infos_to_contacts');
 
     // KEYKEEPER TESTS
     test_utils.run(test_hf_service.keys_repository, 'test_hf_service.keys_repository');
-    test_utils.run(test_hf_service.send_chunks_keys, 'test_hf_service.send_chunks_keys');
+
+    // CONTACTS TESTS
+    test_utils.run(test_hf_service.add_contact, "test_hf_service.add_contact");
+    test_utils.run(test_hf_service.is_contact, "test_hf_service.is_contact");
+    test_utils.run(test_hf_service.list_contacts,"test_hf_service.list_contacts");
+    test_utils.run(test_hf_service.list_contacts_threads_names, "test_hf_service.list_contacts_threads_names");
 
     // THREADS & POSTS & COMMENTS TESTS
     test_utils.run(test_hf_service.post_message, 'test_hf_service.post_message');
@@ -1049,6 +925,8 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.add_contact_to_circle, 'test_hf_service.add_contact_to_circle');
     test_utils.run(test_hf_service.is_contact_into_circle, 'test_hf_service.is_contact_into_circle');
     test_utils.run(test_hf_service.list_circles, 'test_hf_service.list_circles');
+    test_utils.run(test_hf_service.list_circles_names, 'test_hf_service.list_circles_names');
+    test_utils.run(test_hf_service.list_circle_threads_names, 'test_hf_service.list_circle_threads_names');
 
     // REGISTRY TESTES
     test_utils.run(test_hf_service.is_valide_chunk,"test_hf_service.is_valide_chunk");
