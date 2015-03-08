@@ -117,15 +117,15 @@ test_hf_service.verify_append_posts_certification = function()
                             var element_json = JSON.parse(json_message['chunk_content'][0]);
 
                             //get post's part_hash
-                            test_utils.assert(element_json['__meta']['type'] == '/post');
+                            test_utils.assert(element_json['__meta']['type'] == '/thread/post');
                             var post_part_hash = element_json['__meta']['part_hash'];
 
                             //verify current user has the certification for the post's append
                             hf_service.verify_certification(
-                                hf_service.user_private_chunk, 
-                                threads_list[i]['thread_chunk_name'], 
-                                post_part_hash, 
-                                hf.hash(thread_list_posts[j]), 
+                                hf_service.user_private_chunk,
+                                threads_list[i]['thread_chunk_name'],
+                                post_part_hash,
+                                hf.hash(thread_list_posts[j]),
                                 function(success){
                                     test_utils.assert(success == true, "Cannot verify certification post-thread")
                                 });
@@ -238,7 +238,7 @@ test_hf_service.list_certified_posts_comments = function()
                 test_utils.assert(typeof post_info['post_chunk_name'] == "string");
                 test_utils.assert(typeof post_info['symetric_key'] == "string");
 
-                hf_service.comment_post(post_info['post_chunk_name'],post_info['symetric_key'],'comment certified',null); 
+                hf_service.comment_post(post_info['post_chunk_name'],post_info['symetric_key'],'comment certified',null);
 
                 hf.sleep(2 * 1000);
 
@@ -246,7 +246,7 @@ test_hf_service.list_certified_posts_comments = function()
                 var resolved_posts = hf_service.list_posts(thread1_info['thread_chunk_name']);
                 test_utils.assert(resolved_posts != null, 'resolved_posts undefined');
                 test_utils.assert(resolved_posts.length == 1, 'resolved_posts length = '+ resolved_posts.length);
-                test_utils.assert(resolved_posts[0]['comments'].length == 2,'comments length'+resolved_posts[0]['comments'].length);      
+                test_utils.assert(resolved_posts[0]['comments'].length == 2,'comments length'+resolved_posts[0]['comments'].length);
                 test_utils.assert(resolved_posts[0]['comments'][0]['date'] > resolved_posts[0]['comments'][1]['date']);
             }
         );

@@ -91,7 +91,7 @@ hf_service.create_post = function(post_content,threads_list,callback)
         hf.generate_hash('ERmO4vptXigWBnDUjnEN\n');
     var post_chunk_content = {
         '__meta': {
-            'type': '/post',
+            'type': '/thread/post',
             'chunk_name': post_chunk_name,
             'part_hash' : part_hash,
             'author_user_hash': user_hash
@@ -189,7 +189,7 @@ hf_service.append_post_to_threads = function(post_name, post_key, threads_list,c
             assert(json_message['chunk_content'][0] !== 'undefined');
             var element_json = JSON.parse(json_message['chunk_content'][0]);
 
-            assert(element_json['__meta']['type'] == '/post');
+            assert(element_json['__meta']['type'] == '/thread/post');
             var post_part_hash = element_json['__meta']['part_hash'];
 
             var iteration = threads_list.length;
