@@ -64,7 +64,7 @@ hf_service.create_thread = function(owner_hash, public_append, public_thread, ca
  * Creates a post
  *
  * @param <post_content>: the content of the post
-  * @param <threads_list>: (= null if unspecified) list the threads the post will be posted to. 
+  * @param <threads_list>: (= null if unspecified) list the threads the post will be posted to.
   A thread must contain fields
             {
                 'thread_chunk_name':,
@@ -128,10 +128,10 @@ hf_service.create_post = function(post_content,threads_list,callback)
 
             //chunk certification
             hf_service.certify(
-                hf_service.user_private_chunk, 
-                post_chunk_name, 
-                part_hash, 
-                hf.hash(stringified_post_content), 
+                hf_service.user_private_chunk,
+                post_chunk_name,
+                part_hash,
+                hf.hash(stringified_post_content),
                 function(success){
                     if(success){
                         if(threads_list){
@@ -161,7 +161,7 @@ hf_service.create_post = function(post_content,threads_list,callback)
  * @param <callback>: the function called once the response has arrived with parameter
             = {
                 "post_chunk_name" : ,
-                "symetric_key" : 
+                "symetric_key" :
             }; if the append had succeded
             = null otherwise
  */
@@ -198,13 +198,13 @@ hf_service.append_post_to_threads = function(post_name, post_key, threads_list,c
                 assert(typeof threads_list[i]['thread_chunk_name'] == "string");
                 assert(typeof threads_list[i]['symetric_key'] == "string");
 
-                hf_service.certify(hf_service.user_private_chunk, 
-                    threads_list[i]['thread_chunk_name'], 
-                    post_part_hash, 
-                    hf.hash(stringified_post_info), 
+                hf_service.certify(hf_service.user_private_chunk,
+                    threads_list[i]['thread_chunk_name'],
+                    post_part_hash,
+                    hf.hash(stringified_post_info),
                     function(success){
                         iteration--;
-                        
+
                         if(!success){
                             if(callback)
                                 callback(false);
@@ -265,10 +265,10 @@ hf_service.comment_post = function(post_chunk_name,post_chunk_key,comment,callba
     };
     var stringified_comment = JSON.stringify(comment_json);
 
-    hf_service.certify(hf_service.user_private_chunk, 
-        post_chunk_name, 
-        part_hash, 
-        hf.hash(stringified_comment), 
+    hf_service.certify(hf_service.user_private_chunk,
+        post_chunk_name,
+        part_hash,
+        hf.hash(stringified_comment),
         function(success){
             if(!success){
                 if(callback)
@@ -332,8 +332,7 @@ hf_service.list_posts = function(thread_name,callback)
                     assert(json_message['status'] == 'ok');
 
                     hf_service.resolve_post_author(
-                        post_info_json['post_chunk_name'], 
-                        json_message['chunk_content'], 
+                        json_message['chunk_content'],
                         function(resolved_post){
                             if(resolved_post){
                                 list_resolved_posts.push(resolved_post);
@@ -397,11 +396,11 @@ hf_service.resolve_comment_author = function(post_name,comment_json, callback)
 
             hf_service.verify_certification(
                 user_public_chunk,
-                post_name, 
-                comment_json['__meta']['part_hash'], 
-                hf.hash(JSON.stringify(comment_json)), 
+                post_name,
+                comment_json['__meta']['part_hash'],
+                hf.hash(JSON.stringify(comment_json)),
                 function(success){
-                    if(!success){ //if the comment is not certified 
+                    if(!success){ //if the comment is not certified
                         callback(null);
                         console.info('comment not certified');
                         return;
@@ -420,13 +419,13 @@ hf_service.resolve_comment_author = function(post_name,comment_json, callback)
  * Generic post resolver adding the ['author'] key fetched from the
  * ['__meta']['author_user_hash'] and verifying its certification
  */
-hf_service.resolve_post_author = function(post_name,post_content, callback)
+hf_service.resolve_post_author = function(post_content, callback)
 {
     assert(hf.is_function(callback));
-    assert(hf.is_hash(post_name));
     assert(typeof post_content[0] == 'string');
 
     var post_json = JSON.parse(post_content[0]);
+    var post_name = post_json['__meta']['chunk_name'];
 
     hf_service.get_user_public_chunk(post_json['__meta']['author_user_hash'],function(user_public_chunk){
         if (user_public_chunk == null)
@@ -437,10 +436,10 @@ hf_service.resolve_post_author = function(post_name,post_content, callback)
 
         //verify post certification
         hf_service.verify_certification(
-            user_public_chunk, 
-            post_name, 
-            post_json['__meta']['part_hash'], 
-            hf.hash(post_content[0]), 
+            user_public_chunk,
+            post_name,
+            post_json['__meta']['part_hash'],
+            hf.hash(post_content[0]),
             function(success){
                 if(!success){ //if the post is not certified
                     callback(null);
@@ -490,7 +489,7 @@ hf_service.resolve_post_author = function(post_name,post_content, callback)
                     );
                 }
             }
-        );      
+        );
     });
 }
 
