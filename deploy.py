@@ -1,6 +1,7 @@
 
 import argparse
 import os
+import platform
 import shutil
 import signal
 import subprocess
@@ -42,6 +43,7 @@ def popen_mongod(db_name):
 
 def popen_firefox(profile, url):
     cmd = ['firefox']
+    cmd.extend(['--new-instance'])
     cmd.extend(['--profile', profile])
     cmd.extend(['--new-tab', url])
 
@@ -50,6 +52,8 @@ def popen_firefox(profile, url):
 
     if os.path.isdir(profile):
         shutil.rmtree(profile)
+
+    os.makedirs(profile)
 
     return popen(cmd)
 
@@ -68,6 +72,10 @@ def popen_serv(server_type, testing_profile=False):
 def pclose(p):
     p.send_signal(signal.SIGINT)
     p.wait()
+
+def free__port(port):
+    if platform.system() != 'Windows':
+        os.system("kill $(lsof -t -i:{})".format(port))
 
 
 if __name__ == '__main__':
@@ -94,6 +102,8 @@ if __name__ == '__main__':
         port=web_server_port
     )
 
+    free__port(web_server_port)
+
     mongod = popen_mongod(db_name)
     servdata = popen_serv('data', testing_profile=args.testing_profile)
     servweb = popen_serv('web', testing_profile=args.testing_profile)
@@ -109,5 +119,4 @@ if __name__ == '__main__':
     pclose(servdata)
     pclose(mongod)
 
-    if os.uname()[0] == 'Darwin':
-        os.system("kill $(lsof -t -i:{})".format(5000))
+    free__port(web_server_port)
