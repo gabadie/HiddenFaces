@@ -325,47 +325,50 @@ hf_service.list_posts = function(thread_name,callback)
         for(var i = 0; i < list_posts_info.length; i++) {
             var post_info_json = JSON.parse(list_posts_info[i]);
 
-            hf_com.get_data_chunk(
-                post_info_json['post_chunk_name'],
-                post_info_json['symetric_key'],
-                function(json_message){
-                    assert(json_message['status'] == 'ok');
-
-                    hf_service.resolve_post_author(
-                        json_message['chunk_content'],
-                        function(resolved_post){
-                            if(resolved_post){
-                                list_resolved_posts.push(resolved_post);
-                            }
-
-                            iteration++;
-
-                            if(iteration == list_posts_info.length)
-                            {
-                                list_resolved_posts.sort(function(post_a, post_b){
-                                    if (post_a['date'] > post_b['date'])
-                                    {
-                                        return -1;
-                                    }
-                                    else if (post_a['date'] < post_b['date'])
-                                    {
-                                        return 1;
-                                    }
-
-                                    return 0;
-                                });
-
-                                if (callback)
-                                {
-                                    callback(list_resolved_posts);
+            (function(post_info_json){
+                hf_com.get_data_chunk(
+                    post_info_json['post_chunk_name'],
+                    post_info_json['symetric_key'],
+                    function(json_message){
+                        assert(json_message['status'] == 'ok');
+                        hf_service.resolve_post_author(
+                            thread_name,
+                            post_info_json['symetric_key'],
+                            json_message['chunk_content'],
+                            function(resolved_post){
+                                if(resolved_post){
+                                    list_resolved_posts.push(resolved_post);
                                 }
 
-                                list_posts = list_resolved_posts;
+                                iteration++;
+
+                                if(iteration == list_posts_info.length)
+                                {
+                                    list_resolved_posts.sort(function(post_a, post_b){
+                                        if (post_a['date'] > post_b['date'])
+                                        {
+                                            return -1;
+                                        }
+                                        else if (post_a['date'] < post_b['date'])
+                                        {
+                                            return 1;
+                                        }
+
+                                        return 0;
+                                    });
+
+                                    if (callback)
+                                    {
+                                        callback(list_resolved_posts);
+                                    }
+
+                                    list_posts = list_resolved_posts;
+                                }
                             }
-                        }
-                    );
-                }
-            );
+                        );
+                    }
+                );
+            })(post_info_json)
         }
     });
 
@@ -419,13 +422,19 @@ hf_service.resolve_comment_author = function(post_name,comment_json, callback)
  * Generic post resolver adding the ['author'] key fetched from the
  * ['__meta']['author_user_hash'] and verifying its certification
  */
-hf_service.resolve_post_author = function(post_content, callback)
+hf_service.resolve_post_author = function(thread_name,post_key,post_content, callback)
 {
     assert(hf.is_function(callback));
     assert(typeof post_content[0] == 'string');
 
     var post_json = JSON.parse(post_content[0]);
     var post_name = post_json['__meta']['chunk_name'];
+
+    var post_info = {
+        "post_chunk_name" : post_name,
+        "symetric_key" : post_key
+    };
+    var stringified_post_info = JSON.stringify(post_info);
 
     hf_service.get_user_public_chunk(post_json['__meta']['author_user_hash'],function(user_public_chunk){
         if (user_public_chunk == null)
@@ -446,48 +455,61 @@ hf_service.resolve_post_author = function(post_content, callback)
                     console.info('post not certified');
                     return;
                 }
-                //post resolution
-                var clone_post = hf.clone(post_json);
-                clone_post['author'] = user_public_chunk;
-                clone_post['comments'] = [];
-
-                //comments resolution
-                var iterations = post_content.length - 1;
-
-                if(iterations == 0)
-                    callback(clone_post);
-
-                for(var i = 1; i < post_content.length; i++){
-
-                    hf_service.resolve_comment_author(
-                        post_name,
-                        JSON.parse(post_content[i]),
-                        function(comment){
-                            if(comment){ //if comment not corrupted
-                                clone_post['comments'].push(comment);
-                            }
-                            iterations--;
-
-                            if(iterations == 0){
-
-                                clone_post['comments'].sort(function(comment_a, comment_b){
-                                    if (comment_a['date'] > comment_b['date'])
-                                    {
-                                        return -1;
-                                    }
-                                    else if (comment_a['date'] < comment_b['date'])
-                                    {
-                                        return 1;
-                                    }
-
-                                    return 0;
-                                });
-
-                                callback(clone_post);
-                            }
+                //verify post in thread certification
+                hf_service.verify_certification(
+                    user_public_chunk,
+                    thread_name,
+                    post_json['__meta']['part_hash'],
+                    hf.hash(JSON.stringify(post_info)),
+                    function(success){
+                        if(!success){ //if the post is not certified
+                            callback(null);
+                            console.info('post not certified');
+                            return;
                         }
-                    );
-                }
+                        //post resolution
+                        var clone_post = hf.clone(post_json);
+                        clone_post['author'] = user_public_chunk;
+                        clone_post['comments'] = [];
+
+                        //comments resolution
+                        var iterations = post_content.length - 1;
+
+                        if(iterations == 0)
+                            callback(clone_post);
+
+                        for(var i = 1; i < post_content.length; i++){
+
+                            hf_service.resolve_comment_author(
+                                post_name,
+                                JSON.parse(post_content[i]),
+                                function(comment){
+                                    if(comment){ //if comment not corrupted
+                                        clone_post['comments'].push(comment);
+                                    }
+                                    iterations--;
+
+                                    if(iterations == 0){
+
+                                        clone_post['comments'].sort(function(comment_a, comment_b){
+                                            if (comment_a['date'] > comment_b['date'])
+                                            {
+                                                return -1;
+                                            }
+                                            else if (comment_a['date'] < comment_b['date'])
+                                            {
+                                                return 1;
+                                            }
+
+                                            return 0;
+                                        });
+
+                                        callback(clone_post);
+                                    }
+                                }
+                            );
+                        }
+                });
             }
         );
     });
