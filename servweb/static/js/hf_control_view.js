@@ -283,6 +283,8 @@ hf_control.view_threads = function(threads_names, callback)
 
             if (posts_lists.length == threads_names.length)
             {
+                posts_lists = posts_lists.sort();
+
                 posts_list = hf_service.merge_posts_lists(posts_lists);
 
                 var template_context = {
