@@ -102,6 +102,90 @@ test_utils.threads_example = function()
     return [thread1_info,thread2_info];
 }
 
+test_utils.create_uncertified_post = function(threads_list)
+{
+    assert(hf_service.is_connected());
+
+    var owner_hash = hf_service.user_chunks_owner();
+    var user_hash = hf_service.user_hash();
+
+    var part_hash = hf.generate_hash('uGzvkgD6lr6WlMTbvhWK\n');
+    var post_chunk_name =
+        hf.generate_hash('ERmO4vptXigWBnDUjnEN\n');
+    var post_chunk_content = {
+        '__meta': {
+            'type': '/post',
+            'chunk_name': post_chunk_name,
+            'part_hash' : part_hash,
+            'author_user_hash': user_hash
+        },
+        'date': hf.get_date_time(),
+        'content': 'uncertified post'
+    };
+
+    var stringified_post_content = JSON.stringify(post_chunk_content);
+
+    var symetric_key = '';
+
+    var post_info = null;
+    // Creates the post's chunk
+    hf_com.create_data_chunk(
+        post_chunk_name,
+        owner_hash,
+        symetric_key,
+        [stringified_post_content],
+        true,
+        function(json_message){
+
+            post_info = {
+                'status' :  json_message['status'],
+                'post_chunk_name':   post_chunk_name,
+                'symetric_key':   symetric_key
+            };
+
+            if(threads_list)
+                hf_service.append_post_to_threads(post_chunk_name,symetric_key, threads_list);
+        }
+    );
+    assert(post_info != null);
+    return post_info;
+}
+
+hf_service.uncertified_comment = function(post_chunk_name,post_chunk_key)
+{
+    assert(hf.is_hash(post_chunk_name));
+    assert(hf_com.is_AES_key(post_chunk_key) || post_chunk_key == '');
+
+    var transaction = new hf_com.Transaction();
+
+    var part_hash = hf.generate_hash('tZsSPDK94TJZhhGHF2j8\n');
+    var user_hash = hf_service.user_hash();
+    var comment_json = {
+        '__meta': {
+            'type': '/comment',
+            'part_hash' : part_hash,
+            'author_user_hash': user_hash
+        },
+        'date': hf.get_date_time(),
+        'content': 'uncertified comment'
+    };
+    var stringified_comment = JSON.stringify(comment_json);
+
+    transaction.extend_data_chunk(
+        post_chunk_name,
+        hf_service.user_chunks_owner(),
+        post_chunk_key,
+        [stringified_comment]
+    );
+
+    var return_value = null;
+    transaction.commit(function(json_message){
+        return_value = (json_message['status'] == 'ok');
+    });
+    assert(return_value != null);
+    return return_value;
+}
+
 // ---------------------------------------------------------- USER ACCOUNT TESTS
 
 test_hf_service.create_account = function()
@@ -979,4 +1063,5 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.verify_post_certification,'test_hf_service.verify_post_certification');
     test_utils.run(test_hf_service.verify_append_posts_certification,'test_hf_service.verify_append_posts_certification');
     test_utils.run(test_hf_service.verify_comment_certification,'test_hf_service.verify_comment_certification');
+    test_utils.run(test_hf_service.list_certified_posts_comments, 'test_hf_service.list_certified_posts_comments ');
 }

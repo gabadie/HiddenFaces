@@ -159,8 +159,11 @@ hf_service.create_post = function(post_content,threads_list,callback)
                 'symetric_key':
             };
  * @param <callback>: the function called once the response has arrived with parameter
-            = true if the append had succeded
-            = false otherwise
+            = {
+                "post_chunk_name" : ,
+                "symetric_key" : 
+            }; if the append had succeded
+            = null otherwise
  */
 hf_service.append_post_to_threads = function(post_name, post_key, threads_list,callback)
 {
@@ -217,9 +220,9 @@ hf_service.append_post_to_threads = function(post_name, post_key, threads_list,c
             transaction.commit(function(json_message){
                 if (json_message['status'] != 'ok'){
                     if(callback)
-                        callback(false);
+                        callback(null);
                 }else if (callback){
-                    callback(true);
+                    callback(post_info);
                 }
             });
         }
@@ -238,7 +241,7 @@ hf_service.comment_post = function(post_chunk_name,post_chunk_key,comment,callba
 {
     assert(hf.is_hash(post_chunk_name));
     assert(typeof comment == 'string');
-    assert(hf_com.is_AES_key(post_chunk_key));
+    assert(hf_com.is_AES_key(post_chunk_key) || post_chunk_key == '');
     assert(hf.is_function(callback) || callback == undefined);
 
     var transaction = new hf_com.Transaction();
@@ -367,7 +370,7 @@ hf_service.list_posts = function(thread_name,callback)
 }
 
 /*
- * Generic comment resolver adding the ['author'] key fetched from the
+ * Comment resolver adding the ['author'] key fetched from the
  * ['__meta']['author_user_hash'] and verifying its certification
  */
 hf_service.resolve_comment_author = function(post_name,comment_json, callback)
@@ -413,6 +416,7 @@ hf_service.resolve_post_author = function(post_name,post_content, callback)
 {
     assert(hf.is_function(callback));
     assert(hf.is_hash(post_name));
+    assert(typeof post_content[0] == 'string');
 
     var post_json = JSON.parse(post_content[0]);
 
@@ -451,7 +455,7 @@ hf_service.resolve_post_author = function(post_name,post_content, callback)
                         post_name,
                         JSON.parse(post_content[i]),
                         function(comment){
-                            if(comment){ //if comment corrupted, it's erased from the view
+                            if(comment){ //if comment not corrupted
                                 clone_post['comments'].push(comment);
                             }
                             iterations--;

@@ -160,9 +160,9 @@ test_hf_populate.post_into_circle = function()
             'symetric_key': hf_service.get_encryption_key(hf_service.user_private_chunk, circle_hash)
         };
 
-        hf_service.create_post(message, [thread_info], function(success){
+        hf_service.create_post(message, [thread_info], function(json_message){
             test_utils.assert(
-                success == true,
+                json_message != null,
                 'post ' + user_id + '\'s creation should success'
             );
         });

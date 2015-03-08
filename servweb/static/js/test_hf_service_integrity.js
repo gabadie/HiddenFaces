@@ -183,3 +183,74 @@ test_hf_service.verify_comment_certification = function()
 
     test_utils.assert_success(6 + post_list_content.length);
 }
+
+test_hf_service.list_certified_posts_comments = function()
+{
+    var user_profile = test_hf_service.john_smith_profile();
+    hf_service.create_user(user_profile);
+
+    var owner_hash = hf.generate_hash("cWDb8suW3i");
+
+    //user connexion
+    hf_service.login_user(user_profile, null);
+    test_utils.assert(hf_service.is_connected(), 'should be connected after');
+
+    var thread1_info = null;
+
+    //threads list creation
+    hf_service.create_thread(owner_hash,true,true,function(thread_info){
+        test_utils.assert(thread_info['status'] == "ok");
+        thread1_info = thread_info;
+    });
+    //store key
+    hf_service.store_key(hf_service.user_private_chunk, thread1_info['thread_chunk_name'], thread1_info['symetric_key']);
+
+    test_utils.assert(thread1_info != null);
+    var threads_list = [thread1_info];
+
+    //certified post
+    var post_content = test_hf_service.user_example_post();
+    hf_service.create_post(post_content,threads_list, function(post_info){
+        test_utils.assert(typeof post_info['post_chunk_name'] == "string");
+        test_utils.assert(typeof post_info['symetric_key'] == "string");
+
+        hf.sleep(1 * 1000);
+
+        hf_service.comment_post(post_info['post_chunk_name'],post_info['symetric_key'],"comment certified 1",null);
+
+        hf.sleep(2 * 1000);
+
+        hf_service.uncertified_comment(post_info['post_chunk_name'],post_info['symetric_key']);
+
+        hf.sleep(1 * 1000);
+
+        hf_service.comment_post(post_info['post_chunk_name'],post_info['symetric_key'],'comment certified 2',null);
+
+        hf_com.get_data_chunk(
+            post_info['post_chunk_name'],
+            post_info['symetric_key'],
+            function(json_message){
+                //comment corruption
+                JSON.parse(json_message['chunk_content'][2])['__meta']['author_user_hash'] = owner_hash;
+
+                //uncertified post
+                var post_info = test_utils.create_uncertified_post(threads_list);
+                test_utils.assert(typeof post_info['post_chunk_name'] == "string");
+                test_utils.assert(typeof post_info['symetric_key'] == "string");
+
+                hf_service.comment_post(post_info['post_chunk_name'],post_info['symetric_key'],'comment certified',null); 
+
+                hf.sleep(2 * 1000);
+
+                //get list of posts and comments certified
+                var resolved_posts = hf_service.list_posts(thread1_info['thread_chunk_name']);
+                test_utils.assert(resolved_posts != null, 'resolved_posts undefined');
+                test_utils.assert(resolved_posts.length == 1, 'resolved_posts length = '+ resolved_posts.length);
+                test_utils.assert(resolved_posts[0]['comments'].length == 2,'comments length'+resolved_posts[0]['comments'].length);      
+                test_utils.assert(resolved_posts[0]['comments'][0]['date'] > resolved_posts[0]['comments'][1]['date']);
+            }
+        );
+    });
+
+    test_utils.assert_success(11);
+}
