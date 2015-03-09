@@ -928,6 +928,8 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.list_circles_names, 'test_hf_service.list_circles_names');
     test_utils.run(test_hf_service.list_circle_threads_names, 'test_hf_service.list_circle_threads_names');
 
+    //GROUPS
+    test_utils.run(test_hf_service.create_group,'test_hf_service.create_group');
     // REGISTRY TESTES
     test_utils.run(test_hf_service.is_valide_chunk,"test_hf_service.is_valide_chunk");
     test_utils.run(test_hf_service.is_valide_profile,'test_hf_service.is_valide_profile');

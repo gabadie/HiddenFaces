@@ -129,7 +129,7 @@ hf_service.create_group = function(group_name, description, public_group, public
                 };
                 var shared_chunk = hf_service.export_group_shared_chunk(private_chunk);
                 transaction.create_data_chunk(
-                    shared_chunk_hash,
+                    shared_chunk_name,
                     chunks_owner,
                     shared_chunk_key,
                     [JSON.stringify(shared_chunk)],
@@ -150,19 +150,21 @@ hf_service.create_group = function(group_name, description, public_group, public
                 if (json_message['status'] != 'ok')
                 {
                     alert('create group has failed');
-                    return;
-                }
-
-                if (callback)
-                {
-                    callback(group_hash);
+                    if(callback)
+                        callback(null);
+                }else {
+                    //current user is the group's admin
+                    var user_private_chunk = hf_service.user_private_chunk;
+                    hf_service.store_key(user_private_chunk, private_chunk_name, private_chunk_key);
+                    user_private_chunk['groups']['admin_of'][group_hash] = private_chunk_name;
+                    hf_service.save_user_chunks(function(success){
+                        if(success && callback){
+                            callback(group_hash);
+                        }else if(callback)
+                            callback(null);
+                    });
                 }
             });
-
-            //current user is the group's admin
-            var user_private_chunk = hf_service.user_public_chunk;
-            hf_service.store_key(user_private_chunk, private_chunk_name, private_chunk_key);
-            user_private_chunk['groups']['admin_of'][group_hash] = private_chunk_name;
         });
     });
 
@@ -310,6 +312,9 @@ hf_service.add_user_to_group = function(user_hash, group_hash, callback)
                 //add user to group
                 group_json['users'].push(user_hash);
 
+                hf_service.save_group_chunks(group_json,function(success){
+                    callback(success);
+                });
             }
         );
     });
