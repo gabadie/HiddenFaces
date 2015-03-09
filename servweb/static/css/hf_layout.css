@@ -112,7 +112,8 @@
     vertical-align: middle;
 }
 
-.hf_layout_cell .btn btn-default
+
+.hf_layout_cell .btn-default
 {
     display: block;
     vertical-align: middle;
@@ -135,5 +136,8 @@
 .hf_layout_cell .hf_comment
 {
     padding: 10px 10px 10px 0px;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: white;
 }
 
