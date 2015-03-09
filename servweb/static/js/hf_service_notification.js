@@ -37,6 +37,23 @@ hf_service.define_notification = function(notification_type, notification_interf
 }
 
 /*
+ * Inits a notification repository into a given repository chunk.
+ *
+ * @param <repository_chunk>: is the chunk's content where to init the notification
+ *      repository.
+ */
+hf_service.init_notification_repository = function(repository_chunk)
+{
+    assert(!('notifications' in repository_chunk));
+
+    /*
+     * pending notifications that have already been fetched but don't have
+     * automated process and are waiting for the user to be processed.
+     */
+    repository_chunk['notifications'] = [ ];
+}
+
+/*
  * Pushs a notification to an user's protected chunk
  *
  * @param <notifications_chunk_name>: the notifications' chunk name
@@ -79,10 +96,48 @@ hf_service.push_notification = function(notifications_chunk_name, notifications_
     );
 }
 
+/*
+ * Deletes a notification with its hash
+ *
+ * @param <repository_chunk>: the chunk content containing the
+ *      notification repository
+ * @param <notification_hash>: the notification's hash to delete
+ * @param <callback>: the function called once done
+ *      @param <success>: true or false
+ *      function my_callback(success)
+ */
+hf_service.delete_notification = function(repository_chunk, notification_hash, callback)
+{
+    assert(hf.is_hash(notification_hash));
+    assert(hf.is_function(callback));
+
+    var notifications_json = repository_chunk['notifications'];
+
+    for (var i = 0; i < notifications_json.length; i++)
+    {
+        var notification_json = notifications_json[i];
+
+        assert(hf.is_hash(notification_json['__meta']['hash']));
+
+        if (notification_json['__meta']['hash'] != notification_hash)
+        {
+            continue;
+        }
+
+        notifications_json.splice(i, 1);
+
+        callback(true);
+
+        return;
+    }
+
+    callback(false);
+}
+
 
 // --------------------------------------------------- USER NOTIFICATION SERVICE
 /*
- * Pushs a notification to an user's protected chunk
+ * Pushs a user notification to an user's protected chunk
  *
  * @param <user_hash>: the user's hash
  * @param <notification_json>: the notification JSON to push
@@ -113,7 +168,7 @@ hf_service.push_user_notification = function(user_hash, notification_json, callb
 }
 
 /*
- * Deletes a notification with its hash
+ * Deletes an user notification with its hash
  *
  * @param <notification_hash>: the notification's hash to delete
  * @param <callback>: the function called once done
@@ -123,32 +178,22 @@ hf_service.push_user_notification = function(user_hash, notification_json, callb
 hf_service.delete_user_notification = function(notification_hash, callback)
 {
     assert(hf_service.is_connected());
-    assert(hf.is_hash(notification_hash));
-    assert(hf.is_function(callback));
 
-    var notifications_json = hf_service.user_private_chunk['notifications'];
-
-    for (var i = 0; i < notifications_json.length; i++)
-    {
-        var notification_json = notifications_json[i];
-
-        assert(hf.is_hash(notification_json['__meta']['hash']));
-
-        if (notification_json['__meta']['hash'] != notification_hash)
+    hf_service.delete_notification(
+        hf_service.user_private_chunk,
+        notification_hash,
+        function(success)
         {
-            continue;
+            if (success)
+            {
+                hf_service.save_user_chunks(callback);
+            }
+            else
+            {
+                callback(false);
+            }
         }
-
-        notifications_json.splice(i, 1);
-
-        hf_service.save_user_chunks(function(success){
-            callback(success);
-        });
-
-        return;
-    }
-
-    callback(false);
+    );
 }
 
 /*

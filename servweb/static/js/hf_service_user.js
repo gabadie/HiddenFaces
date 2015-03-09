@@ -147,11 +147,6 @@ hf_service.create_user = function(user_profile, callback)
             },
             'certifications' : {
             },
-            /*
-             * pending notifications that have already been fetched but don't have
-             * automated process and are waiting for the user to be processed.
-             */
-            'notifications': [ ],
 
             'contacts': {},
 
@@ -163,6 +158,7 @@ hf_service.create_user = function(user_profile, callback)
         };
 
         hf_service.init_key_repository(private_chunk);
+        hf_service.init_notification_repository(private_chunk);
 
         // Generates the user's public chunk's content
         var public_chunk = hf_service.export_user_public_chunk(private_chunk);
