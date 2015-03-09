@@ -125,6 +125,7 @@ hf_control.circle_contacts = function(circle_hash)
         hf_service.list_contacts(function(list_contacts)
         {
             var params = {
+
                 'circle_hash': circle_hash,
                 'contacts': list_contacts
             }
