@@ -210,6 +210,76 @@ hf_service.delete_notification = function(repository_chunk, notification_hash, c
 }
 
 /*
+ * Processes notifications automations on given notification json.
+ *
+ * @param <notifications_json>: the notifications to process
+ * @param <callback>: the function called once done
+ *      @param <continued_notifications_json>: the notifications that made it
+ *          throught
+ *      function my_callback(continued_notifications_json)
+ */
+hf_service.process_notifications = function(notifications_json, callback)
+{
+    var continued_notifications_json = [];
+
+    for (var i = 0; i < notifications_json.length; i++)
+    {
+        var notification_json = {};
+        var notificationAutomation = null;
+
+        try
+        {
+            notification_json = JSON.parse(notifications_json[i]);
+
+            /*
+             * TODO: need to validate the notification in case someone else has
+             * appened an invalid one (issue #27).
+             */
+
+            var notificationType = notification_json['__meta']['type'] ;
+
+            assert(notificationType in hf_service.notification_interface);
+
+            notificationAutomation = hf_service.notification_interface[notificationType].automation;
+        }
+        catch (err)
+        {
+            continue;
+        }
+
+        if (notificationAutomation != null)
+        {
+            assert(hf.is_function(notificationAutomation));
+
+            status = notificationAutomation(notification_json);
+
+            assert(typeof status == 'string');
+
+            if (status == 'discard')
+            {
+                continue;
+            }
+
+            assert(status == 'continue');
+        }
+
+        /*
+         * We store this notification into the user's private chunk
+         */
+        if (!('hash' in notification_json['__meta']))
+        {
+            notification_json['__meta']['hash'] = hf.generate_hash(
+                JSON.stringify(notification_json)
+            );
+        }
+
+        continued_notifications_json.push(notification_json);
+    }
+
+    callback(continued_notifications_json);
+}
+
+/*
  * Pulls fresh notifications, processes automated one and stores the remaining
  * into the notification repository.
  *
@@ -249,61 +319,19 @@ hf_service.pull_fresh_notifications = function(repository_chunk, callback)
 
         var notifications_json = json_message['chunk'][protected_chunk_name];
 
-        for (var i = 0; i < notifications_json.length; i++)
-        {
-            var notification_json = {};
-            var notificationAutomation = null;
-
-            try
+        hf_service.process_notifications(
+            notifications_json,
+            function(survived_notifications_json)
             {
-                notification_json = JSON.parse(notifications_json[i]);
+                repository_chunk['notifications'] =
+                    repository_chunk['notifications'].concat(survived_notifications_json);
 
-                /*
-                 * TODO: need to validate the notification in case someone else has
-                 * appened an invalid one (issue #27).
-                 */
-
-                var notificationType = notification_json['__meta']['type'] ;
-
-                assert(notificationType in hf_service.notification_interface);
-
-                notificationAutomation = hf_service.notification_interface[notificationType].automation;
-            }
-            catch (err)
-            {
-                continue;
-            }
-
-            if (notificationAutomation != null)
-            {
-                assert(hf.is_function(notificationAutomation));
-
-                status = notificationAutomation(notification_json);
-
-                assert(typeof status == 'string');
-
-                if (status == 'discard')
+                if (callback)
                 {
-                    continue;
+                    callback(notifications_json.length);
                 }
-
-                assert(status == 'continue');
             }
-
-            /*
-             * We store this notification into the user's private chunk
-             */
-            notification_json['__meta']['hash'] = hf.generate_hash(
-                JSON.stringify(notification_json)
-            );
-
-            repository_chunk['notifications'].push(notification_json);
-        }
-
-        if (callback)
-        {
-            callback(notifications_json.length);
-        }
+        );
     });
 }
 
