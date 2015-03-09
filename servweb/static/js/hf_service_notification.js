@@ -236,14 +236,14 @@ hf_service.pull_fresh_notifications = function(callback)
  *      @param <notifcations_list>: the list of notifications
  *      function my_callback(notifcations_list)
  */
-hf_service.list_notifications = function(callback)
+hf_service.list_user_notifications = function(callback)
 {
     assert(hf.is_function(callback));
 
     hf_service.pull_fresh_notifications(function(success){
         if (!success)
         {
-            alert('hf_service.list_notifications() failed');
+            alert('hf_service.list_user_notifications() failed');
         }
 
         var notifications = [];
