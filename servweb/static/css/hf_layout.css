@@ -74,8 +74,14 @@
 
 .hf_layout_cell .hf_action_bar
 {
+    display: block;
     width: 100%;
     padding: 10px 20px 20px 20px;
+}
+
+.hf_layout_cell .hf_action_bar button
+{
+    display: inline-block;
 }
 
 .hf_layout_cell .hf_empty
@@ -131,7 +137,6 @@
     padding: 0px 10px 10px 10px;
     margin: 0px 20px 0px 30px;
 }
-
 
 .hf_layout_cell .hf_comment
 {
