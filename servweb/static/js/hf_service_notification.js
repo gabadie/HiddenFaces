@@ -220,6 +220,8 @@ hf_service.delete_notification = function(repository_chunk, notification_hash, c
  */
 hf_service.process_notifications = function(notifications_json, callback)
 {
+    assert(hf.is_function(callback));
+
     var continued_notifications_json = [];
 
     for (var i = 0; i < notifications_json.length; i++)
@@ -398,6 +400,31 @@ hf_service.list_notifications = function(repository_chunk, callback)
 }
 
 
+/*
+ * Pushs a notification to an user's protected chunk
+ *
+ * @param <repository_chunk>: the chunk content containing the
+ *      public notification repository
+ * @param <notification_json>: the notification JSON to push
+ * @param <callback>: the callback once the notification has been pushed
+ *      @param <success>: true or false
+ *      function my_callback(success)
+ */
+hf_service.refresh_notifications = function(repository_chunk, callback)
+{
+    assert(hf_service.has_notification_repository(repository_chunk));
+    assert(hf.is_function(callback));
+
+    var notifications_json = repository_chunk['notifications'];
+
+    hf_service.process_notifications(notifications_json, function(survived_notifications_json){
+        repository_chunk['notifications'] = survived_notifications_json;
+
+        callback(true);
+    });
+}
+
+
 // --------------------------------------------------- USER NOTIFICATION SERVICE
 /*
  * Pushs a user notification to an user's protected chunk
@@ -487,6 +514,21 @@ hf_service.pull_fresh_user_notifications = function(callback)
         }
     );
 }
+
+/*
+ * Refreshes users' notifications
+ *
+ * @param <callback>: the function called once done
+ *      @param <success>: true or false
+ *      function my_callback(success)
+ */
+hf_service.refresh_user_notifications = function(callback)
+{
+    assert(hf_service.is_connected());
+
+    hf_service.refresh_notifications(hf_service.user_private_chunk, callback);
+}
+
 
 /*
  * Lists user's notifications
