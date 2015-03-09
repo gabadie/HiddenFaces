@@ -96,7 +96,7 @@ hf_service.push_notification = function(user_hash, notification_json, callback)
  *      @param <success>: true or false
  *      function my_callback(success)
  */
-hf_service.delete_notification = function(notification_hash, callback)
+hf_service.delete_user_notification = function(notification_hash, callback)
 {
     assert(hf_service.is_connected());
     assert(hf.is_hash(notification_hash));

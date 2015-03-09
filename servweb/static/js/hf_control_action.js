@@ -75,9 +75,9 @@ hf_control.log_out = function()
 
 // --------------------------------------------------------------- NOTIFICATIONS
 
-hf_control.delete_notification = function(notification_hash)
+hf_control.delete_user_notification = function(notification_hash)
 {
-    hf_service.delete_notification(notification_hash, function(success){
+    hf_service.delete_user_notification(notification_hash, function(success){
         assert(success);
 
         hf_control.refresh_view();

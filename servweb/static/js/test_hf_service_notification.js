@@ -170,7 +170,7 @@ test_hf_service.list_user_notifications = function()
     test_utils.assert_success(6);
 }
 
-test_hf_service.delete_notification = function()
+test_hf_service.delete_user_notification = function()
 {
     var user_profile0 = test_hf_service.john_smith_profile(0);
     var user_hash0 = hf_service.create_user(user_profile0);
@@ -184,7 +184,7 @@ test_hf_service.delete_notification = function()
 
     hf_service.login_user(user_profile0);
 
-    hf_service.delete_notification(hf.generate_hash(''), function(success){
+    hf_service.delete_user_notification(hf.generate_hash(''), function(success){
         test_utils.assert(success == false, 'deleting a non existing notification should fail');
     });
 
@@ -199,7 +199,7 @@ test_hf_service.delete_notification = function()
     hf_service.list_user_notifications(function(notifications_list){
         test_utils.assert(notifications_list.length == 2, 'should have two notifications');
 
-        hf_service.delete_notification(notifications_list[0]['__meta']['hash'], function(success){
+        hf_service.delete_user_notification(notifications_list[0]['__meta']['hash'], function(success){
             test_utils.assert(success == true, 'deleting existing notification should success');
         });
     });
