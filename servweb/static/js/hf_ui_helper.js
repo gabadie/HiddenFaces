@@ -10,7 +10,7 @@ Handlebars.registerHelper('hf_cell', function(options) {
 });
 
 Handlebars.registerHelper('hf_user_link', function(user_public_chunk, options){
-    var out = '<div><a'
+    var out = '<a'
 
     out += ' class="hf_user_link"'
     out += ' onclick="return hf_control.view(\'/profile/' + user_public_chunk['__meta']['user_hash'] + '\');"';
@@ -18,10 +18,11 @@ Handlebars.registerHelper('hf_user_link', function(user_public_chunk, options){
     out += user_public_chunk['profile']['first_name'];
     out += ' ';
     out += user_public_chunk['profile']['last_name'];
-    out += '</a></div>';
+    out += '</a>';
 
     return out;
 });
+
 
 Handlebars.registerHelper('hf_user_add_contact', function(user_public_chunk, options){
     var user_hash = user_public_chunk['__meta']['user_hash'];
@@ -66,4 +67,21 @@ Handlebars.registerHelper('hf_chunk', function(chunk, options){
     out += '</textarea>'
 
     return out;
+});
+
+Handlebars.registerHelper('hf_timestamp_post', function(timestamp){
+    return '<div style="text-align:right;color:black; ">'+timestamp['date']+' </div>';
+});
+
+Handlebars.registerHelper('hf_comment', function(comment, options) {
+    var out = '';
+    out += comment['content'];
+    return out;
+});
+
+Handlebars.registerHelper('if_eq', function(a, b, opts) {
+    if(a == b)
+        return opts.fn(this);
+    else
+        return opts.inverse(this);
 });

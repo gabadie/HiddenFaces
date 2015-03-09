@@ -129,7 +129,7 @@ test_utils.refresh = function()
         );
     }
 
-    domElem.scrollIntoView();
+    window.scrollTo(0, document.body.scrollHeight);
 }
 
 /*

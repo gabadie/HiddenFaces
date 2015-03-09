@@ -10,10 +10,11 @@ import time
 
 
 DEFAULT_CWD=os.path.dirname(os.path.abspath(__file__)) + '/'
+DEVNULL = open(os.devnull, 'w')
 
 
-def popen(cmd, cwd=DEFAULT_CWD):
-    p = subprocess.Popen(cmd, cwd=cwd)
+def popen(cmd, cwd=DEFAULT_CWD, stdout=None, stderr=None):
+    p = subprocess.Popen(cmd, cwd=cwd, stdout=stdout, stderr=stderr)
 
     print '{cwd} ({pid})> {shell}'.format(
         cwd=cwd,
@@ -55,7 +56,7 @@ def popen_firefox(profile, url):
 
     os.makedirs(profile)
 
-    return popen(cmd)
+    return popen(cmd, stderr=DEVNULL, stdout=DEVNULL)
 
 def popen_serv(server_type, testing_profile=False):
     assert server_type in ['web', 'data']

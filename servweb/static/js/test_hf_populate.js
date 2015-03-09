@@ -44,9 +44,6 @@ test_hf_populate.create_users = function()
         generated_profile_ids.push(user_profile_id);
 
         test_hf_populate.user_profile[i] = test_hf_service.john_smith_profile(user_profile_id);
-
-        // avoid private chunk colision
-        test_hf_populate.user_profile[i]['password'] = 'password' + i;
     }
 
     for (var i = 0; i < test_hf_populate.profile_count; i++)

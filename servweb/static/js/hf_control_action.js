@@ -18,6 +18,32 @@ hf_control.add_contact_to_circle = function(contact_user_hash, circle_hash)
     });
 }
 
+
+// -------------------------------------------------------------------- CONTACT INVITATION
+hf_control.contact_invitation = function(domElem)
+{
+   var invitation_infos = hf.inputs_to_json(domElem);
+
+   if(invitation_infos['destination'] == '')
+   {
+        alert('destination required');
+        return;
+   }
+
+   if (invitation_infos['message'] == '')
+   {
+        alert('message required');
+        return;
+   }
+
+    hf_service.send_message(invitation_infos['destination'], invitation_infos['message'], function(success){
+        assert(success);
+
+         hf_control.refresh_view();
+        });
+}
+
+
 // --------------------------------------------------------------------- LOG IN/OUT
 
 hf_control.signed_out.login = function(domElem)
@@ -131,7 +157,7 @@ hf_control.signed_out.sign_up = function(domElem)
 hf_control.create_circle = function(domElem)
 {
     var user_circle = hf.inputs_to_json(domElem);
-    if(user_circle['circle_name'] == '')
+    if(user_circle['name'].trim() == '')
         {
             alert('circle name required');
             return;
@@ -142,7 +168,25 @@ hf_control.create_circle = function(domElem)
 
         hf_control.refresh_view();
     });
-
 }
 
+hf_control.create_comment = function(commentElement)
+{
+    var post = hf.inputs_to_json(commentElement);
+    var comment = post['content'];
+
+    if (comment.trim() == '')
+    {
+        alert('comment cannot be empty');
+        return;
+    }
+
+    var symetric_key = post['symetric_key'];
+    var post_chunk_name = post['chunk_name'];
+
+    hf_service.comment_post(post_chunk_name, symetric_key, comment, function(success) {
+        assert(success);
+        hf_control.refresh_view();
+    });
+}
 

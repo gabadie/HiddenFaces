@@ -293,6 +293,7 @@ hf_service.comment_post = function(post_chunk_name,post_chunk_key,comment,callba
         }
     );
 }
+
 /*
  * Gets list of the resolved posts of a thread
  * @param <thread_name> : thread's name
