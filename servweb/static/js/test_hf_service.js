@@ -931,6 +931,7 @@ test_hf_service.main = function()
     //GROUPS
     test_utils.run(test_hf_service.create_group,'test_hf_service.create_group');
     test_utils.run(test_hf_service.add_user_to_group,'test_hf_service.add_user_to_group');
+    test_utils.run(test_hf_service.subscribe_to_group,'test_hf_service.subscribe_to_group');
 
     // REGISTRY TESTES
     test_utils.run(test_hf_service.is_valide_chunk,"test_hf_service.is_valide_chunk");
