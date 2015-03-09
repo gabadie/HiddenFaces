@@ -328,7 +328,7 @@ test_hf_service.add_contact = function() {
             'user_hash1 should already be in contacts'
         );
         test_utils.assert(
-            user_hash1 in hf_service.user_private_chunk['contacts'],
+            user_hash2 in hf_service.user_private_chunk['contacts'],
             'user_hash2 should be added into contacts'
         );
     });
@@ -930,6 +930,8 @@ test_hf_service.main = function()
 
     //GROUPS
     test_utils.run(test_hf_service.create_group,'test_hf_service.create_group');
+    test_utils.run(test_hf_service.add_user_to_group,'test_hf_service.add_user_to_group');
+
     // REGISTRY TESTES
     test_utils.run(test_hf_service.is_valide_chunk,"test_hf_service.is_valide_chunk");
     test_utils.run(test_hf_service.is_valide_profile,'test_hf_service.is_valide_profile');

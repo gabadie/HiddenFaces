@@ -25,6 +25,7 @@ test_hf_service.group_examples = function(id)
     }
 }
 //-------------------------------------------------------------------------------- TESTS GROUPS
+
 test_hf_service.create_group = function()
 {
     //user connexion
@@ -46,4 +47,44 @@ test_hf_service.create_group = function()
     );
 
     test_utils.assert_success(3);
+}
+
+test_hf_service.add_user_to_group = function() {
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+    var user_profile2 = test_hf_service.john_smith_profile(2);
+
+    var user_hash0 = hf_service.create_user(user_profile0);
+    var user_hash1 = hf_service.create_user(user_profile1);
+    var user_hash2 = hf_service.create_user(user_profile2);
+
+    hf_service.login_user(user_profile0);
+
+    //group creation
+    var group_info = test_hf_service.group_examples();
+    hf_service.create_group(
+        group_info['name'],
+        group_info['description'],
+        false, false,
+        function(group_hash){
+            test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
+            test_utils.assert(hf_service.is_group_admin(group_hash),'The current user has not be set as group admin');
+
+            hf_service.add_user_to_group(user_hash1, group_hash, function(success){
+                test_utils.assert(success == true,'Cannot add user_hash1 to group');
+            });
+            hf_service.add_user_to_group(user_hash2, group_hash, function(success){
+                test_utils.assert(success == true,'Cannot add user_hash2 to group');
+            });
+            hf_service.add_user_to_group('fake', group_hash, function(success){
+                test_utils.assert(success == false,'fake shouldn\'t have been added to group');
+            });
+            //verify group's users
+            hf_service.get_group_private_chunk(group_hash, function(group_json){
+                test_utils.assert(hf_service.already_subscribed(user_hash1,group_json) == true,'user_hash1 is not a group user');
+                test_utils.assert(hf_service.already_subscribed(user_hash2,group_json) == true, 'user_hash2 is not a group user');
+            });
+        }
+    );
+    test_utils.assert_success(7);
 }

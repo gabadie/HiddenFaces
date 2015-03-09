@@ -31,7 +31,7 @@ hf_service.is_group_admin = function(group_hash){
 hf_service.already_subscribed = function(user_hash, group_private_chunk)
 {
     assert(hf.is_hash(user_hash));
-    return user_hash in group_private_chunk['users'];
+    return (group_private_chunk['users'].indexOf(user_hash) >= 0);
 }
 
 /*
@@ -109,18 +109,6 @@ hf_service.create_group = function(group_name, description, public_group, public
                 return;
             }
 
-            // Generates the group's public chunk's content
-            var public_chunk = hf_service.export_group_public_chunk(private_chunk);
-
-            // Creates the group's private chunk
-            transaction.create_data_chunk(
-                private_chunk_name,
-                chunks_owner,
-                private_chunk_key,
-                [JSON.stringify(private_chunk)],
-                false
-            );
-
             // Creates the group's shared chunk
             if(!public_group){
                 private_chunk['shared_chunk'] = {
@@ -136,6 +124,18 @@ hf_service.create_group = function(group_name, description, public_group, public
                     false
                 );
             }
+
+            // Creates the group's private chunk
+            transaction.create_data_chunk(
+                private_chunk_name,
+                chunks_owner,
+                private_chunk_key,
+                [JSON.stringify(private_chunk)],
+                false
+            );
+
+            // Generates the group's public chunk's content
+            var public_chunk = hf_service.export_group_public_chunk(private_chunk);
 
             // Creates the group's public chunk
             transaction.create_data_chunk(
@@ -155,8 +155,11 @@ hf_service.create_group = function(group_name, description, public_group, public
                 }else {
                     //current user is the group's admin
                     var user_private_chunk = hf_service.user_private_chunk;
+
                     hf_service.store_key(user_private_chunk, private_chunk_name, private_chunk_key);
+
                     user_private_chunk['groups']['admin_of'][group_hash] = private_chunk_name;
+
                     hf_service.save_user_chunks(function(success){
                         if(success && callback){
                             callback(group_hash);
@@ -211,6 +214,8 @@ hf_service.export_group_public_chunk = function(group_private_chunk)
  */
 hf_service.export_group_shared_chunk = function(group_private_chunk)
 {
+    assert(group_private_chunk['group']['public'] == false);
+
     var shared_chunk = {
         '__meta': {
             'type':         '/group/shared_chunk',
@@ -259,10 +264,41 @@ hf_service.get_group_public_chunk = function(group_hash, callback)
             return;
         }
 
-        hf_service.users_public_chunks[group_hash] = public_chunk;
-
         callback(public_chunk);
     });
+}
+
+/*
+ * Gets a group's private chunk. User connected must be the admin
+ *
+ * @param <group_hash>: the group's hash
+ * @param <callback>: the function called once the response has arrived
+ *      @param <public_chunk>: is the group's private chunk or null otherwise.
+ *      function my_callback(private_chunk)
+ */
+hf_service.get_group_private_chunk = function(group_hash, callback)
+{
+    assert(hf.is_function(callback));
+    assert(hf.is_hash(group_hash));
+    assert(hf_service.is_group_admin(group_hash));
+
+    var user_private_chunk = hf_service.user_private_chunk;
+    var group_private_chunk_name = user_private_chunk['groups']['admin_of'][group_hash];
+    var group_private_chunk_key = hf_service.get_decryption_key(user_private_chunk, group_private_chunk_name);
+
+    //get group private chunk
+    hf_com.get_data_chunk(
+        group_private_chunk_name,
+        group_private_chunk_key,
+        function(json_message){
+            if(json_message['chunk_content'][0] !== 'undefined'){
+                var group_json = JSON.parse(json_message['chunk_content'][0]);
+                callback(group_json);
+            }else{
+                callback(null);
+            }
+        }
+    );
 }
 
 /* Adds an user to the specified group if the current user is the group's admin
@@ -292,29 +328,23 @@ hf_service.add_user_to_group = function(user_hash, group_hash, callback)
             return;
         }
 
-        var user_private_chunk = hf_service.user_private_chunk;
-        var group_private_chunk_name = user_private_chunk['groups']['admin_of'][group_hash];
-        var group_private_chunk_key = hf_service.get_decryption_key(user_private_chunk, group_private_chunk_name);
+        hf_service.get_group_private_chunk(
+            group_hash,
+            function(group_json){
+                if(group_json){
+                    if(hf_service.already_subscribed(user_hash,group_json)){
+                        callback(false);
+                        return;
+                    }
 
-        //get group private chunk
-        hf_com.get_data_chunk(
-            group_private_chunk_name,
-            group_private_chunk_key,
-            function(json_message){
-                assert(json_message['chunk_content'][0] !== 'undefined');
-                var group_json = JSON.parse(json_message['chunk_content'][0]);
-
-                if(hf_service.already_subscribed(user_hash,group_json)){
+                    //add user to group
+                    group_json['users'].push(user_hash);
+                    hf_service.save_group_chunks(group_json,function(success){
+                        callback(success);
+                    });
+                }else{
                     callback(false);
-                    return;
                 }
-
-                //add user to group
-                group_json['users'].push(user_hash);
-
-                hf_service.save_group_chunks(group_json,function(success){
-                    callback(success);
-                });
             }
         );
     });
@@ -353,7 +383,7 @@ hf_service.save_group_chunks = function(group_private_chunk,callback)
 
     // saves group's shared chunk
     if(!group_private_chunk['group']['public']){
-        var shared_chunk = hf_service.export_group_shared_chunk(private_chunk);
+        var shared_chunk = hf_service.export_group_shared_chunk(group_private_chunk);
         transaction.write_data_chunk(
             group_private_chunk['shared_chunk']['name'],
             group_chunks_owner,
