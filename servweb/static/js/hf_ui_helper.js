@@ -10,7 +10,7 @@ Handlebars.registerHelper('hf_cell', function(options) {
 });
 
 Handlebars.registerHelper('hf_user_link', function(user_public_chunk, options){
-    var out = '<a'
+    var out = '<div><a'
 
     out += ' class="hf_user_link"'
     out += ' onclick="return hf_control.view(\'/profile/' + user_public_chunk['__meta']['user_hash'] + '\');"';
@@ -18,7 +18,7 @@ Handlebars.registerHelper('hf_user_link', function(user_public_chunk, options){
     out += user_public_chunk['profile']['first_name'];
     out += ' ';
     out += user_public_chunk['profile']['last_name'];
-    out += '</a>';
+    out += '</a></div>';
 
     return out;
 });
@@ -45,8 +45,8 @@ Handlebars.registerHelper('hf_add_contact_to_circle', function(contact, circle_h
     if (hf_service.is_contact_into_circle(contact['__meta']['user_hash'], circle_hash))
         return '';
 
-    var out = '<div style="float: right;"> <button ';
-    out += 'class="btn btn-default" ';
+    var out = '<div style="float:right;"><button ';
+    out += 'class="btn btn-default" style="float:right;" ';
     out += 'onclick="return hf_control.add_contact_to_circle(\''+contact['__meta']['user_hash']+ '\',\'' + circle_hash+'\');"';
     out += '>Add to circle </button></div>';
 

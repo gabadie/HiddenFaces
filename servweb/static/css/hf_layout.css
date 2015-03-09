@@ -87,6 +87,49 @@
 
 .hf_layout_cell .hf_list_item
 {
-    border-top: 1px solid #EEEEEE;
-    padding: 10px 20px;
+
+    width: 100%;
+    overflow: auto;
 }
+
+.hf_layout_cell
+{
+    padding: 0px 0px 0px 30px;
+}
+
+.hf_list_item
+{
+    padding: 10px 10px 10px 10px;
+    border-bottom-style: dotted;
+    border-bottom-width: 1px;
+    border-bottom-color: black;
+}
+
+.hf_list_item div a
+{
+    vertical-align: middle;
+}
+
+.hf_list_item div
+{
+    display: inline-block;
+}
+
+.hf_contact_btn
+{
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.btn btn-default
+{
+    display: block;
+    vertical-align: middle;
+}
+
+.hf_contact_name
+{
+    font-size: 20px;
+    padding: 0px 10px 10px 0px;
+}
+
