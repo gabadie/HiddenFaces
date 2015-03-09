@@ -185,6 +185,106 @@ hf_service.delete_notification = function(repository_chunk, notification_hash, c
     callback(false);
 }
 
+/*
+ * Pulls fresh notifications, processes automated one and stores the remaining
+ * into the notification repository.
+ *
+ * @param <repository_chunk>: the chunk content containing the
+ *      notification repository
+ * @param <callback>: the function called once done
+ *      @param <notifcation_count>: the number of pulled notification  or null
+ *      function my_callback(notifcation_count)
+ */
+hf_service.pull_fresh_notifications = function(repository_chunk, callback)
+{
+    assert(hf.is_function(callback) || callback == undefined);
+    assert('system' in repository_chunk);
+    assert('notifications' in repository_chunk);
+    assert('protected_chunk' in repository_chunk['system']);
+
+    var transaction = new hf_com.Transaction();
+    var protected_chunk_name =
+        repository_chunk['system']['protected_chunk']['name'];
+
+    transaction.get_data_chunk(
+        protected_chunk_name,
+        repository_chunk['system']['protected_chunk']['private_key']
+    );
+    transaction.write_data_chunk(
+        protected_chunk_name,
+        repository_chunk['system']['chunks_owner'],
+        '',
+        []
+    );
+
+    transaction.commit(function(json_message){
+        if (json_message['status'] != 'ok')
+        {
+            assert(hf.is_function(callback));
+            callback(null);
+            return;
+        }
+
+        var notifications_json = json_message['chunk'][protected_chunk_name];
+
+        for (var i = 0; i < notifications_json.length; i++)
+        {
+            var notification_json = {};
+            var notificationAutomation = null;
+
+            try
+            {
+                notification_json = JSON.parse(notifications_json[i]);
+
+                /*
+                 * TODO: need to validate the notification in case someone else has
+                 * appened an invalid one (issue #27).
+                 */
+
+                var notificationType = notification_json['__meta']['type'] ;
+
+                assert(notificationType in hf_service.notification_interface);
+
+                notificationAutomation = hf_service.notification_interface[notificationType].automation;
+            }
+            catch (err)
+            {
+                continue;
+            }
+
+            if (notificationAutomation != null)
+            {
+                assert(hf.is_function(notificationAutomation));
+
+                status = notificationAutomation(notification_json);
+
+                assert(typeof status == 'string');
+
+                if (status == 'discard')
+                {
+                    continue;
+                }
+
+                assert(status == 'continue');
+            }
+
+            /*
+             * We store this notification into the user's private chunk
+             */
+            notification_json['__meta']['hash'] = hf.generate_hash(
+                JSON.stringify(notification_json)
+            );
+
+            repository_chunk['notifications'].push(notification_json);
+        }
+
+        if (callback)
+        {
+            callback(notifications_json.length);
+        }
+    });
+}
+
 
 // --------------------------------------------------- USER NOTIFICATION SERVICE
 /*
@@ -243,7 +343,7 @@ hf_service.delete_user_notification = function(notification_hash, callback)
 }
 
 /*
- * Pulls fresh notifications, processes automated one and stores the remaining
+ * Pulls fresh user's notifications, processes automated one and stores the remaining
  * into the user's private chunk.
  *
  * @param <callback>: the function called once done
@@ -253,94 +353,27 @@ hf_service.delete_user_notification = function(notification_hash, callback)
 hf_service.pull_fresh_user_notifications = function(callback)
 {
     assert(hf_service.is_connected());
-    assert(hf.is_function(callback) || callback == undefined);
 
-    var transaction = new hf_com.Transaction();
-    var protected_chunk_name =
-        hf_service.user_private_chunk['system']['protected_chunk']['name'];
+    hf_service.pull_fresh_notifications(
+        hf_service.user_private_chunk,
+        function(notification_count)
+        {
+            if (notification_count == null)
+            {
+                callback(false);
+                return;
+            }
+            else if (notification_count == 0)
+            {
+                callback(true);
+                return;
+            }
 
-    transaction.get_data_chunk(
-        protected_chunk_name,
-        hf_service.user_private_chunk['system']['protected_chunk']['private_key']
+            assert(notification_count > 0);
+
+            hf_service.save_user_chunks(callback);
+        }
     );
-    transaction.write_data_chunk(
-        protected_chunk_name,
-        hf_service.user_chunks_owner(),
-        '',
-        []
-    );
-
-    transaction.commit(function(json_message){
-        if (json_message['status'] != 'ok')
-        {
-            assert(hf.is_function(callback));
-            callback(false);
-            return;
-        }
-
-        var notifications_json = json_message['chunk'][protected_chunk_name];
-
-        for (var i = 0; i < notifications_json.length; i++)
-        {
-            var notification_json = {};
-            var notificationAutomation = null;
-
-            try
-            {
-                notification_json = JSON.parse(notifications_json[i]);
-
-                /*
-                 * TODO: need to validate the notification in case someone else has
-                 * appened an invalid one (issue #27).
-                 */
-
-                var notificationType = notification_json['__meta']['type'] ;
-
-                assert(notificationType in hf_service.notification_interface);
-
-                notificationAutomation = hf_service.notification_interface[notificationType].automation;
-            }
-            catch (err)
-            {
-                continue;
-            }
-
-            if (notificationAutomation != null)
-            {
-                assert(hf.is_function(notificationAutomation));
-
-                status = notificationAutomation(notification_json);
-
-                assert(typeof status == 'string');
-
-                if (status == 'discard')
-                {
-                    continue;
-                }
-
-                assert(status == 'continue');
-            }
-
-            /*
-             * We store this notification into the user's private chunk
-             */
-            notification_json['__meta']['hash'] = hf.generate_hash(
-                JSON.stringify(notification_json)
-            );
-
-            hf_service.user_private_chunk['notifications'].push(notification_json);
-        }
-
-        if (notifications_json.length > 0)
-        {
-            hf_service.save_user_chunks();
-        }
-
-        if (callback)
-        {
-            callback(true);
-        }
-    });
 }
 
 /*

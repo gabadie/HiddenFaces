@@ -371,7 +371,8 @@ hf_service.get_user_login_cookie = function(user_login_profile)
 /*
  * Saves user's public and private chunks
  * @param <callback>: the function called once done
- *      function my_callback()
+ *      @param <success>: true or false
+ *      function my_callback(success)
  */
 hf_service.save_user_chunks = function(callback)
 {
