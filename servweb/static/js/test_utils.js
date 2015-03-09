@@ -171,6 +171,25 @@ test_utils.drop_database = function()
 }
 
 /*
+ * Standard callback expecting the <success> paramter
+ */
+test_utils.callbackSuccess = function(success)
+{
+    if (success == true)
+    {
+        test_utils.success('a callback has successed');
+    }
+    else if (success == false)
+    {
+        test_utils.failure('a callback has failed');
+    }
+    else
+    {
+        test_utils.failure('a callback was excepting a boolean has a <success> parameter');
+    }
+}
+
+/*
  * Inits the test API
  */
 test_utils.init = function()

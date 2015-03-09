@@ -1,15 +1,6 @@
 
 /* ----------------------------------------------------------- Generic layout */
 
-hr{
-    display: block;
-    height: 1px;
-    border: 0;
-    border-top: 1px solid #ccc;
-    margin: 1em 0;
-    padding: 0;
-}
-
 .hf_layout_page_width
 {
     margin: 0 auto;
@@ -58,6 +49,14 @@ hr{
     font-size: 20px;
 }
 
+.hf_layout_cell .hf_code
+{
+    width: 100%;
+    min-height: 300px;
+    margin: 3px 0;
+    border: none;
+}
+
 .hf_layout_cell .hf_author
 {
     padding: 20px 30px 10px 30px;
@@ -86,15 +85,32 @@ hr{
     padding: 40px 0 120px 0;
 }
 
-.hf_contact
+.hf_layout_cell .hf_list_item
 {
+
     width: 100%;
-    display: table;
     overflow: auto;
+}
+
+.hf_layout_cell
+{
     padding: 0px 0px 0px 30px;
 }
 
-.hf_contact div
+.hf_list_item
+{
+    padding: 10px 10px 10px 10px;
+    border-bottom-style: dotted;
+    border-bottom-width: 1px;
+    border-bottom-color: black;
+}
+
+.hf_list_item div a
+{
+    vertical-align: middle;
+}
+
+.hf_list_item div
 {
     display: inline-block;
 }

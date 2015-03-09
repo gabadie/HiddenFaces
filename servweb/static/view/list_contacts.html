@@ -2,9 +2,8 @@
     <div class="hf_padding">
         <div class="hf_title">Your contacts.</div>
         {{#each contacts}}
-            <div class="hf_contact">
-                {{#hf_user_link this}}{{/hf_user_link}}
-                <hr>
+            <div class="hf_list_item">
+                {{{hf_user_link this}}}
             </div>
         {{else}}
             <div class="hf_empty">You don't have any contact.</div>

@@ -13,10 +13,14 @@ hf_service.certify = function(certificate_repository, data_chunk_name, data_chun
 	assert(hf.is_hash(data_chunk_part));
     assert(hf.is_hash(data_hash));
 
-    certificate_repository['certifications'][hf.hash(data_chunk_name + data_chunk_part)] = data_hash;
+    hf_service.verify_certification(certificate_repository, data_chunk_name, data_chunk_part, data_hash, function(certified){
+		assert(certified == false);
 
-    hf_service.save_user_chunks(function(success){
-        callback(success);
+		certificate_repository['certifications'][hf.hash(data_chunk_name + data_chunk_part)] = data_hash;
+		
+	    hf_service.save_user_chunks(function(success){
+	        callback(success);
+	    });
     });
 }
 

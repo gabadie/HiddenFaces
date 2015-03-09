@@ -27,22 +27,32 @@ hf_control.signed_in = new hf_control.ViewRouter(function(callback){
 // ------------------------------------------------------------- LOGED OUT VIEWS
 
 hf_control.signed_out.route('/', function(){
-    hf_ui.apply_template("login.html", null, hf_control.domPageContainer);
+    hf_ui.apply_template("form/login.html", null, hf_control.domPageContainer);
 });
 
 hf_control.signed_out.route('/signup/', function(){
-    hf_ui.apply_template("signup.html", null, hf_control.domPageContainer);
+    hf_ui.apply_template("form/signup.html", null, hf_control.domPageContainer);
 });
 
 
 // ------------------------------------------------------------------------ HOME
 
 hf_control.signed_in.route('/', function(){
-    hf_ui.apply_template(
-        "list_post.html",
-        null,
-        document.getElementById('hf_page_main_content')
-    );
+    var domElem = document.getElementById('hf_page_main_content');
+
+    hf_control.view_new_post(null, function(new_post_html){
+        domElem.innerHTML = new_post_html;
+
+        hf_service.list_circles_names(function(circles_names){
+            hf_service.list_contacts_threads_names(function(contacts_threads_names){
+                var threads_names = contacts_threads_names.concat(circles_names);
+
+                hf_control.view_threads(threads_names, function(posts_html){
+                    domElem.innerHTML += posts_html;
+                });
+            });
+        });
+    });
 });
 
 
@@ -73,41 +83,50 @@ hf_control.signed_in.route('/circles', function(){
 hf_control.signed_in.route('/circle/', function() {
     var viewUrl = hf_control.current_view_url();
     var arrs = viewUrl.split("/");
-    var thread_chunk_name = viewUrl.split("/")[2];
+    var circle_hash = viewUrl.split("/")[2];
     if (arrs.length >= 4)
     {
         if(arrs[3] == 'contacts')
         {
-            hf_control.contacts_circle(thread_chunk_name);
+            hf_control.circle_contacts(circle_hash);
         }
     }
     else
     {
-        hf_control.circle_posts(thread_chunk_name);
+        hf_control.circle_posts(circle_hash);
     }
 });
 
-hf_control.circle_posts = function(thread_chunk_name)
+hf_control.circle_posts = function(circle_hash)
 {
-    hf_control.view_threads([thread_chunk_name], function(posts_html){
-        hf_service.get_circle(thread_chunk_name, function(circle){
-            var circle_header_html = hf_ui.template('circle_header.html', circle);
+    var domElem = document.getElementById('hf_page_main_content');
 
-            document.getElementById('hf_page_main_content').innerHTML = (
-                circle_header_html + posts_html
-            );
+    hf_service.get_circle(circle_hash, function(circle){
+        var circle_header_html = hf_ui.template('circle_header.html', circle);
+
+        domElem.innerHTML = circle_header_html;
+
+        hf_control.view_new_post(circle_hash, function(new_post_html){
+            domElem.innerHTML += new_post_html;
+
+            hf_service.list_circle_threads_names(circle_hash, function(threads_names){
+                hf_control.view_threads(threads_names, function(posts_html){
+                    domElem.innerHTML += posts_html;
+                });
+            });
         });
     });
 }
 
-hf_control.contacts_circle = function(thread_chunk_name)
+hf_control.circle_contacts = function(circle_hash)
 {
-    hf_service.get_circle(thread_chunk_name, function(circle)
+    hf_service.get_circle(circle_hash, function(circle)
     {
         hf_service.list_contacts(function(list_contacts)
         {
             var params = {
-                'circle_hash': thread_chunk_name,
+
+                'circle_hash': circle_hash,
                 'contacts': list_contacts
             }
 
@@ -155,24 +174,89 @@ hf_control.signed_in.route('/contacts', function () {
 // ------------------------------------------------------ CONSULT A CONTACT OR CIRCLE
 
 hf_control.signed_in.route('/profile', function (){
+    var private_chunk = hf_service.user_private_chunk;
+
+    var params = {
+        'name': private_chunk['profile']['first_name'] + ' ' + private_chunk['profile']['last_name']
+    };
+
+    var html = hf_ui.template(
+        'user_profile.html',
+        params
+    );
+
+    document.getElementById('hf_page_main_content').innerHTML = html;
+
+    hf_service.list_circles_names(function(circles_names){
+        hf_control.view_threads(circles_names, function(posts_html){
+            document.getElementById('hf_page_main_content').innerHTML += posts_html;
+        });
+    });
+});
+
+hf_control.signed_in.route('/profile/', function (){
     var viewUrl = hf_control.current_view_url();
-    var user_hash_public = viewUrl.split("/")[2];
-    hf_service.get_user_public_chunk(user_hash_public, function(public_chunk) {
+    var user_hash = viewUrl.split("/")[2];
+
+    if (!hf.is_hash(user_hash))
+    {
+        return hf_control.view('/');
+    }
+    else if (user_hash == hf_service.user_hash())
+    {
+        return hf_control.view('/profile');
+    }
+
+    hf_service.get_user_public_chunk(user_hash, function(public_chunk) {
+        if (!public_chunk)
+        {
+            return hf_control.view('/');
+        }
+
         var params = {
             'name': public_chunk['profile']['first_name'] + ' ' + public_chunk['profile']['last_name']
         };
 
-        hf_ui.apply_template(
-            'contact_name.html',
-            params,
-            document.getElementById('hf_page_main_content')
+        var html = hf_ui.template(
+            'user_profile.html',
+            params
         );
 
+        document.getElementById('hf_page_main_content').innerHTML = html;
+
+        if (!hf_service.is_contact(user_hash))
+        {
+            return;
+        }
+
+        hf_service.list_contact_threads_names(user_hash, function(contacts_threads_names){
+            hf_control.view_threads(contacts_threads_names, function(posts_html){
+                document.getElementById('hf_page_main_content').innerHTML += posts_html;
+            });
+        });
     });
 });
 
 
-// ------------------------------------------------------ LEFT MENU
+// ------------------------------------------------------ THREADS VIEWS
+
+/*
+ * @param <callback>: the callback once the html is fully computed
+ *      @param <html>: html code
+ *      function my_callback(html)
+ */
+hf_control.view_new_post = function(current_circle_hash, callback)
+{
+    hf_service.list_circles(function(circles_list){
+        var template_context = {
+            'circles': circles_list
+        };
+
+        var html = hf_ui.template('form/new_post.html', template_context);
+
+        callback(html);
+    });
+}
 
 /*
  * @param <callback>: the callback once the html is fully computed
@@ -181,9 +265,17 @@ hf_control.signed_in.route('/profile', function (){
  */
 hf_control.view_threads = function(threads_names, callback)
 {
-    assert(threads_names.length != 0);
+    var posts_lists = [];
 
-    posts_lists = [];
+    if(threads_names.length == 0){
+        var template_context = {
+            'chunks': posts_list
+        };
+
+        var posts_html = hf_ui.template('list_chunks.html', template_context);
+
+        callback(posts_html);
+    }
 
     for (var i = 0; i < threads_names.length; i++)
     {
@@ -192,6 +284,8 @@ hf_control.view_threads = function(threads_names, callback)
 
             if (posts_lists.length == threads_names.length)
             {
+                posts_lists = posts_lists.sort();
+
                 posts_list = hf_service.merge_posts_lists(posts_lists);
 
                 var template_context = {
