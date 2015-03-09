@@ -36,7 +36,51 @@ hf_service.define_notification = function(notification_type, notification_interf
     hf_service.notification_interface[notification_type] = notification_interface;
 }
 
+/*
+ * Pushs a notification to an user's protected chunk
+ *
+ * @param <notifications_chunk_name>: the notifications' chunk name
+ * @param <notifications_chunk_key>: the notifications' chunk key
+ * @param <notification_json>: the notification JSON to push
+ * @param <callback>: the callback once the notification has been pushed
+ *      @param <success>: true or false
+ *      function my_callback(success)
+ */
+hf_service.push_notification = function(notifications_chunk_name, notifications_chunk_key, notification_json, callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf.is_hash(notifications_chunk_name));
+    assert(typeof notification_json['__meta']['type'] == 'string');
+    assert(notification_json['__meta']['type'] in hf_service.notification_interface);
+    assert(notification_json['__meta']['author_user_hash'] == hf_service.user_hash());
+    assert(hf.is_function(callback));
 
+    // appends the notification to the end of <user_hash>'s protected file
+    hf_com.append_data_chunk(
+        notifications_chunk_name,
+        hf_service.user_chunks_owner(),
+        notifications_chunk_key,
+        JSON.stringify(notification_json),
+        function(json_message) {
+            if (json_message['status'] != 'ok')
+            {
+                allert(
+                    'hf_service.push_user_notification(' +
+                    user_hash + ', ' +
+                    JSON.stringify(notification_json) +
+                    ') failed'
+                );
+                callback(false);
+                return;
+            }
+
+            callback(true);
+        }
+    );
+}
+
+
+// --------------------------------------------------- USER NOTIFICATION SERVICE
 /*
  * Pushs a notification to an user's protected chunk
  *
@@ -50,10 +94,6 @@ hf_service.push_user_notification = function(user_hash, notification_json, callb
 {
     assert(hf_service.is_connected());
     assert(hf.is_hash(user_hash));
-    assert(typeof notification_json['__meta']['type'] == 'string');
-    assert(notification_json['__meta']['type'] in hf_service.notification_interface);
-    assert(notification_json['__meta']['author_user_hash'] == hf_service.user_hash());
-    assert(hf.is_function(callback));
 
     // Gets <user_hash>'s public chunk to find <user_hash>'s protected file
     hf_service.get_user_public_chunk(user_hash, function(public_chunk){
@@ -63,28 +103,12 @@ hf_service.push_user_notification = function(user_hash, notification_json, callb
             return;
         }
 
-        // appends the notification to the end of <user_hash>'s protected file
-        hf_com.append_data_chunk(
+        hf_service.push_notification(
             public_chunk['system']['protected_chunk']['name'],
-            hf_service.user_chunks_owner(),
             public_chunk['system']['protected_chunk']['public_key'],
-            JSON.stringify(notification_json),
-            function(json_message) {
-                if (json_message['status'] != 'ok')
-                {
-                    allert(
-                        'hf_service.push_user_notification(' +
-                        user_hash + ', ' +
-                        JSON.stringify(notification_json) +
-                        ') failed'
-                    );
-                    callback(false);
-                    return;
-                }
-
-                callback(true);
-            }
-        )
+            notification_json,
+            callback
+        );
     });
 }
 
