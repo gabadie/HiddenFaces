@@ -41,16 +41,46 @@ hf_service.define_notification = function(notification_type, notification_interf
  *
  * @param <repository_chunk>: is the chunk's content where to init the notification
  *      repository.
+ * @param <transaction>: the transaction in charge of creating <repository_chunk>
+ * @param <callback>: the callback once the notification has been pushed
+ *      @param <success>: true or false
+ *      function my_callback(success)
  */
-hf_service.init_notification_repository = function(repository_chunk)
+hf_service.init_notification_repository = function(repository_chunk, transaction, callback)
 {
+    assert('system' in repository_chunk);
+    assert('chunks_owner' in repository_chunk['system']);
+    assert(typeof repository_chunk['system']['chunks_owner'] == 'string');
     assert(!('notifications' in repository_chunk));
+    assert(hf.is_function(callback));
 
-    /*
-     * pending notifications that have already been fetched but don't have
-     * automated process and are waiting for the user to be processed.
-     */
-    repository_chunk['notifications'] = [ ];
+    hf_com.generate_RSA_key(function(notification_chunk_private_key, notification_chunk_public_key)
+    {
+        var notification_chunk_name = hf.generate_hash('qUaMF8HtvLUtsXArCfhU');
+
+        repository_chunk['system']['protected_chunk'] = {
+            'name':         notification_chunk_name,
+            'private_key':  notification_chunk_private_key,
+            'public_key':   notification_chunk_public_key
+        },
+
+        /*
+         * pending notifications that have already been fetched but don't have
+         * automated process and are waiting for the user to be processed.
+         */
+        repository_chunk['notifications'] = [ ];
+
+        // Creates the user's protected chunk
+        transaction.create_data_chunk(
+            notification_chunk_name,
+            repository_chunk['system']['chunks_owner'],
+            '',
+            [],
+            true
+        );
+
+        callback(true);
+    });
 }
 
 /*
