@@ -7,5 +7,15 @@
 <div class="hf_action_bar" align="right">
     {{#hf_user_add_contact author}}{{/hf_user_add_contact}}
     <button class="btn btn-default"
+
+
+        onclick="hf_control.view('/send_message/{{author.__meta.user_hash}}');">Reply</button>
+
+        onclick="hf_control.view('/send_message/{{__meta.hash}}');">Reply</button>
+
+
+        onclick="hf_control.view('/send_message/{{__meta.hash}}');">Reply</button>
+
+    <button class="btn btn-default"
         onclick="hf_control.delete_notification('{{__meta.hash}}');">Delete</button>
 </div>

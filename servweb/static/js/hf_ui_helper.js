@@ -23,6 +23,7 @@ Handlebars.registerHelper('hf_user_link', function(user_public_chunk, options){
     return out;
 });
 
+
 Handlebars.registerHelper('hf_user_add_contact', function(user_public_chunk, options){
     var user_hash = user_public_chunk['__meta']['user_hash'];
 

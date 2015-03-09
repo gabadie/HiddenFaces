@@ -158,6 +158,13 @@ hf.inputs_to_json = function(domElement)
         obj[inputs[i].name] = inputs[i].value;
     }
 
+    var textareas = domElement.getElementsByTagName('textarea');
+
+    for (var i = 0; i < textareas.length; i++)
+    {
+        obj[textareas[i].name] = textareas[i].value;
+    }
+
     return obj;
 }
 

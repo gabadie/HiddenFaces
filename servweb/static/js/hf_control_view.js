@@ -171,6 +171,31 @@ hf_control.signed_in.route('/contacts', function () {
     });
 });
 
+// ------------------------------------------------------ INVITATIONS' VIEWS
+hf_control.signed_in.route('/send_message', function(){
+    var template_context = {
+        'user_hash': ''
+    };
+
+    hf_ui.apply_template(
+        'send_message.html',
+        template_context,
+        document.getElementById('hf_page_main_content')
+    );
+});
+
+hf_control.signed_in.route('/send_message/', function(){
+
+    var viewUrl = hf_control.current_view_url();
+    var user_hash = viewUrl.split("/")[2];
+
+    hf_ui.apply_template(
+        'send_message.html',
+        {'user_hash': user_hash},
+        document.getElementById('hf_page_main_content')
+    );
+});
+
 // ------------------------------------------------------ CONSULT A CONTACT OR CIRCLE
 
 hf_control.signed_in.route('/profile', function (){
