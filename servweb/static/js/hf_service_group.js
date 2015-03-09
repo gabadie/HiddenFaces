@@ -7,9 +7,31 @@ hf_service.init_groups_repository = function(repository_chunk)
 {
     assert(!('groups' in repository_chunk));
     repository_chunk['groups'] = {
-        'subscribed_to': [],
-        'admin_of': []
+        'subscribed_to': {},
+        'admin_of': {}
     };
+}
+
+/*Verifies if the current user is the group's admin
+ * @param <group_hash> : the hash of the specified group
+ * @return true or false
+ */
+hf_service.is_group_admin = function(group_hash){
+    assert(hf_service.is_connected());
+    return group_hash in hf_service.user_private_chunk['groups']['admin_of'];
+}
+
+/*Verifies if the user has already subscribed to the specified group
+ *
+ * @param <user_hash>
+ * @param <group_private_chunk>
+ * @param <callback>: the function once
+ *      function my_callback(bool) : true or false
+ */
+hf_service.already_subscribed = function(user_hash, group_private_chunk)
+{
+    assert(hf.is_hash(user_hash));
+    return user_hash in group_private_chunk['users'];
 }
 
 /*
@@ -24,8 +46,9 @@ hf_service.init_groups_repository = function(repository_chunk)
  *
  *      @param <group_hash>: is the group's hash
  */
-hf_service.create_group = function(group_name, description, public_group, public_thread,callback)
+hf_service.create_group = function(group_name, description, public_group, public_thread, callback)
 {
+    assert(hf_service.is_connected());
     assert(typeof group_name == "string");
     assert(typeof description == 'string');
     assert(group_name.length > 0);
@@ -101,9 +124,9 @@ hf_service.create_group = function(group_name, description, public_group, public
             // Creates the group's shared chunk
             if(!public_group){
                 private_chunk['shared_chunk'] = {
-                        'name': shared_chunk_name,
-                        'key': shared_chunk_key
-                    };
+                    'name': shared_chunk_name,
+                    'key': shared_chunk_key
+                };
                 var shared_chunk = hf_service.export_group_shared_chunk(private_chunk);
                 transaction.create_data_chunk(
                     shared_chunk_hash,
@@ -136,8 +159,10 @@ hf_service.create_group = function(group_name, description, public_group, public
                 }
             });
 
-            hf_service.reset_cache();
-            hf_service.users_public_chunks[group_hash] = public_chunk;
+            //current user is the group's admin
+            var user_private_chunk = hf_service.user_public_chunk;
+            hf_service.store_key(user_private_chunk, private_chunk_name, private_chunk_key);
+            user_private_chunk['groups']['admin_of'][group_hash] = private_chunk_name;
         });
     });
 
@@ -218,14 +243,6 @@ hf_service.get_group_public_chunk = function(group_hash, callback)
         return ;
     }
 
-    // checks if <group_hash>'s public chunk is already cached
-    if (group_hash in hf_service.users_public_chunks)
-    {
-        callback(hf_service.users_public_chunks[group_hash]);
-
-        return;
-    }
-
     // fetches the <group_hash>'s public chunk
     hf_com.get_data_chunk(group_hash, '', function(json_message){
         assert(json_message['chunk_content'].length == 1);
@@ -257,10 +274,11 @@ hf_service.add_user_to_group = function(user_hash, group_hash, callback)
     assert(hf_service.is_connected());
     assert(hf.is_function(callback) || callback == undefined);
 
-    if (user_hash == hf_service.user_hash() || (user_hash in hf_service.user_private_chunk['contacts']))
+    if (!hf_service.is_group_admin(group_hash) || user_hash == hf_service.user_hash())
     {
-        assert(hf.is_function(callback));
-        callback(false);
+        console.info('Cannot add user to specified group');
+        if(callback)
+            callback(false);
         return ;
     }
 
@@ -272,30 +290,80 @@ hf_service.add_user_to_group = function(user_hash, group_hash, callback)
             return;
         }
 
-        hf_service.user_private_chunk['contacts'][user_hash] = {
-            /*
-             * Contact's user hash
-             */
-            'user_hash': user_hash,
+        var user_private_chunk = hf_service.user_private_chunk;
+        var group_private_chunk_name = user_private_chunk['groups']['admin_of'][group_hash];
+        var group_private_chunk_key = hf_service.get_decryption_key(user_private_chunk, group_private_chunk_name);
 
-            /*
-             * Lists of circles hashes in which this contact is included
-             */
-            'circles': [],
+        //get group private chunk
+        hf_com.get_data_chunk(
+            group_private_chunk_name,
+            group_private_chunk_key,
+            function(json_message){
+                assert(json_message['chunk_content'][0] !== 'undefined');
+                var group_json = JSON.parse(json_message['chunk_content'][0]);
 
-            /*
-             * Lists of threads' names of the contact. The keys are store
-             * in the user's keykeeper.
-             */
-            'threads': []
-        };
+                if(hf_service.already_subscribed(user_hash,group_json)){
+                    callback(false);
+                    return;
+                }
 
-        hf_service.save_user_chunks(function(success)
-        {
-            if (callback)
-            {
-                callback(success);
+                //add user to group
+                group_json['users'].push(user_hash);
+
             }
-        });
+        );
+    });
+}
+
+/*
+ * Saves group's public, shared and private chunks
+ * @param <callback>: the function called once done
+ *      function my_callback(success) with success = true or false
+ */
+hf_service.save_group_chunks = function(group_private_chunk,callback)
+{
+    assert(hf.is_function(callback) || callback == undefined);
+
+    var group_chunks_owner = group_private_chunk['system']['chunks_owner'];
+    var group_hash = group_private_chunk['__meta']['group_hash'];
+
+    var transaction = new hf_com.Transaction();
+
+    // saves user's private chunk
+    transaction.write_data_chunk(
+        group_private_chunk['__meta']['chunk_name'],
+        group_chunks_owner,
+        group_private_chunk['__meta']['key'],
+        [JSON.stringify(group_private_chunk)]
+    );
+
+    // saves user's public chunk
+    var group_public_chunk = hf_service.export_group_public_chunk(group_private_chunk);
+    transaction.write_data_chunk(
+        group_hash,
+        group_chunks_owner,
+        '',
+        [JSON.stringify(group_public_chunk)]
+    );
+
+    // saves group's shared chunk
+    if(!group_private_chunk['group']['public']){
+        var shared_chunk = hf_service.export_group_shared_chunk(private_chunk);
+        transaction.write_data_chunk(
+            group_private_chunk['shared_chunk']['name'],
+            group_chunks_owner,
+            group_private_chunk['shared_chunk']['key'],
+            [JSON.stringify(shared_chunk)]
+        );
+    }
+
+    transaction.commit(function(json_message){
+        if (callback)
+        {
+            if(json_message['status'] == 'ok')
+                callback(true);
+            else
+                callback(false);
+        }
     });
 }
