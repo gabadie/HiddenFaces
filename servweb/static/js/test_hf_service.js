@@ -435,7 +435,7 @@ test_hf_service.send_chunks_infos_to_contacts = function()
     hf_service.disconnect();
 
     hf_service.login_user(user_profile1);
-    hf_service.pull_fresh_notifications();
+    hf_service.pull_fresh_user_notifications();
 
     test_utils.assert(
         hf_service.user_private_chunk['contacts'][user_hash0]['threads'].indexOf(chunks_infos[0]['name']) >= 0,
@@ -521,7 +521,7 @@ test_hf_service.list_contacts_threads_names = function()
     hf_service.disconnect();
 
     hf_service.login_user(user_profile0);
-    hf_service.pull_fresh_notifications();
+    hf_service.pull_fresh_user_notifications();
 
     hf_service.list_contacts_threads_names(function(threads_names){
         test_utils.assert(threads_names.length == 3, 'should have 3 threads')
@@ -896,10 +896,10 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.save_user_chunks, 'test_hf_service.save_user_chunks');
 
     // NOTIFICATIONS TESTS
-    test_utils.run(test_hf_service.push_notification, 'test_hf_service.push_notification');
+    test_utils.run(test_hf_service.push_user_notification, 'test_hf_service.push_user_notification');
     test_utils.run(test_hf_service.notification_automation_sanity, 'test_hf_service.notification_automation_sanity');
-    test_utils.run(test_hf_service.list_notifications, 'test_hf_service.list_notifications');
-    test_utils.run(test_hf_service.delete_notification, 'test_hf_service.delete_notification');
+    test_utils.run(test_hf_service.list_user_notifications, 'test_hf_service.list_user_notifications');
+    test_utils.run(test_hf_service.delete_user_notification, 'test_hf_service.delete_user_notification');
     test_utils.run(test_hf_service.send_message, "test_hf_service.send_message");
     test_utils.run(test_hf_service.send_chunks_infos_to_contacts, 'test_hf_service.send_chunks_infos_to_contacts');
 

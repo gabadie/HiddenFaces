@@ -143,7 +143,7 @@ hf_control.circle_contacts = function(circle_hash)
 // -------------------------------------------------------- NOTIFICATIONS' VIEWS
 
 hf_control.signed_in.route('/notifications', function(){
-    hf_service.list_notifications(function(notifications_list){
+    hf_service.list_user_notifications(function(notifications_list){
         var template_param = {
             'chunks': notifications_list
         };

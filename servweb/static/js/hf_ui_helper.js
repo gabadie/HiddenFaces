@@ -10,7 +10,7 @@ Handlebars.registerHelper('hf_cell', function(options) {
 });
 
 Handlebars.registerHelper('hf_user_link', function(user_public_chunk, options){
-    var out = '<div><a'
+    var out = '<a'
 
     out += ' class="hf_user_link"'
     out += ' onclick="return hf_control.view(\'/profile/' + user_public_chunk['__meta']['user_hash'] + '\');"';
@@ -18,7 +18,7 @@ Handlebars.registerHelper('hf_user_link', function(user_public_chunk, options){
     out += user_public_chunk['profile']['first_name'];
     out += ' ';
     out += user_public_chunk['profile']['last_name'];
-    out += '</a></div>';
+    out += '</a>';
 
     return out;
 });
@@ -69,5 +69,8 @@ Handlebars.registerHelper('hf_chunk', function(chunk, options){
 });
 
 Handlebars.registerHelper('hf_comment', function(comment, options) {
-
+    var out = '';
+    out += comment['content'];
+    out += '<div>'+comment['date']+' </div>';
+    return out;
 });

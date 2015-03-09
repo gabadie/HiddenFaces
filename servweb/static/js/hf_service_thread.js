@@ -469,6 +469,7 @@ hf_service.resolve_post_author = function(thread_name,post_key,post_content, cal
                             return;
                         }
                         //post resolution
+                        post_json['symetric_key'] = post_key;
                         post_json['author'] = user_public_chunk;
                         post_json['comments'] = [];
 

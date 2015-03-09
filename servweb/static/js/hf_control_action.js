@@ -75,9 +75,9 @@ hf_control.log_out = function()
 
 // --------------------------------------------------------------- NOTIFICATIONS
 
-hf_control.delete_notification = function(notification_hash)
+hf_control.delete_user_notification = function(notification_hash)
 {
-    hf_service.delete_notification(notification_hash, function(success){
+    hf_service.delete_user_notification(notification_hash, function(success){
         assert(success);
 
         hf_control.refresh_view();
@@ -148,10 +148,12 @@ hf_control.create_circle = function(domElem)
 hf_control.create_comment = function(commentElement)
 {
     var post = hf.inputs_to_json(commentElement);
-    var comment = post['content'];
-    if (comment == '')
-    {
-        alert('commnet cannot be empty!');
-        return;
-    }
+    console.log(post);
+    var symetric_key = post['symetric_key'];
+    var post_chunk_name = post['chunk_name'];
+
+    hf_service.comment_post(post_chunk_name, symetric_key, comment, function(success) {
+        assert(success);
+        //hf_control.refresh_view();
+    });
 }

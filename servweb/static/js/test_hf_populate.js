@@ -348,12 +348,12 @@ test_hf_populate.comment_posts = function()
     test_utils.assert_success(test_hf_populate.comment_count * 2);
 }
 
-test_hf_populate.pull_fresh_notifications = function()
+test_hf_populate.pull_fresh_user_notifications = function()
 {
     for (var i = 0; i < test_hf_populate.profile_count; i++)
     {
         hf_service.login_user(test_hf_populate.user_profile[i]);
-        hf_service.pull_fresh_notifications(test_utils.callbackSuccess);
+        hf_service.pull_fresh_user_notifications(test_utils.callbackSuccess);
         hf_service.disconnect();
     }
 
@@ -373,5 +373,5 @@ test_hf_populate.main = function()
     test_utils.run(test_hf_populate.add_asymetric_users_contacts, 'test_hf_populate.add_asymetric_users_contacts', true);
     test_utils.run(test_hf_populate.post_into_circle, 'test_hf_populate.post_into_circle', true);
     test_utils.run(test_hf_populate.comment_posts,'test_hf_populate.comment_posts',true);
-    test_utils.run(test_hf_populate.pull_fresh_notifications, 'test_hf_populate.pull_fresh_notifications', true);
+    test_utils.run(test_hf_populate.pull_fresh_user_notifications, 'test_hf_populate.pull_fresh_user_notifications', true);
 }

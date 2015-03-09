@@ -36,73 +36,133 @@ hf_service.define_notification = function(notification_type, notification_interf
     hf_service.notification_interface[notification_type] = notification_interface;
 }
 
+/*
+ * Inits a notification repository into a given repository chunk.
+ *
+ * @param <repository_chunk>: is the chunk's content where to init the notification
+ *      repository.
+ * @param <transaction>: the transaction in charge of creating <repository_chunk>
+ * @param <callback>: the callback once the notification has been pushed
+ *      @param <success>: true or false
+ *      function my_callback(success)
+ */
+hf_service.init_notification_repository = function(repository_chunk, transaction, callback)
+{
+    assert('system' in repository_chunk);
+    assert('chunks_owner' in repository_chunk['system']);
+    assert(typeof repository_chunk['system']['chunks_owner'] == 'string');
+    assert(!('notifications' in repository_chunk));
+    assert(hf.is_function(callback));
+
+    hf_com.generate_RSA_key(function(notification_chunk_private_key, notification_chunk_public_key)
+    {
+        var notification_chunk_name = hf.generate_hash('qUaMF8HtvLUtsXArCfhU');
+
+        repository_chunk['system']['protected_chunk'] = {
+            'name':         notification_chunk_name,
+            'private_key':  notification_chunk_private_key,
+            'public_key':   notification_chunk_public_key
+        },
+
+        /*
+         * pending notifications that have already been fetched but don't have
+         * automated process and are waiting for the user to be processed.
+         */
+        repository_chunk['notifications'] = [ ];
+
+        // Creates the user's protected chunk
+        transaction.create_data_chunk(
+            notification_chunk_name,
+            repository_chunk['system']['chunks_owner'],
+            '',
+            [],
+            true
+        );
+
+        callback(true);
+    });
+}
+
+/*
+ * Exports a public notification repository from a notification repository
+ *
+ * @param <repository_chunk>: the chunk content containing the
+ *      notification repository
+ * @param <public_repository_chunk>: the chunk content where to export the
+ *      public notification repository
+ */
+hf_service.export_public_notification_repository = function(repository_chunk, public_repository_chunk)
+{
+    assert('system' in repository_chunk);
+    assert('notifications' in repository_chunk);
+    assert('system' in public_repository_chunk);
+
+    public_repository_chunk['system']['protected_chunk'] = {
+        'name':         repository_chunk['system']['protected_chunk']['name'],
+        'public_key':   repository_chunk['system']['protected_chunk']['public_key']
+    };
+}
 
 /*
  * Pushs a notification to an user's protected chunk
  *
- * @param <user_hash>: the user's hash
+ * @param <repository_chunk>: the chunk content containing the
+ *      public notification repository
  * @param <notification_json>: the notification JSON to push
  * @param <callback>: the callback once the notification has been pushed
  *      @param <success>: true or false
  *      function my_callback(success)
  */
-hf_service.push_notification = function(user_hash, notification_json, callback)
+hf_service.push_notification = function(public_repository_chunk, notification_json, callback)
 {
     assert(hf_service.is_connected());
-    assert(hf.is_hash(user_hash));
+    assert('system' in public_repository_chunk);
+    assert('protected_chunk' in public_repository_chunk['system']);
     assert(typeof notification_json['__meta']['type'] == 'string');
     assert(notification_json['__meta']['type'] in hf_service.notification_interface);
     assert(notification_json['__meta']['author_user_hash'] == hf_service.user_hash());
     assert(hf.is_function(callback));
 
-    // Gets <user_hash>'s public chunk to find <user_hash>'s protected file
-    hf_service.get_user_public_chunk(user_hash, function(public_chunk){
-        if (!public_chunk)
-        {
-            callback(false);
-            return;
-        }
-
-        // appends the notification to the end of <user_hash>'s protected file
-        hf_com.append_data_chunk(
-            public_chunk['system']['protected_chunk']['name'],
-            hf_service.user_chunks_owner(),
-            public_chunk['system']['protected_chunk']['public_key'],
-            JSON.stringify(notification_json),
-            function(json_message) {
-                if (json_message['status'] != 'ok')
-                {
-                    allert(
-                        'hf_service.push_notification(' +
-                        user_hash + ', ' +
-                        JSON.stringify(notification_json) +
-                        ') failed'
-                    );
-                    callback(false);
-                    return;
-                }
-
-                callback(true);
+    // appends the notification to the end of <user_hash>'s protected file
+    hf_com.append_data_chunk(
+        public_repository_chunk['system']['protected_chunk']['name'],
+        hf_service.user_chunks_owner(),
+        public_repository_chunk['system']['protected_chunk']['public_key'],
+        JSON.stringify(notification_json),
+        function(json_message) {
+            if (json_message['status'] != 'ok')
+            {
+                allert(
+                    'hf_service.push_user_notification(' +
+                    user_hash + ', ' +
+                    JSON.stringify(notification_json) +
+                    ') failed'
+                );
+                callback(false);
+                return;
             }
-        )
-    });
+
+            callback(true);
+        }
+    );
 }
 
 /*
  * Deletes a notification with its hash
  *
+ * @param <repository_chunk>: the chunk content containing the
+ *      notification repository
  * @param <notification_hash>: the notification's hash to delete
  * @param <callback>: the function called once done
  *      @param <success>: true or false
  *      function my_callback(success)
  */
-hf_service.delete_notification = function(notification_hash, callback)
+hf_service.delete_notification = function(repository_chunk, notification_hash, callback)
 {
-    assert(hf_service.is_connected());
     assert(hf.is_hash(notification_hash));
     assert(hf.is_function(callback));
 
-    var notifications_json = hf_service.user_private_chunk['notifications'];
+    var notifications_json = repository_chunk['notifications'];
 
     for (var i = 0; i < notifications_json.length; i++)
     {
@@ -117,14 +177,69 @@ hf_service.delete_notification = function(notification_hash, callback)
 
         notifications_json.splice(i, 1);
 
-        hf_service.save_user_chunks(function(success){
-            callback(success);
-        });
+        callback(true);
 
         return;
     }
 
     callback(false);
+}
+
+
+// --------------------------------------------------- USER NOTIFICATION SERVICE
+/*
+ * Pushs a user notification to an user's protected chunk
+ *
+ * @param <user_hash>: the user's hash
+ * @param <notification_json>: the notification JSON to push
+ * @param <callback>: the callback once the notification has been pushed
+ *      @param <success>: true or false
+ *      function my_callback(success)
+ */
+hf_service.push_user_notification = function(user_hash, notification_json, callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf.is_hash(user_hash));
+
+    // Gets <user_hash>'s public chunk to find <user_hash>'s protected file
+    hf_service.get_user_public_chunk(user_hash, function(public_chunk){
+        if (!public_chunk)
+        {
+            callback(false);
+            return;
+        }
+
+        hf_service.push_notification(public_chunk, notification_json, callback);
+    });
+}
+
+/*
+ * Deletes an user notification with its hash
+ *
+ * @param <notification_hash>: the notification's hash to delete
+ * @param <callback>: the function called once done
+ *      @param <success>: true or false
+ *      function my_callback(success)
+ */
+hf_service.delete_user_notification = function(notification_hash, callback)
+{
+    assert(hf_service.is_connected());
+
+    hf_service.delete_notification(
+        hf_service.user_private_chunk,
+        notification_hash,
+        function(success)
+        {
+            if (success)
+            {
+                hf_service.save_user_chunks(callback);
+            }
+            else
+            {
+                callback(false);
+            }
+        }
+    );
 }
 
 /*
@@ -135,7 +250,7 @@ hf_service.delete_notification = function(notification_hash, callback)
  *      @param <success>: true or false
  *      function my_callback(success)
  */
-hf_service.pull_fresh_notifications = function(callback)
+hf_service.pull_fresh_user_notifications = function(callback)
 {
     assert(hf_service.is_connected());
     assert(hf.is_function(callback) || callback == undefined);
@@ -236,14 +351,14 @@ hf_service.pull_fresh_notifications = function(callback)
  *      @param <notifcations_list>: the list of notifications
  *      function my_callback(notifcations_list)
  */
-hf_service.list_notifications = function(callback)
+hf_service.list_user_notifications = function(callback)
 {
     assert(hf.is_function(callback));
 
-    hf_service.pull_fresh_notifications(function(success){
+    hf_service.pull_fresh_user_notifications(function(success){
         if (!success)
         {
-            alert('hf_service.list_notifications() failed');
+            alert('hf_service.list_user_notifications() failed');
         }
 
         var notifications = [];
@@ -352,5 +467,5 @@ hf_service.send_message = function(user_hash, message, callback)
         'content': message
     };
 
-    hf_service.push_notification(user_hash, notification_json, callback);
+    hf_service.push_user_notification(user_hash, notification_json, callback);
 }
