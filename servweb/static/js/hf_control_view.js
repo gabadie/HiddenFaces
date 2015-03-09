@@ -102,7 +102,7 @@ hf_control.circle_posts = function(circle_hash)
     var domElem = document.getElementById('hf_page_main_content');
 
     hf_service.get_circle(circle_hash, function(circle){
-        var circle_header_html = hf_ui.template('circle_header.html', circle);
+        var circle_header_html = hf_ui.template('header/circle_header.html', circle);
 
         domElem.innerHTML = circle_header_html;
 
@@ -130,7 +130,7 @@ hf_control.circle_contacts = function(circle_hash)
                 'contacts': list_contacts
             }
 
-            var circle_header_html = hf_ui.template('circle_header.html', circle);
+            var circle_header_html = hf_ui.template('header/circle_header.html', circle);
             var list_contacts = hf_ui.template('list_contacts_circle.html',params);
 
             document.getElementById('hf_page_main_content').innerHTML = (
@@ -206,7 +206,7 @@ hf_control.signed_in.route('/profile', function (){
     };
 
     var html = hf_ui.template(
-        'user_profile.html',
+        'header/user_profile.html',
         params
     );
 
@@ -243,7 +243,7 @@ hf_control.signed_in.route('/profile/', function (){
         };
 
         var html = hf_ui.template(
-            'user_profile.html',
+            'header/user_profile.html',
             params
         );
 
