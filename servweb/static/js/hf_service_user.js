@@ -147,6 +147,7 @@ hf_service.create_user = function(user_profile, callback)
     var transaction = new hf_com.Transaction();
 
     hf_service.init_key_repository(private_chunk);
+    hf_service.init_groups_repository(private_chunk);
     hf_service.init_notification_repository(private_chunk, transaction, function(success){
         if (!success)
         {
