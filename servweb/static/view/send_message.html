@@ -5,14 +5,25 @@
             <table width="100%">
                 <tr>
                     <td>
-                        <input
+                        {{#if_eq user_hash ''}}
+                            <input
                             ID="destination_name"
                             type="text"
                             class="form-control"
                             placeholder="Destination..."
                             name="destination"
-                            value="{{user_hash}}"
                             >
+                        {{else}}
+                            <input
+                            ID="destination_name"
+                            type="text"
+                            class="form-control"
+                            value="{{user_hash}}"
+                            readonly
+                            >
+                            </label>
+
+                        {{/if_eq}}
                     </td>
                 <tr>
                     <td>
