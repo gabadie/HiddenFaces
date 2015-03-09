@@ -468,15 +468,14 @@ hf_service.resolve_post_author = function(thread_name,post_key,post_content, cal
                             return;
                         }
                         //post resolution
-                        var clone_post = hf.clone(post_json);
-                        clone_post['author'] = user_public_chunk;
-                        clone_post['comments'] = [];
+                        post_json['author'] = user_public_chunk;
+                        post_json['comments'] = [];
 
                         //comments resolution
                         var iterations = post_content.length - 1;
 
                         if(iterations == 0)
-                            callback(clone_post);
+                            callback(post_json);
 
                         for(var i = 1; i < post_content.length; i++){
 
@@ -485,13 +484,13 @@ hf_service.resolve_post_author = function(thread_name,post_key,post_content, cal
                                 JSON.parse(post_content[i]),
                                 function(comment){
                                     if(comment){ //if comment not corrupted
-                                        clone_post['comments'].push(comment);
+                                        post_json['comments'].push(comment);
                                     }
                                     iterations--;
 
                                     if(iterations == 0){
 
-                                        clone_post['comments'].sort(function(comment_a, comment_b){
+                                        post_json['comments'].sort(function(comment_a, comment_b){
                                             if (comment_a['date'] > comment_b['date'])
                                             {
                                                 return -1;
@@ -504,7 +503,7 @@ hf_service.resolve_post_author = function(thread_name,post_key,post_content, cal
                                             return 0;
                                         });
 
-                                        callback(clone_post);
+                                        callback(post_json);
                                     }
                                 }
                             );

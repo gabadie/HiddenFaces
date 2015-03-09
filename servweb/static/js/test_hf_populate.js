@@ -7,6 +7,7 @@ test_hf_populate.message_count = 100;
 test_hf_populate.symetric_contact_count = 200;
 test_hf_populate.asymetric_contact_count = 200;
 test_hf_populate.post_count = 200;
+test_hf_populate.comment_count = 300;
 
 
 test_hf_populate.seed = 0;
@@ -283,6 +284,70 @@ test_hf_populate.post_into_circle = function()
     test_utils.assert_success(test_hf_populate.post_count * 3);
 }
 
+test_hf_populate.comment_posts = function()
+{
+    for (var i = 0; i < test_hf_populate.comment_count; i++)
+    {
+        var user_id = test_hf_populate.rand_user_id();
+
+        hf_service.login_user(test_hf_populate.user_profile[user_id]);
+
+        var circles_list = null;
+        hf_service.list_circles(function(json_message){
+            test_utils.assert(
+                json_message.length == test_hf_populate.circle_count,
+                'failed to list prolfile ' + user_id + '\'s circles'
+            );
+            circles_list = json_message;
+        });
+        assert(circles_list != null);
+
+        var list_posts_info = null;
+        var list_length = 0;
+
+        while(list_length == 0){
+            var circle_id = test_hf_populate.rand() % test_hf_populate.circle_count;
+            var circle_hash = circles_list[circle_id]['thread_chunk_name'];
+            var circle_key = hf_service.get_encryption_key(hf_service.user_private_chunk, circle_hash);
+
+            assert(
+                hf.is_hash(circle_hash),
+                'user ' + user_id + '\'s circle hash is not a hash'
+            );
+
+            hf_com.get_data_chunk(circle_hash,circle_key,function(thread_json_message){
+                assert(thread_json_message['status'] == 'ok');
+
+                list_posts_info = thread_json_message['chunk_content'];
+
+                list_length = list_posts_info.length;
+            });
+        }
+        assert(list_posts_info != null);
+
+        var comment = 'Cool! I feel like eating ' + i + ' bananas today. I\'ll be there ASAP!';
+
+        var post_id = test_hf_populate.rand() % list_posts_info.length;
+        var post_info_json = JSON.parse(list_posts_info[post_id]);
+
+        hf_service.comment_post(
+            post_info_json['post_chunk_name'],
+            post_info_json['symetric_key'],
+            comment,
+            function(success){
+                test_utils.assert(
+                    success == true,
+                    'User '+user_id+' cannot comment post '+list_posts_info[post_id]
+                );
+            }
+        );
+
+        hf_service.disconnect();
+    }
+
+    test_utils.assert_success(test_hf_populate.comment_count * 2);
+}
+
 test_hf_populate.pull_fresh_notifications = function()
 {
     for (var i = 0; i < test_hf_populate.profile_count; i++)
@@ -307,5 +372,6 @@ test_hf_populate.main = function()
     test_utils.run(test_hf_populate.add_symetric_users_contacts, 'test_hf_populate.add_symetric_users_contacts', true);
     test_utils.run(test_hf_populate.add_asymetric_users_contacts, 'test_hf_populate.add_asymetric_users_contacts', true);
     test_utils.run(test_hf_populate.post_into_circle, 'test_hf_populate.post_into_circle', true);
+    test_utils.run(test_hf_populate.comment_posts,'test_hf_populate.comment_posts',true);
     test_utils.run(test_hf_populate.pull_fresh_notifications, 'test_hf_populate.pull_fresh_notifications', true);
 }
