@@ -131,7 +131,7 @@ hf_control.signed_out.sign_up = function(domElem)
 hf_control.create_circle = function(domElem)
 {
     var user_circle = hf.inputs_to_json(domElem);
-    if(user_circle['circle_name'] == '')
+    if(user_circle['name'].trim() == '')
         {
             alert('circle name required');
             return;
@@ -145,4 +145,13 @@ hf_control.create_circle = function(domElem)
 
 }
 
-
+hf_control.create_comment = function(commentElement)
+{
+    var post = hf.inputs_to_json(commentElement);
+    var comment = post['content'];
+    if (comment == '')
+    {
+        alert('commnet cannot be empty!');
+        return;
+    }
+}

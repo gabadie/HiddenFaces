@@ -67,3 +67,7 @@ Handlebars.registerHelper('hf_chunk', function(chunk, options){
 
     return out;
 });
+
+Handlebars.registerHelper('hf_comment', function(comment, options) {
+
+});
