@@ -90,44 +90,35 @@
 
     width: 100%;
     overflow: auto;
-}
-
-.hf_layout_cell
-{
-    padding: 0px 0px 0px 30px;
-}
-
-.hf_list_item
-{
     padding: 10px 10px 10px 10px;
     border-bottom-style: dotted;
     border-bottom-width: 1px;
     border-bottom-color: black;
 }
 
-.hf_list_item div a
+.hf_layout_cell .hf_list_item div a
 {
     vertical-align: middle;
 }
 
-.hf_list_item div
+.hf_layout_cell .hf_list_item div
 {
     display: inline-block;
 }
 
-.hf_contact_btn
+.hf_layout_cell .hf_contact_btn
 {
     display: table-cell;
     vertical-align: middle;
 }
 
-.btn btn-default
+.hf_layout_cell .btn-default
 {
     display: block;
     vertical-align: middle;
 }
 
-.hf_contact_name
+.hf_layout_cell .hf_contact_name
 {
     font-size: 20px;
     padding: 0px 10px 10px 0px;
