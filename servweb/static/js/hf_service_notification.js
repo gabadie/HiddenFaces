@@ -272,8 +272,8 @@ hf_service.process_notifications = function(notifications_json, callback)
  * @param <repository_chunk>: the chunk content containing the
  *      notification repository
  * @param <callback>: the function called once done
- *      @param <notifcation_count>: the number of pulled notification  or null
- *      function my_callback(notifcation_count)
+ *      @param <modification_count>: the number of modification
+ *      function my_callback(modification_count)
  */
 hf_service.pull_fresh_notifications = function(repository_chunk, callback)
 {
@@ -333,16 +333,16 @@ hf_service.pull_fresh_notifications = function(repository_chunk, callback)
             notifications_json.push(notification_json);
         }
 
-        hf_service.process_notifications(
-            notifications_json,
-            function(survived_notifications_json)
-            {
-                repository_chunk['notifications'] =
-                    repository_chunk['notifications'].concat(survived_notifications_json);
+        repository_chunk['notifications'] =
+            repository_chunk['notifications'].concat(notifications_json);
 
+        hf_service.refresh_notifications(
+            repository_chunk,
+            function(discarded_count)
+            {
                 if (callback)
                 {
-                    callback(notifications_json.length);
+                    callback(discarded_count + notifications_json.length);
                 }
             }
         );
@@ -509,48 +509,26 @@ hf_service.pull_fresh_user_notifications = function(callback)
 
     hf_service.pull_fresh_notifications(
         hf_service.user_private_chunk,
-        function(notification_count)
+        function(modification_count)
         {
-            if (notification_count == null)
+            if (modification_count == null)
             {
                 assert(hf.is_function(callback));
                 callback(false);
             }
-            else if (notification_count == 0)
+            else if (modification_count == 0)
             {
                 if (callback)
                     callback(true);
             }
             else
             {
-                assert(notification_count > 0);
+                assert(modification_count > 0);
 
                 hf_service.save_user_chunks(callback);
             }
         }
     );
-}
-
-/*
- * Refreshes users' notifications
- *
- * @param <callback>: the function called once done
- *      @param <success>: true or false
- *      function my_callback(success)
- */
-hf_service.refresh_user_notifications = function(callback)
-{
-    assert(hf_service.is_connected());
-
-    hf_service.refresh_notifications(hf_service.user_private_chunk, function(discarded_count){
-        if (discarded_count == 0)
-        {
-            callback(true);
-            return;
-        }
-
-        hf_service.save_user_chunks(callback);
-    });
 }
 
 /*
