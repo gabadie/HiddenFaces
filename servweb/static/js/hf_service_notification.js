@@ -226,28 +226,12 @@ hf_service.process_notifications = function(notifications_json, callback)
 
     for (var i = 0; i < notifications_json.length; i++)
     {
-        var notification_json = {};
-        var notificationAutomation = null;
+        var notification_json = notifications_json[i];
+        var notificationType = notification_json['__meta']['type'];
 
-        try
-        {
-            notification_json = JSON.parse(notifications_json[i]);
+        assert(notificationType in hf_service.notification_interface);
 
-            /*
-             * TODO: need to validate the notification in case someone else has
-             * appened an invalid one (issue #27).
-             */
-
-            var notificationType = notification_json['__meta']['type'] ;
-
-            assert(notificationType in hf_service.notification_interface);
-
-            notificationAutomation = hf_service.notification_interface[notificationType].automation;
-        }
-        catch (err)
-        {
-            continue;
-        }
+        var notificationAutomation = hf_service.notification_interface[notificationType].automation;
 
         if (notificationAutomation != null)
         {
@@ -319,7 +303,35 @@ hf_service.pull_fresh_notifications = function(repository_chunk, callback)
             return;
         }
 
-        var notifications_json = json_message['chunk'][protected_chunk_name];
+        var notification_chunk_content = json_message['chunk'][protected_chunk_name];
+        var notifications_json = [];
+
+        for (var i = 0; i < notification_chunk_content.length; i++)
+        {
+            var notification_json = null;
+
+            try
+            {
+                notification_json = JSON.parse(notification_chunk_content[i]);
+
+                /*
+                 * TODO: need to validate the notification in case someone else has
+                 * appened an invalid one (issue #27).
+                 */
+
+                var notificationType = notification_json['__meta']['type'];
+
+                assert(notificationType in hf_service.notification_interface);
+            }
+            catch (err)
+            {
+                continue;
+            }
+
+            assert(notification_json != null);
+
+            notifications_json.push(notification_json);
+        }
 
         hf_service.process_notifications(
             notifications_json,
@@ -407,8 +419,8 @@ hf_service.list_notifications = function(repository_chunk, callback)
  *      public notification repository
  * @param <notification_json>: the notification JSON to push
  * @param <callback>: the callback once the notification has been pushed
- *      @param <success>: true or false
- *      function my_callback(success)
+ *      @param <discarded_count>: number of discarded notifications
+ *      function my_callback(discarded_count)
  */
 hf_service.refresh_notifications = function(repository_chunk, callback)
 {
@@ -418,9 +430,11 @@ hf_service.refresh_notifications = function(repository_chunk, callback)
     var notifications_json = repository_chunk['notifications'];
 
     hf_service.process_notifications(notifications_json, function(survived_notifications_json){
+        assert(survived_notifications_json.length <= notifications_json.length);
+
         repository_chunk['notifications'] = survived_notifications_json;
 
-        callback(true);
+        callback(notifications_json.length - survived_notifications_json.length);
     });
 }
 
@@ -499,18 +513,20 @@ hf_service.pull_fresh_user_notifications = function(callback)
         {
             if (notification_count == null)
             {
+                assert(hf.is_function(callback));
                 callback(false);
-                return;
             }
             else if (notification_count == 0)
             {
-                callback(true);
-                return;
+                if (callback)
+                    callback(true);
             }
+            else
+            {
+                assert(notification_count > 0);
 
-            assert(notification_count > 0);
-
-            hf_service.save_user_chunks(callback);
+                hf_service.save_user_chunks(callback);
+            }
         }
     );
 }
@@ -526,9 +542,16 @@ hf_service.refresh_user_notifications = function(callback)
 {
     assert(hf_service.is_connected());
 
-    hf_service.refresh_notifications(hf_service.user_private_chunk, callback);
-}
+    hf_service.refresh_notifications(hf_service.user_private_chunk, function(discarded_count){
+        if (discarded_count == 0)
+        {
+            callback(true);
+            return;
+        }
 
+        hf_service.save_user_chunks(callback);
+    });
+}
 
 /*
  * Lists user's notifications
