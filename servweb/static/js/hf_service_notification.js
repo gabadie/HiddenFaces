@@ -135,7 +135,7 @@ hf_service.delete_user_notification = function(notification_hash, callback)
  *      @param <success>: true or false
  *      function my_callback(success)
  */
-hf_service.pull_fresh_notifications = function(callback)
+hf_service.pull_fresh_user_notifications = function(callback)
 {
     assert(hf_service.is_connected());
     assert(hf.is_function(callback) || callback == undefined);
@@ -240,7 +240,7 @@ hf_service.list_user_notifications = function(callback)
 {
     assert(hf.is_function(callback));
 
-    hf_service.pull_fresh_notifications(function(success){
+    hf_service.pull_fresh_user_notifications(function(success){
         if (!success)
         {
             alert('hf_service.list_user_notifications() failed');

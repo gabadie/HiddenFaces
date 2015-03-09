@@ -435,7 +435,7 @@ test_hf_service.send_chunks_infos_to_contacts = function()
     hf_service.disconnect();
 
     hf_service.login_user(user_profile1);
-    hf_service.pull_fresh_notifications();
+    hf_service.pull_fresh_user_notifications();
 
     test_utils.assert(
         hf_service.user_private_chunk['contacts'][user_hash0]['threads'].indexOf(chunks_infos[0]['name']) >= 0,
@@ -521,7 +521,7 @@ test_hf_service.list_contacts_threads_names = function()
     hf_service.disconnect();
 
     hf_service.login_user(user_profile0);
-    hf_service.pull_fresh_notifications();
+    hf_service.pull_fresh_user_notifications();
 
     hf_service.list_contacts_threads_names(function(threads_names){
         test_utils.assert(threads_names.length == 3, 'should have 3 threads')

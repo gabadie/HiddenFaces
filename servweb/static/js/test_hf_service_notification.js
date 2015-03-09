@@ -73,7 +73,7 @@ test_hf_service.notification_automation_util = function(send_notification_callba
 
     test_utils.assert_success(1);
 
-    hf_service.pull_fresh_notifications();
+    hf_service.pull_fresh_user_notifications();
 
     test_utils.assert_success(assert_count);
 
@@ -83,14 +83,14 @@ test_hf_service.notification_automation_util = function(send_notification_callba
         function(json_message){
             test_utils.assert(
                 json_message['chunk_content'].length == 0,
-                'hf_service.pull_fresh_notifications() failed should clean the protected chunk'
+                'hf_service.pull_fresh_user_notifications() failed should clean the protected chunk'
             );
         }
     );
 
     test_utils.assert(
         hf_service.user_private_chunk['notifications'].length == 0,
-        'hf_service.pull_fresh_notifications() should not modify the user\'s private chunk'
+        'hf_service.pull_fresh_user_notifications() should not modify the user\'s private chunk'
     );
 
     test_utils.assert_success(2);

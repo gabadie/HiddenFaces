@@ -189,7 +189,7 @@ test_hf_service.list_circle_threads_names = function()
     hf_service.disconnect();
 
     hf_service.login_user(user_profile0);
-    hf_service.pull_fresh_notifications();
+    hf_service.pull_fresh_user_notifications();
     hf_service.list_circle_threads_names(circle_hash0, function(threads_names){
         test_utils.assert(threads_names.length == 3, 'should have two threads names');
         test_utils.assert(threads_names[0] == circle_hash0, 'the first thread name should be the circle hash');
