@@ -9,6 +9,7 @@
  */
 hf_service.create_circle = function(circle_name, callback)
 {
+    assert(circle_name.trim() != "", "Circle must be not empty");
     assert(hf_service.is_connected());
     assert(typeof circle_name == 'string');
     assert(hf.is_function(callback));
