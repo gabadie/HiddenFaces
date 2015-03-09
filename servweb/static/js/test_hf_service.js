@@ -896,7 +896,7 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.save_user_chunks, 'test_hf_service.save_user_chunks');
 
     // NOTIFICATIONS TESTS
-    test_utils.run(test_hf_service.push_notification, 'test_hf_service.push_notification');
+    test_utils.run(test_hf_service.push_user_notification, 'test_hf_service.push_user_notification');
     test_utils.run(test_hf_service.notification_automation_sanity, 'test_hf_service.notification_automation_sanity');
     test_utils.run(test_hf_service.list_user_notifications, 'test_hf_service.list_user_notifications');
     test_utils.run(test_hf_service.delete_user_notification, 'test_hf_service.delete_user_notification');

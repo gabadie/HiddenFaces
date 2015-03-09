@@ -46,7 +46,7 @@ hf_service.define_notification = function(notification_type, notification_interf
  *      @param <success>: true or false
  *      function my_callback(success)
  */
-hf_service.push_notification = function(user_hash, notification_json, callback)
+hf_service.push_user_notification = function(user_hash, notification_json, callback)
 {
     assert(hf_service.is_connected());
     assert(hf.is_hash(user_hash));
@@ -73,7 +73,7 @@ hf_service.push_notification = function(user_hash, notification_json, callback)
                 if (json_message['status'] != 'ok')
                 {
                     allert(
-                        'hf_service.push_notification(' +
+                        'hf_service.push_user_notification(' +
                         user_hash + ', ' +
                         JSON.stringify(notification_json) +
                         ') failed'
@@ -352,5 +352,5 @@ hf_service.send_message = function(user_hash, message, callback)
         'content': message
     };
 
-    hf_service.push_notification(user_hash, notification_json, callback);
+    hf_service.push_user_notification(user_hash, notification_json, callback);
 }

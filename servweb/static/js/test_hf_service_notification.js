@@ -5,7 +5,7 @@ hf_service.define_notification('/notification/testing/manual', {
 });
 
 
-test_hf_service.push_notification = function()
+test_hf_service.push_user_notification = function()
 {
     var user_profile0 = test_hf_service.john_smith_profile();
     var user_hash0 = hf_service.create_user(user_profile0);
@@ -29,7 +29,7 @@ test_hf_service.push_notification = function()
             }
         );
 
-        hf_service.push_notification(user_hash0, notification, function(success){
+        hf_service.push_user_notification(user_hash0, notification, function(success){
             test_utils.assert(success == true, 'notification push with success')
         });
 
@@ -122,7 +122,7 @@ test_hf_service.notification_automation_sanity = function()
             resolve: null
         });
 
-        hf_service.push_notification(user_hash, original_notification, function(success){
+        hf_service.push_user_notification(user_hash, original_notification, function(success){
             test_utils.assert(success == true, 'notification push with success')
         });
 
@@ -150,11 +150,11 @@ test_hf_service.list_user_notifications = function()
         test_utils.assert(notifications_list.length == 0, 'should not have any notifications');
     });
 
-    hf_service.push_notification(user_hash0, original_notification, function(success){
+    hf_service.push_user_notification(user_hash0, original_notification, function(success){
         test_utils.assert(success == true, 'should push a testing notification');
     });
 
-    hf_service.push_notification(user_hash0, original_notification, function(success){
+    hf_service.push_user_notification(user_hash0, original_notification, function(success){
         test_utils.assert(success == true, 'should push another testing notification');
     });
 
@@ -188,11 +188,11 @@ test_hf_service.delete_user_notification = function()
         test_utils.assert(success == false, 'deleting a non existing notification should fail');
     });
 
-    hf_service.push_notification(user_hash0, original_notification, function(success){
+    hf_service.push_user_notification(user_hash0, original_notification, function(success){
         test_utils.assert(success == true, 'should push a testing notification');
     });
 
-    hf_service.push_notification(user_hash0, original_notification, function(success){
+    hf_service.push_user_notification(user_hash0, original_notification, function(success){
         test_utils.assert(success == true, 'should push another testing notification');
     });
 

@@ -203,7 +203,7 @@ hf_service.send_chunks_infos_to_contacts = function(contacts_hashes, chunks_info
 
     for (var i = 0; i < contacts_hashes.length; i++)
     {
-        hf_service.push_notification(contacts_hashes[i], notification_json, function(success){
+        hf_service.push_user_notification(contacts_hashes[i], notification_json, function(success){
             assert(success);
 
             callback_remaining--;
