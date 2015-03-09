@@ -216,13 +216,11 @@ hf_service.export_user_public_chunk = function(user_private_chunk)
             'email':        ''
         },
         'system': {
-            'protected_chunk': {
-                'name':         user_private_chunk['system']['protected_chunk']['name'],
-                'public_key':   user_private_chunk['system']['protected_chunk']['public_key']
-            }
         },
         'certifications' : hf.clone(user_private_chunk['certifications'])
     };
+
+    hf_service.export_public_notification_repository(user_private_chunk, public_chunk);
 
     return public_chunk;
 }

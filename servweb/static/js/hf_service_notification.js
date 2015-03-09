@@ -84,19 +84,40 @@ hf_service.init_notification_repository = function(repository_chunk, transaction
 }
 
 /*
+ * Exports a public notification repository from a notification repository
+ *
+ * @param <repository_chunk>: the chunk content containing the
+ *      notification repository
+ * @param <public_repository_chunk>: the chunk content where to export the
+ *      public notification repository
+ */
+hf_service.export_public_notification_repository = function(repository_chunk, public_repository_chunk)
+{
+    assert('system' in repository_chunk);
+    assert('notifications' in repository_chunk);
+    assert('system' in public_repository_chunk);
+
+    public_repository_chunk['system']['protected_chunk'] = {
+        'name':         repository_chunk['system']['protected_chunk']['name'],
+        'public_key':   repository_chunk['system']['protected_chunk']['public_key']
+    };
+}
+
+/*
  * Pushs a notification to an user's protected chunk
  *
- * @param <notifications_chunk_name>: the notifications' chunk name
- * @param <notifications_chunk_key>: the notifications' chunk key
+ * @param <repository_chunk>: the chunk content containing the
+ *      public notification repository
  * @param <notification_json>: the notification JSON to push
  * @param <callback>: the callback once the notification has been pushed
  *      @param <success>: true or false
  *      function my_callback(success)
  */
-hf_service.push_notification = function(notifications_chunk_name, notifications_chunk_key, notification_json, callback)
+hf_service.push_notification = function(public_repository_chunk, notification_json, callback)
 {
     assert(hf_service.is_connected());
-    assert(hf.is_hash(notifications_chunk_name));
+    assert('system' in public_repository_chunk);
+    assert('protected_chunk' in public_repository_chunk['system']);
     assert(typeof notification_json['__meta']['type'] == 'string');
     assert(notification_json['__meta']['type'] in hf_service.notification_interface);
     assert(notification_json['__meta']['author_user_hash'] == hf_service.user_hash());
@@ -104,9 +125,9 @@ hf_service.push_notification = function(notifications_chunk_name, notifications_
 
     // appends the notification to the end of <user_hash>'s protected file
     hf_com.append_data_chunk(
-        notifications_chunk_name,
+        public_repository_chunk['system']['protected_chunk']['name'],
         hf_service.user_chunks_owner(),
-        notifications_chunk_key,
+        public_repository_chunk['system']['protected_chunk']['public_key'],
         JSON.stringify(notification_json),
         function(json_message) {
             if (json_message['status'] != 'ok')
@@ -188,12 +209,7 @@ hf_service.push_user_notification = function(user_hash, notification_json, callb
             return;
         }
 
-        hf_service.push_notification(
-            public_chunk['system']['protected_chunk']['name'],
-            public_chunk['system']['protected_chunk']['public_key'],
-            notification_json,
-            callback
-        );
+        hf_service.push_notification(public_chunk, notification_json, callback);
     });
 }
 
