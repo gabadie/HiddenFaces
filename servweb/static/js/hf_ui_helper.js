@@ -70,13 +70,7 @@ Handlebars.registerHelper('hf_chunk', function(chunk, options){
 });
 
 Handlebars.registerHelper('hf_timestamp_post', function(timestamp){
-    return '<div style="text-align:right;color:black; ">'+timestamp['date']+' </div>';
-});
-
-Handlebars.registerHelper('hf_comment', function(comment, options) {
-    var out = '';
-    out += comment['content'];
-    return out;
+    return '<div class="hf_date">'+timestamp['date']+' </div>';
 });
 
 Handlebars.registerHelper('if_eq', function(a, b, opts) {
