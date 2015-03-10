@@ -269,21 +269,24 @@ test_hf_populate.subscription_requests = function()
 {
     for (var i = 0; i < test_hf_populate.subscription_count; i++)
     {
-        var from = 0;
-        var to = 0;
+        var from;
+        var to;
 
-        while (from == to)
-        {
+        do{
+            hf_service.disconnect();
             from = test_hf_populate.rand() % test_hf_populate.profile_count;
             to = test_hf_populate.rand() % test_hf_populate.group_count;
-        }
+            hf_service.login_user(test_hf_populate.user_profile[from]);
+        }while (hf_service.is_group_admin(test_hf_populate.groups_hash[to]));
 
         var subscription_message = 'I would like to subscribe to this group';
 
-        hf_service.login_user(test_hf_populate.user_profile[from]);
-        hf_service.subscribe_to_group(test_hf_populate.groups_hash[], subscription_message, function(success){
-            test_utils.assert(success == true, 'user_profile2 cannot subscribe to the group');
+        hf_service.subscribe_to_group(test_hf_populate.groups_hash[to], subscription_message, function(success){
+            test_utils.assert(success == true,
+                test_hf_populate.user_profile[from]['first_name']+' cannot subscribe to the group'
+            );
         });
+
         hf_service.disconnect();
     }
 
