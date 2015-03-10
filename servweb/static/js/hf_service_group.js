@@ -175,6 +175,7 @@ hf_service.create_group = function(group_name, description, public_group, public
                     hf_service.store_key(user_private_chunk, private_chunk_name, private_chunk_key);
 
                     user_private_chunk['groups']['admin_of'][group_hash] = private_chunk_name;
+                    user_private_chunk['groups']['subscribed_to'].push(group_hash);
 
                     hf_service.save_user_chunks(function(success){
                         if(success && callback){
@@ -433,6 +434,41 @@ hf_service.add_user_to_group = function(user_hash, group_hash, callback)
             }
         );
     });
+}
+
+/*
+ * Lists groups' public chunks the user has subscribes to
+ * @param <callback>: the function called once the response has arrived
+ *      @param <public_chunks>: the contacts' public chunk
+ *      function my_callback(public_chunks)
+ */
+hf_service.list_groups = function(callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf.is_function(callback));
+
+    var groups = hf_service.user_private_chunk['groups']['subscribed_to'];
+    var content = [];
+
+    if (groups.length === 0) {
+        callback(content);
+        return ;
+    }
+
+    var iteration = groups.length;
+
+    for(var i = 0; i < groups.length; i++) {
+        hf_service.get_group_public_chunk(groups[i], function(group_public_chunk){
+        if(group_public_chunk){
+                content.push(group_public_chunk);
+            }
+
+            iteration--;
+            if (iteration == 0) {
+                callback(content);
+            }
+        });
+    }
 }
 
 //------------------------------------------------------------------- GROUP NOTIFICATIONS
