@@ -9,7 +9,8 @@ test_hf_populate.asymetric_contact_count = 200;
 test_hf_populate.post_count = 200;
 test_hf_populate.comment_count = 300;
 test_hf_populate.group_count = 12;
-test_hf_populate.subscription_count = 50;
+test_hf_populate.subscription_count = 10;
+test_hf_populate.users_group_count = 10;
 
 
 test_hf_populate.seed = 0;
@@ -239,7 +240,7 @@ test_hf_populate.add_asymetric_users_contacts = function()
 
 test_hf_populate.create_groups = function()
 {
-    test_hf_populate.groups_hash = [];
+    test_hf_populate.groups_hash_and_admin = {};
     for (var i = 0; i < test_hf_populate.group_count; i++)
     {
         var user_id = test_hf_populate.rand_user_id();
@@ -247,7 +248,7 @@ test_hf_populate.create_groups = function()
 
         var group_info = test_hf_service.group_examples(i);
 
-        (function(i){
+        (function(user_id){
             hf_service.create_group(
                 group_info['name'],
                 group_info['description'],
@@ -255,46 +256,71 @@ test_hf_populate.create_groups = function()
                 function(group_hash){
                     test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
                     test_utils.assert(hf_service.is_group_admin(group_hash));
-                    test_hf_populate.groups_hash[i] = group_hash;
+                    test_hf_populate.groups_hash_and_admin[group_hash] = user_id;
                 }
             );
-            test_utils.assert(test_hf_populate.groups_hash[i] !== undefined);
-        })(i)
+        })(user_id)
         hf_service.disconnect();
     }
-    test_utils.assert(test_hf_populate.groups_hash.length == test_hf_populate.group_count,
+    test_utils.assert(Object.keys(test_hf_populate.groups_hash_and_admin).length == test_hf_populate.group_count,
         'Not all the groups have been created'
     );
-    test_utils.assert_success(3 * test_hf_populate.group_count + 1);
+    test_utils.assert_success(2 * test_hf_populate.group_count + 1);
 }
 
 test_hf_populate.subscription_requests = function()
 {
-    for (var i = 0; i < test_hf_populate.subscription_count; i++)
-    {
-        var from;
-        var to;
-        hf_service.login_user(test_hf_populate.user_profile[0]);
+    var subscription_message = 'I would like to subscribe to this group';
+    for(var group_hash in test_hf_populate.groups_hash_and_admin){
 
-        do{
-            hf_service.disconnect();
-            from = test_hf_populate.rand() % test_hf_populate.profile_count;
-            to = test_hf_populate.rand() % test_hf_populate.group_count;
+        var subscribers_id = [test_hf_populate.groups_hash_and_admin[group_hash]];
+
+        for (var i = 0; i < test_hf_populate.subscription_count; i++)
+        {
+            var from = test_hf_populate.groups_hash_and_admin[group_hash];
+
+            while(subscribers_id.indexOf(from) >= 0){
+                from = test_hf_populate.rand() % test_hf_populate.profile_count;
+            }
+
+            subscribers_id.push(from);
+
             hf_service.login_user(test_hf_populate.user_profile[from]);
-        }while (hf_service.is_group_admin(test_hf_populate.groups_hash[to]));
 
-        var subscription_message = 'I would like to subscribe to this group';
+            hf_service.subscribe_to_group(group_hash, subscription_message, function(success){
+                test_utils.assert(success == true,
+                    test_hf_populate.user_profile[from]['first_name']+' cannot subscribe to the group '
+                );
+            });
 
-        hf_service.subscribe_to_group(test_hf_populate.groups_hash[to], subscription_message, function(success){
-            test_utils.assert(success == true,
-                test_hf_populate.user_profile[from]['first_name']+' cannot subscribe to the group'
-            );
-        });
-
-        hf_service.disconnect();
+            hf_service.disconnect();
+        }
     }
 
-    test_utils.assert_success(test_hf_populate.subscription_count);
+    test_utils.assert_success(test_hf_populate.users_group_count * test_hf_populate.group_count);
+}
+
+test_hf_populate.add_users_to_groups = function()
+{
+    for(var group_hash in test_hf_populate.groups_hash_and_admin){
+
+        var users_id = [test_hf_populate.groups_hash_and_admin[group_hash]];
+
+        for (var i = 0; i < test_hf_populate.users_group_count; i++)
+        {
+            var user_id = test_hf_populate.groups_hash_and_admin[group_hash];
+
+            while(users_id.indexOf(user_id) >= 0){
+                user_id = test_hf_populate.rand() % test_hf_populate.profile_count;
+            }
+
+            hf_service.add_user_to_group(test_hf_populate.user_hash[user_id], group_hash, function(success){
+                test_utils.assert(success == true,
+                'Cannot add'+test_hf_populate.user_profile[from]['first_name']+' to group')
+            });
+        }
+    }
+    test_utils.assert_success(test_hf_populate.group_count * test_hf_populate.users_group_count);
 }
 
 test_hf_populate.post_into_circle = function()
