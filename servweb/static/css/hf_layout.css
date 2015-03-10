@@ -74,50 +74,7 @@
     color: #BBBBBB;
 }
 
-.hf_layout_cell .hf_post .hf_author
-{
-    padding: 0px 0px 10px 0px;
-}
-
-.hf_layout_cell .hf_post .hf_text
-{
-    padding: 0 20px 20px 20px;
-}
-
-.hf_layout_cell .hf_post .hf_date
-{
-    text-align: right;
-    padding: 0 10px 0px 10px;
-    float: right;
-}
-
-.hf_layout_cell .hf_notification .hf_author
-{
-    padding: 0px 0px 10px 0px;
-}
-
-.hf_layout_cell .hf_notification .hf_date
-{
-    float: right;
-    display: inline-block;
-}
-
-.hf_layout_cell .hf_notification .hf_text
-{
-    padding: 0 20px;
-}
-
-.hf_layout_cell .hf_notification .hf_action_bar
-{
-    display: block;
-    width: 100%;
-}
-
-.hf_layout_cell .hf_notification .hf_action_bar button
-{
-    display: inline-block;
-}
-
+/* ------------------------------------------------------------ NOTIFICATIONS */
 .hf_layout_cell .hf_list_item
 {
 
@@ -156,6 +113,25 @@
     padding: 0px 10px 10px 10px;
 }
 
+/* -------------------------------------------------------------------- POSTS */
+.hf_layout_cell .hf_post .hf_author
+{
+    padding: 0px 0px 10px 0px;
+}
+
+.hf_layout_cell .hf_post .hf_text
+{
+    padding: 0px 20px 20px 20px;
+}
+
+.hf_layout_cell .hf_post .hf_date
+{
+    text-align: right;
+    padding: 0 20px;
+    float: right;
+}
+
+/* ----------------------------------------------------------------- COMMENTS */
 .hf_layout_cell .hf_comments
 {
     background: #F7F7F7;
@@ -168,7 +144,7 @@
 
 .hf_layout_cell .hf_comment
 {
-    padding: 5px 10px;
+    padding: 10px 20px;
     border-bottom: 1px solid #FFFFFF;
 }
 
@@ -177,8 +153,30 @@
     text-align: right;
 }
 
-.hf_layout_cell .hf_text .hf_date
+/* ------------------------------------------------------------ NOTIFICATIONS */
+.hf_layout_cell .hf_notification .hf_author
 {
-    text-align: right;
+    padding: 0px 0px 10px 0px;
 }
 
+.hf_layout_cell .hf_notification .hf_date
+{
+    float: right;
+    display: inline-block;
+}
+
+.hf_layout_cell .hf_notification .hf_text
+{
+    padding: 0 20px;
+}
+
+.hf_layout_cell .hf_notification .hf_action_bar
+{
+    display: block;
+    width: 100%;
+}
+
+.hf_layout_cell .hf_notification .hf_action_bar button
+{
+    display: inline-block;
+}
