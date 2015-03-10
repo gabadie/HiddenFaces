@@ -84,6 +84,13 @@
     padding: 0 20px 20px 20px;
 }
 
+.hf_layout_cell .hf_post .hf_date
+{
+    text-align: right;
+    padding: 0 10px 0px 10px;
+    float: right;
+}
+
 .hf_layout_cell .hf_notification .hf_author
 {
     padding: 0px 0px 10px 0px;
@@ -99,6 +106,7 @@
 {
     padding: 0 20px;
 }
+
 .hf_layout_cell .hf_notification .hf_action_bar
 {
     display: block;
