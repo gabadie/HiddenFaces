@@ -19,8 +19,8 @@ hf_control.add_contact_to_circle = function(contact_user_hash, circle_hash)
 }
 
 
-// -------------------------------------------------------------------- CONTACT INVITATION
-hf_control.contact_invitation = function(domElem)
+// -------------------------------------------------------------------- SEND MESSAGE
+hf_control.send_message = function(domElem)
 {
    var invitation_infos = hf.inputs_to_json(domElem);
 

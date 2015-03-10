@@ -171,7 +171,7 @@ hf_control.signed_in.route('/contacts', function () {
     });
 });
 
-// ------------------------------------------------------ INVITATIONS' VIEWS
+// ------------------------------------------------------ MESSAGES' VIEWS
 hf_control.signed_in.route('/send_message', function(){
     var template_context = {
         'user_hash': ''
