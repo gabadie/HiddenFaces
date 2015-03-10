@@ -2,7 +2,7 @@
 {{#hf_cell}}
     <div class="hf_padding">
         <div class="hf_title">Write what is on your mind... Privately.</div>
-        <form onsubmit="return false;" style="padding: 3px;">
+        <form onsubmit="hf_control.create_post(this);return false;" style="padding: 3px;">
             <textarea class="form-control" name="content"></textarea>
             <table width="100%">
                 <tr>
@@ -12,7 +12,7 @@
                                 <label>
                                     <input
                                         type="checkbox"
-                                        name="cirlce/{{thread_chunk_name}}"
+                                        name="circle/{{thread_chunk_name}}"
                                         value="" />
                                     {{name}}
                                 </label>

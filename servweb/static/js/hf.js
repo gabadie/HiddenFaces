@@ -155,7 +155,14 @@ hf.inputs_to_json = function(domElement)
 
     for (var i = 0; i < inputs.length; i++)
     {
-        obj[inputs[i].name] = inputs[i].value;
+        if(inputs[i].type == 'checkbox')
+        {
+            obj[inputs[i].name] = inputs[i].checked;
+        }
+        else
+        {
+            obj[inputs[i].name] = inputs[i].value;
+        }
     }
 
     var textareas = domElement.getElementsByTagName('textarea');
@@ -296,12 +303,10 @@ hf.date_to_string = function(date)
  *
  */
 
-hf.generate_full_date = function()
+hf.generate_full_date = function(date_format, timestamp_string)
 {
-    var string_date = hf.get_date_time();
-    var date = hf.string_to_date(string_date);
+    var date = hf.string_to_date(timestamp_string);
     var date_timeStamp = date.getTime();
-    var full_date = Date.create(date_timeStamp).toString().substr(0,21);
-    return full_date;
-
+    var date_formatted = Date.create(date_timeStamp).format(date_format);
+    return date_formatted;
 }

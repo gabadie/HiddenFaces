@@ -18,9 +18,8 @@ hf_control.add_contact_to_circle = function(contact_user_hash, circle_hash)
     });
 }
 
-
-// -------------------------------------------------------------------- CONTACT INVITATION
-hf_control.contact_invitation = function(domElem)
+// -------------------------------------------------------------------- SEND MESSAGE
+hf_control.send_message = function(domElem)
 {
    var invitation_infos = hf.inputs_to_json(domElem);
 
@@ -170,9 +169,10 @@ hf_control.create_circle = function(domElem)
     });
 }
 
-hf_control.create_comment = function(commentElement)
+// ------------------------------------------------------------------- Post a comment
+hf_control.create_comment = function(commentDom)
 {
-    var post = hf.inputs_to_json(commentElement);
+    var post = hf.inputs_to_json(commentDom);
     var comment = post['content'];
 
     if (comment.trim() == '')
@@ -190,3 +190,59 @@ hf_control.create_comment = function(commentElement)
     });
 }
 
+// ------------------------------------------------------------------- New post
+hf_control.create_post = function(postDom)
+{
+    var postElms = hf.inputs_to_json(postDom);
+    var circles = hf_control.is_any_circle_checked(postElms);
+
+    if(circles.length == 0)
+    {
+        alert('You must post to at least a circle!')
+        return;
+    }
+
+    if(postElms['content'].trim() == '')
+    {
+        alert('you cannot post an empty content');
+        return;
+    }
+
+    var post_appended = 0;
+    var threads = [];
+    for(var i = 0; i < circles.length; i++)
+    {
+        hf_service.get_circle(circles[i], function(circle){
+            var symetric_key = hf_service.get_encryption_key(hf_service.user_private_chunk, circle['thread_chunk_name']);
+            var thread = {
+                'thread_chunk_name': circle['thread_chunk_name'],
+                'symetric_key':symetric_key
+            };
+
+            threads.push(thread);
+            post_appended++;
+
+            if(post_appended == circles.length)
+            {
+                hf_service.create_post(postElms['content'].trim(), threads, function(success){
+                    assert(success);
+                    hf_control.refresh_view();
+                });
+            }
+        });
+    }
+}
+
+hf_control.is_any_circle_checked = function(postElms)
+{
+    var circles = [];
+    for(var input in postElms)
+    {
+        if (input.indexOf('circle') > -1 && postElms[input])
+        {
+            circles.push(input.split("/")[1]);
+        }
+    }
+
+    return circles;
+}

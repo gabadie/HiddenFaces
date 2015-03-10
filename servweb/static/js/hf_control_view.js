@@ -171,7 +171,7 @@ hf_control.signed_in.route('/contacts', function () {
     });
 });
 
-// ------------------------------------------------------ INVITATIONS' VIEWS
+// ------------------------------------------------------ MESSAGES' VIEWS
 hf_control.signed_in.route('/send_message', function(){
     var template_context = {
         'user_hash': ''
@@ -238,29 +238,63 @@ hf_control.signed_in.route('/profile/', function (){
             return hf_control.view('/');
         }
 
-        var params = {
-            'name': public_chunk['profile']['first_name'] + ' ' + public_chunk['profile']['last_name']
-        };
-
         var html = hf_ui.template(
             'header/user_profile.html',
-            params
+            public_chunk
         );
 
         document.getElementById('hf_page_main_content').innerHTML = html;
 
         if (!hf_service.is_contact(user_hash))
         {
+            var message_html = hf_ui.template('send_message.html',
+                {'user_hash': user_hash}
+            );
+            var add_contact = hf_ui.template('form/add_from_user_profile.html',
+                public_chunk
+            );
+
+            document.getElementById('hf_page_main_content').innerHTML = (html + add_contact + message_html);
+
+            return;
+        }
+        else if(hf_service.is_contact(user_hash))
+        {
+           var message_html = hf_ui.template('send_message.html',
+                {'user_hash': user_hash}
+            );
+            var no_post = hf_ui.template('form/no_post.html',
+                public_chunk
+            );
+
+            document.getElementById('hf_page_main_content').innerHTML = (html + no_post + message_html);
+
             return;
         }
 
         hf_service.list_contact_threads_names(user_hash, function(contacts_threads_names){
-            hf_control.view_threads(contacts_threads_names, function(posts_html){
-                document.getElementById('hf_page_main_content').innerHTML += posts_html;
-            });
+            if(contacts_threads_names.length == 0)
+            {
+                var message_html = hf_ui.template('send_message.html',
+                    {'user_hash': user_hash}
+                );
+                var add_contact = hf_ui.template('form/add_from_user_profile.html',
+                    public_chunk
+                );
+
+                document.getElementById('hf_page_main_content').innerHTML = (html + add_contact + message_html);
+
+            }
+            else
+            {
+                hf_control.view_threads(contacts_threads_names, function(posts_html){
+                    document.getElementById('hf_page_main_content').innerHTML += posts_html;
+                });
+            }
         });
     });
 });
+
 
 
 // ------------------------------------------------------ THREADS VIEWS
@@ -306,6 +340,10 @@ hf_control.view_threads = function(threads_names, callback)
     {
         hf_service.list_posts(threads_names[i], function(posts_list){
             posts_lists.push(posts_list);
+            for(var j = 0; j < posts_list.length; j++)
+            {
+                posts_list[j]['comments'] = hf_service.qsort_comments(posts_list[j]['comments']);
+            }
 
             if (posts_lists.length == threads_names.length)
             {
