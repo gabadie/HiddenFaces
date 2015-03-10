@@ -729,6 +729,9 @@ test_hf_service.is_valide_public_chunk = function()
 
 test_hf_service.main = function()
 {
+    // GLOBAL FEATURES TESTS
+    test_utils.run(test_hf_service.publish_into_global_list, 'test_hf_service.publish_into_global_list');
+
     // USER ACCOUNT TESTS
     test_utils.run(test_hf_service.create_account, 'test_hf_service.create_account');
     test_utils.run(test_hf_service.get_user_public_chunk, 'test_hf_service.get_user_public_chunk');
