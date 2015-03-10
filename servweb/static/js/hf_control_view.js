@@ -238,13 +238,9 @@ hf_control.signed_in.route('/profile/', function (){
             return hf_control.view('/');
         }
 
-        var params = {
-            'name': public_chunk['profile']['first_name'] + ' ' + public_chunk['profile']['last_name']
-        };
-
         var html = hf_ui.template(
             'header/user_profile.html',
-            params
+            public_chunk
         );
 
         document.getElementById('hf_page_main_content').innerHTML = html;
