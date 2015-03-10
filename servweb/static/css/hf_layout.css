@@ -149,6 +149,11 @@
     background: #F7F7F7;
 }
 
+.hf_layout_cell .hf_comments .hf_empty
+{
+    padding: 15px 0;
+}
+
 .hf_layout_cell .hf_comment
 {
     padding: 5px 10px;
