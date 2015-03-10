@@ -188,16 +188,24 @@ hf_service.uncertified_comment = function(post_chunk_name,post_chunk_key)
 
 // ---------------------------------------------------------- USER ACCOUNT TESTS
 
-test_hf_service.create_account = function()
+test_hf_service.create_user = function()
 {
     var user_profile0 = test_hf_service.john_smith_profile();
 
-    hf_service.create_user(user_profile0, function(user_hash){
+    var user_hash0 = hf_service.create_user(user_profile0, function(user_hash){
         test_utils.assert(hf.is_hash(user_hash));
     });
 
     test_utils.assert(!hf_service.is_connected(), 'no-one should be signed in after sign up');
-    test_utils.assert_success(2);
+
+    hf_service.global_list('/global/users_list', function(global_users_list){
+        test_utils.assert(
+            global_users_list.indexOf(user_hash0) >= 0,
+            'user_hash0 should be in the global users list'
+        );
+    });
+
+    test_utils.assert_success(3);
 }
 
 test_hf_service.get_user_public_chunk = function()
@@ -733,7 +741,7 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.publish_into_global_list, 'test_hf_service.publish_into_global_list');
 
     // USER ACCOUNT TESTS
-    test_utils.run(test_hf_service.create_account, 'test_hf_service.create_account');
+    test_utils.run(test_hf_service.create_user, 'test_hf_service.create_user');
     test_utils.run(test_hf_service.get_user_public_chunk, 'test_hf_service.get_user_public_chunk');
     test_utils.run(test_hf_service.login_user, 'test_hf_service.login_user');
     test_utils.run(test_hf_service.save_user_chunks, 'test_hf_service.save_user_chunks');

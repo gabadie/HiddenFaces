@@ -176,6 +176,8 @@ hf_service.create_user = function(user_profile, callback)
             false
         );
 
+        hf_service.publish_into_global_list(transaction, '/global/users_list', user_hash);
+
         transaction.commit(function(json_message){
             if (json_message['status'] != 'ok')
             {
