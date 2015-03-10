@@ -305,6 +305,7 @@ test_hf_populate.add_users_to_groups = function()
     for(var group_hash in test_hf_populate.groups_hash_and_admin){
 
         var users_id = [test_hf_populate.groups_hash_and_admin[group_hash]];
+        hf_service.login_user(test_hf_populate.user_profile[test_hf_populate.groups_hash_and_admin[group_hash]]);
 
         for (var i = 0; i < test_hf_populate.users_group_count; i++)
         {
@@ -314,11 +315,15 @@ test_hf_populate.add_users_to_groups = function()
                 user_id = test_hf_populate.rand() % test_hf_populate.profile_count;
             }
 
+            users_id.push(user_id);
+
             hf_service.add_user_to_group(test_hf_populate.user_hash[user_id], group_hash, function(success){
                 test_utils.assert(success == true,
-                'Cannot add'+test_hf_populate.user_profile[from]['first_name']+' to group')
+                'Cannot add'+test_hf_populate.user_profile[user_id]['first_name']+' to group')
             });
         }
+
+        hf_service.disconnect();
     }
     test_utils.assert_success(test_hf_populate.group_count * test_hf_populate.users_group_count);
 }
@@ -458,6 +463,7 @@ test_hf_populate.main = function()
     test_utils.run(test_hf_populate.add_asymetric_users_contacts, 'test_hf_populate.add_asymetric_users_contacts', true);
     test_utils.run(test_hf_populate.create_groups,'test_hf_populate.create_groups',true);
     test_utils.run(test_hf_populate.subscription_requests,'test_hf_populate.subscription_requests',true);
+    test_utils.run(test_hf_populate.add_users_to_groups,'test_hf_populate.add_users_to_groups',true);
     test_utils.run(test_hf_populate.post_into_circle, 'test_hf_populate.post_into_circle', true);
     test_utils.run(test_hf_populate.comment_posts,'test_hf_populate.comment_posts',true);
     test_utils.run(test_hf_populate.pull_fresh_user_notifications, 'test_hf_populate.pull_fresh_user_notifications', true);
