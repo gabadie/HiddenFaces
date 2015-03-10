@@ -28,7 +28,7 @@ hf_service.is_group_admin = function(group_hash){
  * @param <callback>: the function once
  *      function my_callback(bool) : true or false
  */
-hf_service.already_subscribed = function(user_hash, group_private_chunk)
+hf_service.already_user = function(user_hash, group_private_chunk)
 {
     assert(hf.is_hash(user_hash));
     return (group_private_chunk['users'].indexOf(user_hash) >= 0);
@@ -96,8 +96,8 @@ hf_service.create_group = function(group_name, description, public_group, public
                 'name': thread_info['thread_chunk_name'],
                 'key': thread_info['symetric_key']
             },
-            //users who had subscribed to the group
-            'users': []
+            //users who had subscribed to the group. At the beginning only the admin
+            'users': [hf_service.user_hash()]
         };
 
         var transaction = new hf_com.Transaction();
@@ -332,7 +332,7 @@ hf_service.add_user_to_group = function(user_hash, group_hash, callback)
             group_hash,
             function(group_json){
                 if(group_json){
-                    if(hf_service.already_subscribed(user_hash,group_json)){
+                    if(hf_service.already_user(user_hash,group_json)){
                         callback(false);
                         return;
                     }
@@ -449,3 +449,49 @@ hf_service.subscribe_to_group = function(group_hash, message, callback)
         }
     });
 }
+
+/*
+ * Define a notification interface for /notification/group_chunks_infos
+ */
+hf_service.define_notification('/notification/group_chunks_infos', {
+    automation: function(notification_json)
+    {
+        assert(hf_service.is_connected());
+
+        if (!hf_service.is_contact(notification_json['__meta']['author_user_hash']))
+        {
+            return 'continue';
+        }
+
+        var user_private_chunk = hf_service.user_private_chunk;
+        var chunks_infos = notification_json['chunks'];
+        var contact_hash = notification_json['__meta']['author_user_hash'];
+        var contact_info = hf_service.user_private_chunk['contacts'][contact_hash];
+
+        for (var i = 0; i < chunks_infos.length; i++)
+        {
+            var chunk_infos = chunks_infos[i];
+
+            if (chunk_infos['type'] == '/thread')
+            {
+                if (contact_info['threads'].indexOf(chunk_infos['name']) < 0)
+                {
+                    contact_info['threads'].push(chunk_infos['name']);
+                }
+            }
+            else
+            {
+                assert(false, 'unexpected type');
+            }
+
+            /*
+             * TODO: we should check that we can still open this document in
+             * the notification's validation (issue #27).
+             */
+            hf_service.store_key(user_private_chunk, chunk_infos['name'], chunk_infos['symetric_key']);
+        }
+
+        return 'discard';
+    },
+    resolve: hf_service.resolve_notification_author
+});

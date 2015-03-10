@@ -81,8 +81,8 @@ test_hf_service.add_user_to_group = function() {
             });
             //verify group's users
             hf_service.get_group_private_chunk(group_hash, function(group_json){
-                test_utils.assert(hf_service.already_subscribed(user_hash1,group_json) == true,'user_hash1 is not a group user');
-                test_utils.assert(hf_service.already_subscribed(user_hash2,group_json) == true, 'user_hash2 is not a group user');
+                test_utils.assert(hf_service.already_user(user_hash1,group_json) == true,'user_hash1 is not a group user');
+                test_utils.assert(hf_service.already_user(user_hash2,group_json) == true, 'user_hash2 is not a group user');
             });
         }
     );
