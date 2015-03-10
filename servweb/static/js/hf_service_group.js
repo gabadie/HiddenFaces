@@ -7,7 +7,7 @@ hf_service.init_groups_repository = function(repository_chunk)
 {
     assert(!('groups' in repository_chunk));
     repository_chunk['groups'] = {
-        'subscribed_to': {},
+        'subscribed_to': [],
         'admin_of': {}
     };
 }
@@ -22,7 +22,7 @@ hf_service.is_group_admin = function(group_hash){
 }
 
 /*Verifies if the user has already subscribed to the specified group
- *
+ * Accessible only by the admin
  * @param <user_hash>
  * @param <group_private_chunk>
  * @param <callback>: the function once
@@ -34,6 +34,21 @@ hf_service.already_user = function(user_hash, group_private_chunk)
     return (group_private_chunk['users'].indexOf(user_hash) >= 0);
 }
 
+/*Verifies if the user has already subscribed to the specified group
+ *
+ * @param <user_hash>
+ * @param <group_private_chunk>
+ * @param <callback>: the function once
+ *      function my_callback(bool) : true or false
+ */
+hf_service.already_subscribed = function(group_hash)
+{
+    assert(hf.is_hash(group_hash));
+    assert(hf_service.is_connected());
+
+    var private_chunk = hf_service.user_private_chunk;
+    return (private_chunk['groups']['subscribed_to'].indexOf(group_hash) >= 0);
+}
 /*
  * Creates a group
  *
@@ -439,10 +454,17 @@ hf_service.subscribe_to_group = function(group_hash, message, callback)
         },
         'content': message
     };
+
     hf_service.get_group_public_chunk(group_hash, function(group_public_chunk){
         if(group_public_chunk){
             hf_service.push_notification(group_public_chunk, notification_json, function(success){
-                callback(success);
+                if(success){
+                    var private_chunk = hf_service.user_private_chunk;
+                    private_chunk['groups']['subscribed_to'].push(group_hash);
+                    hf_service.save_user_chunks(callback);
+                }else{
+                    callback(false);
+                }
             });
         }else{
             callback(false);
@@ -453,12 +475,12 @@ hf_service.subscribe_to_group = function(group_hash, message, callback)
 /*
  * Define a notification interface for /notification/group_chunks_infos
  */
-hf_service.define_notification('/notification/group_chunks_infos', {
-    automation: function(notification_json)
+hf_service.define_notification('/notification/group_chunk_infos', {
+    automation: function(notification_json,group_hash)
     {
         assert(hf_service.is_connected());
 
-        if (!hf_service.is_contact(notification_json['__meta']['author_user_hash']))
+        if (!hf_service.already_subscribed(group_hash))
         {
             return 'continue';
         }
@@ -490,8 +512,27 @@ hf_service.define_notification('/notification/group_chunks_infos', {
              */
             hf_service.store_key(user_private_chunk, chunk_infos['name'], chunk_infos['symetric_key']);
         }
-
         return 'discard';
     },
     resolve: hf_service.resolve_notification_author
 });
+
+/*
+ * Sends chunks' keys to severals users.
+ *
+ * @param <users_hashes>: the users' hashes to send the chunks' keys
+ * @param <chunk_infos>: the chunk group infos to send
+ *      {
+ *          'name':             <the chunk's name>,
+ *          'type':             <the chunk's type>,
+ *          'symetric_key':     <the chunk's symetric key>
+ *      }
+ *
+ * @param <callback>: the callback once the notifications have been pushed
+ *      @param <success>: true or false
+ *      function my_callback(success)
+ */
+hf_service.send_group_infos_to_users = function(users_hashes, chunk_infos, callback)
+{
+    hf_service.send_chunks_infos_to_users(users_hashes, [chunk_infos], '/group', callback);
+}
