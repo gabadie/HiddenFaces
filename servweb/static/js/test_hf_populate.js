@@ -8,6 +8,8 @@ test_hf_populate.symetric_contact_count = 200;
 test_hf_populate.asymetric_contact_count = 200;
 test_hf_populate.post_count = 200;
 test_hf_populate.comment_count = 300;
+test_hf_populate.group_count = 12;
+test_hf_populate.subscription_count = 50;
 
 
 test_hf_populate.seed = 0;
@@ -233,6 +235,59 @@ test_hf_populate.add_asymetric_users_contacts = function()
     }
 
     test_utils.assert_success(3 * test_hf_populate.asymetric_contact_count);
+}
+
+test_hf_populate.create_groups = function()
+{
+    test_hf_populate.groups_hash = [];
+    for (var i = 0; i < test_hf_populate.group_count; i++)
+    {
+        var user_id = test_hf_populate.rand_user_id();
+        hf_service.login_user(test_hf_populate.user_profile[user_id]);
+
+        var group_info = test_hf_service.group_examples(i);
+
+        (function(i){
+            hf_service.create_group(
+                group_info['name'],
+                group_info['description'],
+                false, false,
+                function(group_hash){
+                    test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
+                    test_utils.assert(hf_service.is_group_admin(group_hash));
+                    test_hf_populate.groups_hash[i] = group_hash;
+                }
+            );
+            test_utils.assert(test_hf_populate.groups_hash[i] !== undefined);
+        })(i)
+        hf_service.disconnect();
+    }
+    test_utils.assert_success(3 * test_hf_populate.group_count);
+}
+
+test_hf_populate.subscription_requests = function()
+{
+    for (var i = 0; i < test_hf_populate.subscription_count; i++)
+    {
+        var from = 0;
+        var to = 0;
+
+        while (from == to)
+        {
+            from = test_hf_populate.rand() % test_hf_populate.profile_count;
+            to = test_hf_populate.rand() % test_hf_populate.group_count;
+        }
+
+        var subscription_message = 'I would like to subscribe to this group';
+
+        hf_service.login_user(test_hf_populate.user_profile[from]);
+        hf_service.subscribe_to_group(test_hf_populate.groups_hash[], subscription_message, function(success){
+            test_utils.assert(success == true, 'user_profile2 cannot subscribe to the group');
+        });
+        hf_service.disconnect();
+    }
+
+    test_utils.assert_success(test_hf_populate.message_count);
 }
 
 test_hf_populate.post_into_circle = function()
