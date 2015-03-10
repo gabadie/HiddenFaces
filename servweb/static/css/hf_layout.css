@@ -110,9 +110,7 @@
     width: 100%;
     overflow: auto;
     padding: 10px 10px 10px 10px;
-    border-bottom-style: dotted;
-    border-bottom-width: 1px;
-    border-bottom-color: black;
+    border-top: 1px solid #EEEEEE;
 }
 
 .hf_layout_cell .hf_list_item div a
