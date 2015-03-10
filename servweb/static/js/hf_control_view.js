@@ -251,16 +251,35 @@ hf_control.signed_in.route('/profile/', function (){
 
         if (!hf_service.is_contact(user_hash))
         {
+            var message_html = hf_ui.template('send_message.html',
+                {'user_hash': user_hash}
+            );
+
+            document.getElementById('hf_page_main_content').innerHTML += message_html;
+
             return;
         }
 
         hf_service.list_contact_threads_names(user_hash, function(contacts_threads_names){
-            hf_control.view_threads(contacts_threads_names, function(posts_html){
-                document.getElementById('hf_page_main_content').innerHTML += posts_html;
-            });
+            if(contacts_threads_names.length == 0)
+            {
+                var message_html = hf_ui.template('send_message.html',
+                    {'user_hash': user_hash}
+                );
+
+                document.getElementById('hf_page_main_content').innerHTML += message_html;
+
+            }
+            else
+            {
+                hf_control.view_threads(contacts_threads_names, function(posts_html){
+                    document.getElementById('hf_page_main_content').innerHTML += posts_html;
+                });
+            }
         });
     });
 });
+
 
 
 // ------------------------------------------------------ THREADS VIEWS
