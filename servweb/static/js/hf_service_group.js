@@ -315,56 +315,6 @@ hf_service.get_group_private_chunk = function(group_hash, callback)
         }
     );
 }
-
-/* Adds an user to the specified group if the current user is the group's admin
- * @param <user_hash>: contact's user hash
- * @param <callback>: the function called once the response has arrived
- *      @param <success>: true or false
- *      function my_callback(success)
- */
-hf_service.add_user_to_group = function(user_hash, group_hash, callback)
-{
-    assert(hf_service.is_connected());
-    assert(hf.is_function(callback) || callback == undefined);
-
-    if (!hf_service.is_group_admin(group_hash) || user_hash == hf_service.user_hash())
-    {
-        console.info('Cannot add user to specified group');
-        if(callback)
-            callback(false);
-        return ;
-    }
-
-    hf_service.is_user_hash(user_hash, function(is_user_hash)
-    {
-        if (!is_user_hash)
-        {
-            callback(false);
-            return;
-        }
-
-        hf_service.get_group_private_chunk(
-            group_hash,
-            function(group_json){
-                if(group_json){
-                    if(hf_service.already_user(user_hash,group_json)){
-                        callback(false);
-                        return;
-                    }
-
-                    //add user to group
-                    group_json['users'].push(user_hash);
-                    hf_service.save_group_chunks(group_json,function(success){
-                        callback(success);
-                    });
-                }else{
-                    callback(false);
-                }
-            }
-        );
-    });
-}
-
 /*
  * Saves group's public, shared and private chunks
  * @param <callback>: the function called once done
@@ -415,6 +365,68 @@ hf_service.save_group_chunks = function(group_private_chunk,callback)
             else
                 callback(false);
         }
+    });
+}
+
+/* Adds an user to the specified group if the current user is the group's admin
+ * @param <user_hash>: contact's user hash
+ * @param <callback>: the function called once the response has arrived
+ *      @param <success>: true or false
+ *      function my_callback(success)
+ */
+hf_service.add_user_to_group = function(user_hash, group_hash, callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf.is_function(callback) || callback == undefined);
+    assert(hf_service.is_group_admin(group_hash));
+
+    if (user_hash == hf_service.user_hash())
+    {
+        console.info('Cannot add user to specified group');
+        if(callback)
+            callback(false);
+        return ;
+    }
+
+    hf_service.is_user_hash(user_hash, function(is_user_hash)
+    {
+        if (!is_user_hash)
+        {
+            callback(false);
+            return;
+        }
+
+        hf_service.get_group_private_chunk(
+            group_hash,
+            function(group_json){
+                if(group_json){
+                    if(hf_service.already_user(user_hash,group_json)){
+                        callback(false);
+                        return;
+                    }
+
+                    //add user to group
+                    group_json['users'].push(user_hash);
+
+                    //send notification to user
+                    var shared_chunk_infos = {
+                        'name': group_json['shared_chunk']['name'],
+                        'type': '/group/shared_chunk',
+                        'symetric_key': group_json['shared_chunk']['key']
+                    };
+
+                    hf_service.save_group_chunks(group_json,function(success){
+                        if(success){
+                            hf_service.send_group_infos_to_user(user_hash, group_hash, shared_chunk_infos,callback);
+                        }else{
+                            callback(false);
+                        }
+                    });
+                }else{
+                    callback(false);
+                }
+            }
+        );
     });
 }
 
@@ -473,12 +485,16 @@ hf_service.subscribe_to_group = function(group_hash, message, callback)
 }
 
 /*
- * Define a notification interface for /notification/group_chunks_infos
+ * Define a notification interface for /notification/group_shared_chunk_infos
  */
-hf_service.define_notification('/notification/group_chunk_infos', {
-    automation: function(notification_json,group_hash)
+hf_service.define_notification('/notification/group_shared_chunk_infos', {
+    automation: function(notification_json)
     {
         assert(hf_service.is_connected());
+        assert(notification_json['chunks'] !== undefined);
+        assert(notification_json['__meta']['author_user_hash'] !== undefined);
+
+        var group_hash = notification_json['__meta']['author_user_hash'];
 
         if (!hf_service.already_subscribed(group_hash))
         {
@@ -486,42 +502,38 @@ hf_service.define_notification('/notification/group_chunk_infos', {
         }
 
         var user_private_chunk = hf_service.user_private_chunk;
-        var chunks_infos = notification_json['chunks'];
-        var contact_hash = notification_json['__meta']['author_user_hash'];
-        var contact_info = hf_service.user_private_chunk['contacts'][contact_hash];
+        var shared_chunk_infos = notification_json['chunks'];
+        var user_groups_list = user_private_chunk['groups']['subscribed_to'];
 
-        for (var i = 0; i < chunks_infos.length; i++)
+        if (shared_chunk_infos['type'] == '/group/shared_chunk')
         {
-            var chunk_infos = chunks_infos[i];
-
-            if (chunk_infos['type'] == '/thread')
+            if (user_groups_list.indexOf(group_hash) < 0)
             {
-                if (contact_info['threads'].indexOf(chunk_infos['name']) < 0)
-                {
-                    contact_info['threads'].push(chunk_infos['name']);
-                }
+                user_groups_list.push(group_hash);
             }
-            else
-            {
-                assert(false, 'unexpected type');
-            }
-
-            /*
-             * TODO: we should check that we can still open this document in
-             * the notification's validation (issue #27).
-             */
-            hf_service.store_key(user_private_chunk, chunk_infos['name'], chunk_infos['symetric_key']);
         }
+        else
+        {
+            assert(false, 'unexpected type');
+        }
+
+        /*
+         * TODO: we should check that we can still open this document in
+         * the notification's validation (issue #27).
+         */
+        hf_service.store_key(user_private_chunk, shared_chunk_infos['name'], shared_chunk_infos['symetric_key']);
+
         return 'discard';
     },
     resolve: hf_service.resolve_notification_author
 });
 
 /*
- * Sends chunks' keys to severals users.
+ * Sends shared chunk infos to an user.
  *
- * @param <users_hashes>: the users' hashes to send the chunks' keys
- * @param <chunk_infos>: the chunk group infos to send
+ * @param <user_hash>: the user's hash to send the infos
+ * @param <group_hash>: the group's hash the infos are relative to
+ * @param <shared_chunk_infos>: the shared chunk infos to send
  *      {
  *          'name':             <the chunk's name>,
  *          'type':             <the chunk's type>,
@@ -532,7 +544,33 @@ hf_service.define_notification('/notification/group_chunk_infos', {
  *      @param <success>: true or false
  *      function my_callback(success)
  */
-hf_service.send_group_infos_to_users = function(users_hashes, chunk_infos, callback)
+hf_service.send_group_infos_to_user = function(user_hash, group_hash, shared_chunk_infos, callback)
 {
-    hf_service.send_chunks_infos_to_users(users_hashes, [chunk_infos], '/group', callback);
+    assert(hf_service.is_connected());
+    assert(hf.is_hash(user_hash));
+    assert(hf.is_hash(group_hash));
+    assert(hf.is_function(callback));
+
+    assert('name' in shared_chunk_infos);
+    assert('type' in shared_chunk_infos);
+    assert('symetric_key' in shared_chunk_infos);
+
+    assert(hf.is_hash(shared_chunk_infos['name']));
+    assert(shared_chunk_infos['type'] == '/group/shared_chunk');
+    assert(hf_com.is_AES_key(shared_chunk_infos['symetric_key']));
+
+    hf_service.get_group_private_chunk(group_hash, function(group_private_chunk){
+        assert(hf_service.already_user(user_hash, group_private_chunk));
+        var notification_json = {
+            '__meta': {
+                'type': '/notification/group_shared_chunk_infos',
+                'author_user_hash': group_hash
+            },
+            'chunks': hf.clone(shared_chunk_infos)
+        };
+
+        hf_service.get_user_public_chunk(user_hash, function(user_public_chunk){
+            hf_service.push_notification(user_public_chunk, notification_json, callback);
+        });
+    });
 }
