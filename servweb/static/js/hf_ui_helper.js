@@ -74,7 +74,9 @@ Handlebars.registerHelper('hf_timestamp', function(timestamp){
 });
 
 Handlebars.registerHelper('hf_timestamp_post', function(timestamp){
-    return '<div class="hf_date">'+timestamp['date']+' </div>';
+
+    var date_format = "{{dd}} {{Month}} {{yyyy}} at {{hh}}:{{mm}}";
+    return '<div class="hf_date">'+hf.generate_full_date(date_format, timestamp['date']) +' </div>';
 });
 
 Handlebars.registerHelper('if_eq', function(a, b, opts) {

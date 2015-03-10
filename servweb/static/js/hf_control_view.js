@@ -171,7 +171,7 @@ hf_control.signed_in.route('/contacts', function () {
     });
 });
 
-// ------------------------------------------------------ INVITATIONS' VIEWS
+// ------------------------------------------------------ MESSAGES' VIEWS
 hf_control.signed_in.route('/send_message', function(){
     var template_context = {
         'user_hash': ''
@@ -325,6 +325,10 @@ hf_control.view_threads = function(threads_names, callback)
     {
         hf_service.list_posts(threads_names[i], function(posts_list){
             posts_lists.push(posts_list);
+            for(var j = 0; j < posts_list.length; j++)
+            {
+                posts_list[j]['comments'] = hf_service.qsort_comments(posts_list[j]['comments']);
+            }
 
             if (posts_lists.length == threads_names.length)
             {
