@@ -210,14 +210,70 @@ hf_service.delete_notification = function(repository_chunk, notification_hash, c
 }
 
 /*
+ * Processes notifications automations on given notification json.
+ *
+ * @param <notifications_json>: the notifications to process
+ * @param <callback>: the function called once done
+ *      @param <continued_notifications_json>: the notifications that made it
+ *          throught
+ *      function my_callback(continued_notifications_json)
+ */
+hf_service.process_notifications = function(notifications_json, callback)
+{
+    assert(hf.is_function(callback));
+
+    var continued_notifications_json = [];
+
+    for (var i = 0; i < notifications_json.length; i++)
+    {
+        var notification_json = notifications_json[i];
+        var notificationType = notification_json['__meta']['type'];
+
+        assert(notificationType in hf_service.notification_interface);
+
+        var notificationAutomation = hf_service.notification_interface[notificationType].automation;
+
+        if (notificationAutomation != null)
+        {
+            assert(hf.is_function(notificationAutomation));
+
+            status = notificationAutomation(notification_json);
+
+            assert(typeof status == 'string');
+
+            if (status == 'discard')
+            {
+                continue;
+            }
+
+            assert(status == 'continue');
+        }
+
+        /*
+         * We store this notification into the user's private chunk
+         */
+        if (!('hash' in notification_json['__meta']))
+        {
+            notification_json['__meta']['hash'] = hf.generate_hash(
+                JSON.stringify(notification_json)
+            );
+        }
+
+        continued_notifications_json.push(notification_json);
+    }
+
+    callback(continued_notifications_json);
+}
+
+/*
  * Pulls fresh notifications, processes automated one and stores the remaining
  * into the notification repository.
  *
  * @param <repository_chunk>: the chunk content containing the
  *      notification repository
  * @param <callback>: the function called once done
- *      @param <notifcation_count>: the number of pulled notification  or null
- *      function my_callback(notifcation_count)
+ *      @param <modification_count>: the number of modification
+ *      function my_callback(modification_count)
  */
 hf_service.pull_fresh_notifications = function(repository_chunk, callback)
 {
@@ -247,63 +303,49 @@ hf_service.pull_fresh_notifications = function(repository_chunk, callback)
             return;
         }
 
-        var notifications_json = json_message['chunk'][protected_chunk_name];
+        var notification_chunk_content = json_message['chunk'][protected_chunk_name];
+        var notifications_json = [];
 
-        for (var i = 0; i < notifications_json.length; i++)
+        for (var i = 0; i < notification_chunk_content.length; i++)
         {
-            var notification_json = {};
-            var notificationAutomation = null;
+            var notification_json = null;
 
             try
             {
-                notification_json = JSON.parse(notifications_json[i]);
+                notification_json = JSON.parse(notification_chunk_content[i]);
 
                 /*
                  * TODO: need to validate the notification in case someone else has
                  * appened an invalid one (issue #27).
                  */
 
-                var notificationType = notification_json['__meta']['type'] ;
+                var notificationType = notification_json['__meta']['type'];
 
                 assert(notificationType in hf_service.notification_interface);
-
-                notificationAutomation = hf_service.notification_interface[notificationType].automation;
             }
             catch (err)
             {
                 continue;
             }
 
-            if (notificationAutomation != null)
+            assert(notification_json != null);
+
+            notifications_json.push(notification_json);
+        }
+
+        repository_chunk['notifications'] =
+            repository_chunk['notifications'].concat(notifications_json);
+
+        hf_service.refresh_notifications(
+            repository_chunk,
+            function(discarded_count)
             {
-                assert(hf.is_function(notificationAutomation));
-
-                status = notificationAutomation(notification_json);
-
-                assert(typeof status == 'string');
-
-                if (status == 'discard')
+                if (callback)
                 {
-                    continue;
+                    callback(discarded_count + notifications_json.length);
                 }
-
-                assert(status == 'continue');
             }
-
-            /*
-             * We store this notification into the user's private chunk
-             */
-            notification_json['__meta']['hash'] = hf.generate_hash(
-                JSON.stringify(notification_json)
-            );
-
-            repository_chunk['notifications'].push(notification_json);
-        }
-
-        if (callback)
-        {
-            callback(notifications_json.length);
-        }
+        );
     });
 }
 
@@ -366,6 +408,33 @@ hf_service.list_notifications = function(repository_chunk, callback)
         {
             callback(notifications);
         }
+    });
+}
+
+
+/*
+ * Pushs a notification to an user's protected chunk
+ *
+ * @param <repository_chunk>: the chunk content containing the
+ *      public notification repository
+ * @param <notification_json>: the notification JSON to push
+ * @param <callback>: the callback once the notification has been pushed
+ *      @param <discarded_count>: number of discarded notifications
+ *      function my_callback(discarded_count)
+ */
+hf_service.refresh_notifications = function(repository_chunk, callback)
+{
+    assert(hf_service.has_notification_repository(repository_chunk));
+    assert(hf.is_function(callback));
+
+    var notifications_json = repository_chunk['notifications'];
+
+    hf_service.process_notifications(notifications_json, function(survived_notifications_json){
+        assert(survived_notifications_json.length <= notifications_json.length);
+
+        repository_chunk['notifications'] = survived_notifications_json;
+
+        callback(notifications_json.length - survived_notifications_json.length);
     });
 }
 
@@ -440,22 +509,24 @@ hf_service.pull_fresh_user_notifications = function(callback)
 
     hf_service.pull_fresh_notifications(
         hf_service.user_private_chunk,
-        function(notification_count)
+        function(modification_count)
         {
-            if (notification_count == null)
+            if (modification_count == null)
             {
+                assert(hf.is_function(callback));
                 callback(false);
-                return;
             }
-            else if (notification_count == 0)
+            else if (modification_count == 0)
             {
-                callback(true);
-                return;
+                if (callback)
+                    callback(true);
             }
+            else
+            {
+                assert(modification_count > 0);
 
-            assert(notification_count > 0);
-
-            hf_service.save_user_chunks(callback);
+                hf_service.save_user_chunks(callback);
+            }
         }
     );
 }

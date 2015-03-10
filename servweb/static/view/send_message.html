@@ -1,18 +1,28 @@
 {{#hf_cell}}
     <div class="hf_padding">
-        <div class="hf_title">Contact invitation.</div>
+        <div class="hf_title">Send message.</div>
         <form onsubmit="hf_control.contact_invitation(this); return false;">
             <table width="100%">
                 <tr>
                     <td>
-                        <input
+                        {{#if_eq user_hash ''}}
+                            <input
                             ID="destination_name"
                             type="text"
                             class="form-control"
                             placeholder="Destination..."
                             name="destination"
-                            value="{{user_hash}}"
                             >
+                        {{else}}
+                            <input
+                            ID="destination_name"
+                            type="text"
+                            class="form-control"
+                            value="{{user_hash}}"
+                            name="destination"
+                            readonly
+                            />
+                        {{/if_eq}}
                     </td>
                 <tr>
                     <td>

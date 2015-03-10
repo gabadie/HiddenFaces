@@ -1,8 +1,16 @@
-<div class="hf_author">
-    {{#hf_user_link author}}{{/hf_user_link}} invited you to {{chunks.length}} threads.
-</div>
-<div class="hf_action_bar" align="right">
-    {{#hf_user_add_contact author}}{{/hf_user_add_contact}}
-    <button class="btn btn-default"
-        onclick="hf_control.delete_notification('{{__meta.hash}}');">Ignore</button>
+<div class="hf_padding">
+    <div class="hf_notification">
+        <div class="hf_author">
+            {{{hf_user_link author}}} invited you to {{chunks.length}} threads.
+        </div>
+        <div class="hf_action_bar" align="right">
+            {{{hf_user_add_contact author}}}
+
+            <button class="btn btn-default"
+                onclick="hf_control.view('/send_message/{{author.__meta.user_hash}}');">Send message</button>
+
+            <button class="btn btn-default"
+                onclick="hf_control.delete_notification('{{__meta.hash}}');">Ignore</button>
+        </div>
+    </div>
 </div>

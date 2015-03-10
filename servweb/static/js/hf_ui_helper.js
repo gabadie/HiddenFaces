@@ -70,12 +70,14 @@ Handlebars.registerHelper('hf_chunk', function(chunk, options){
 });
 
 Handlebars.registerHelper('hf_timestamp_post', function(timestamp){
+
     var date_format = "{{dd}} {{Month}} {{yyyy}} at {{hh}}:{{mm}}";
-    return hf.generate_full_date(date_format, timestamp['date']);
+    return '<div class="hf_date">'+hf.generate_full_date(date_format, timestamp['date']) +' </div>';
 });
 
-Handlebars.registerHelper('hf_comment', function(comment, options) {
-    var out = '';
-    out += comment['content'];
-    return out;
+Handlebars.registerHelper('if_eq', function(a, b, opts) {
+    if(a == b)
+        return opts.fn(this);
+    else
+        return opts.inverse(this);
 });

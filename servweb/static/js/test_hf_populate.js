@@ -8,6 +8,9 @@ test_hf_populate.symetric_contact_count = 200;
 test_hf_populate.asymetric_contact_count = 200;
 test_hf_populate.post_count = 200;
 test_hf_populate.comment_count = 300;
+test_hf_populate.group_count = 12;
+test_hf_populate.subscription_count = 10;
+test_hf_populate.users_group_count = 10;
 
 
 test_hf_populate.seed = 0;
@@ -27,6 +30,7 @@ test_hf_populate.create_users = function()
 {
     test_hf_populate.user_profile = [];
     test_hf_populate.user_hash = [];
+    test_hf_populate.user_id = [];
 
     test_hf_populate.user_profile[0] = test_hf_service.john_smith_profile(0);
 
@@ -66,6 +70,8 @@ test_hf_populate.create_users = function()
             );
         });
         hf_service.disconnect();
+
+        test_hf_populate.user_id[test_hf_populate.user_hash[i]] = i;
     }
 
     test_utils.assert_success(test_hf_populate.profile_count * 4);
@@ -235,6 +241,96 @@ test_hf_populate.add_asymetric_users_contacts = function()
     test_utils.assert_success(3 * test_hf_populate.asymetric_contact_count);
 }
 
+test_hf_populate.create_groups = function()
+{
+    test_hf_populate.groups_hash_and_admin = {};
+    for (var i = 0; i < test_hf_populate.group_count; i++)
+    {
+        var user_id = test_hf_populate.rand_user_id();
+        hf_service.login_user(test_hf_populate.user_profile[user_id]);
+
+        var group_info = test_hf_service.group_examples(i);
+
+        (function(user_id){
+            hf_service.create_group(
+                group_info['name'],
+                group_info['description'],
+                false, false,
+                function(group_hash){
+                    test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
+                    test_utils.assert(hf_service.is_group_admin(group_hash));
+                    test_hf_populate.groups_hash_and_admin[group_hash] = user_id;
+                }
+            );
+        })(user_id)
+        hf_service.disconnect();
+    }
+    test_utils.assert(Object.keys(test_hf_populate.groups_hash_and_admin).length == test_hf_populate.group_count,
+        'Not all the groups have been created'
+    );
+    test_utils.assert_success(2 * test_hf_populate.group_count + 1);
+}
+
+test_hf_populate.subscription_requests = function()
+{
+    var subscription_message = 'I would like to subscribe to this group';
+    for(var group_hash in test_hf_populate.groups_hash_and_admin){
+
+        var subscribers_id = [test_hf_populate.groups_hash_and_admin[group_hash]];
+
+        for (var i = 0; i < test_hf_populate.subscription_count; i++)
+        {
+            var from = test_hf_populate.groups_hash_and_admin[group_hash];
+
+            while(subscribers_id.indexOf(from) >= 0){
+                from = test_hf_populate.rand() % test_hf_populate.profile_count;
+            }
+
+            subscribers_id.push(from);
+
+            hf_service.login_user(test_hf_populate.user_profile[from]);
+
+            hf_service.subscribe_to_group(group_hash, subscription_message, function(success){
+                test_utils.assert(success == true,
+                    test_hf_populate.user_profile[from]['first_name']+' cannot subscribe to the group '
+                );
+            });
+
+            hf_service.disconnect();
+        }
+    }
+
+    test_utils.assert_success(test_hf_populate.users_group_count * test_hf_populate.group_count);
+}
+
+test_hf_populate.add_users_to_groups = function()
+{
+    for(var group_hash in test_hf_populate.groups_hash_and_admin){
+
+        var users_id = [test_hf_populate.groups_hash_and_admin[group_hash]];
+        hf_service.login_user(test_hf_populate.user_profile[test_hf_populate.groups_hash_and_admin[group_hash]]);
+
+        for (var i = 0; i < test_hf_populate.users_group_count; i++)
+        {
+            var user_id = test_hf_populate.groups_hash_and_admin[group_hash];
+
+            while(users_id.indexOf(user_id) >= 0){
+                user_id = test_hf_populate.rand() % test_hf_populate.profile_count;
+            }
+
+            users_id.push(user_id);
+
+            hf_service.add_user_to_group(test_hf_populate.user_hash[user_id], group_hash, function(success){
+                test_utils.assert(success == true,
+                'Cannot add'+test_hf_populate.user_profile[user_id]['first_name']+' to group')
+            });
+        }
+
+        hf_service.disconnect();
+    }
+    test_utils.assert_success(test_hf_populate.group_count * test_hf_populate.users_group_count);
+}
+
 test_hf_populate.post_into_circle = function()
 {
     for (var i = 0; i < test_hf_populate.post_count; i++)
@@ -283,50 +379,79 @@ test_hf_populate.post_into_circle = function()
 
 test_hf_populate.comment_posts = function()
 {
+    var assert_count = 2 * test_hf_populate.comment_count;
+
     for (var i = 0; i < test_hf_populate.comment_count; i++)
     {
-        var user_id = test_hf_populate.rand_user_id();
+        var circle_hash = null;
+        var posts_refs_list = null;
+        var user_id = null;
 
-        hf_service.login_user(test_hf_populate.user_profile[user_id]);
+        while (user_id == null)
+        {
+            var post_owner_id = test_hf_populate.rand_user_id();
+            var circles_list = null;
 
-        var circles_list = null;
-        hf_service.list_circles(function(json_message){
-            test_utils.assert(
-                json_message.length == test_hf_populate.circle_count,
-                'failed to list prolfile ' + user_id + '\'s circles'
-            );
-            circles_list = json_message;
-        });
-        assert(circles_list != null);
+            hf_service.login_user(test_hf_populate.user_profile[post_owner_id]);
+            hf_service.list_circles(function(json_message){
+                test_utils.assert(
+                    json_message.length == test_hf_populate.circle_count,
+                    'failed to list prolfile ' + post_owner_id + '\'s circles'
+                );
+                circles_list = json_message;
+            });
+            assert(circles_list != null);
 
-        var list_posts_info = null;
-        var list_length = 0;
+            var circle_id = test_hf_populate.rand() % circles_list.length;
+            var circle_infos = circles_list[circle_id];
 
-        while(list_length == 0){
-            var circle_id = test_hf_populate.rand() % test_hf_populate.circle_count;
-            var circle_hash = circles_list[circle_id]['thread_chunk_name'];
-            var circle_key = hf_service.get_encryption_key(hf_service.user_private_chunk, circle_hash);
+            if (circle_infos['contacts'].length == 0)
+            {
+                hf_service.disconnect();
+                assert_count += 1;
+                continue;
+            }
+
+            circle_hash = circle_infos['thread_chunk_name'];
 
             assert(
                 hf.is_hash(circle_hash),
-                'user ' + user_id + '\'s circle hash is not a hash'
+                'user ' + post_owner_id + '\'s circle hash is not a hash'
             );
+
+            var circle_key = hf_service.get_encryption_key(hf_service.user_private_chunk, circle_hash);
 
             hf_com.get_data_chunk(circle_hash,circle_key,function(thread_json_message){
                 assert(thread_json_message['status'] == 'ok');
 
-                list_posts_info = thread_json_message['chunk_content'];
-
-                list_length = list_posts_info.length;
+                posts_refs_list = thread_json_message['chunk_content'];
             });
+            assert(posts_refs_list != null);
+
+            if (posts_refs_list.length == 0)
+            {
+                hf_service.disconnect();
+                assert_count += 1;
+                continue;
+            }
+
+            var contact_user_id = test_hf_populate.rand() % circle_infos['contacts'].length;
+            var contact_user_hash = circle_infos['contacts'][contact_user_id];
+            var user_id = test_hf_populate.user_id[contact_user_hash];
+
+            hf_service.disconnect();
         }
-        assert(list_posts_info != null);
+
+        assert(circle_hash != null);
+        assert(posts_refs_list != null);
+        assert(user_id != null);
 
         var comment = 'Cool! I feel like eating ' + i + ' bananas today. I\'ll be there ASAP!';
 
-        var post_id = test_hf_populate.rand() % list_posts_info.length;
-        var post_info_json = JSON.parse(list_posts_info[post_id]);
+        var post_id = test_hf_populate.rand() % posts_refs_list.length;
+        var post_info_json = JSON.parse(posts_refs_list[post_id]);
 
+        hf_service.login_user(test_hf_populate.user_profile[user_id]);
         hf_service.comment_post(
             post_info_json['post_chunk_name'],
             post_info_json['symetric_key'],
@@ -334,15 +459,14 @@ test_hf_populate.comment_posts = function()
             function(success){
                 test_utils.assert(
                     success == true,
-                    'User '+user_id+' cannot comment post '+list_posts_info[post_id]
+                    'User '+user_id+' cannot comment post '+post_info_json['post_chunk_name']
                 );
             }
         );
-
         hf_service.disconnect();
     }
 
-    test_utils.assert_success(test_hf_populate.comment_count * 2);
+    test_utils.assert_success(assert_count);
 }
 
 test_hf_populate.pull_fresh_user_notifications = function()
@@ -368,6 +492,9 @@ test_hf_populate.main = function()
     test_utils.run(test_hf_populate.send_messages, 'test_hf_populate.send_messages', true);
     test_utils.run(test_hf_populate.add_symetric_users_contacts, 'test_hf_populate.add_symetric_users_contacts', true);
     test_utils.run(test_hf_populate.add_asymetric_users_contacts, 'test_hf_populate.add_asymetric_users_contacts', true);
+    test_utils.run(test_hf_populate.create_groups,'test_hf_populate.create_groups',true);
+    test_utils.run(test_hf_populate.subscription_requests,'test_hf_populate.subscription_requests',true);
+    test_utils.run(test_hf_populate.add_users_to_groups,'test_hf_populate.add_users_to_groups',true);
     test_utils.run(test_hf_populate.post_into_circle, 'test_hf_populate.post_into_circle', true);
     test_utils.run(test_hf_populate.comment_posts,'test_hf_populate.comment_posts',true);
     test_utils.run(test_hf_populate.pull_fresh_user_notifications, 'test_hf_populate.pull_fresh_user_notifications', true);

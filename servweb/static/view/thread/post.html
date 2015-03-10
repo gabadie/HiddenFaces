@@ -1,22 +1,27 @@
-<div class="hf_author">
-    {{#hf_user_link author}}{{/hf_user_link}}
-    <span class="hf_timestamp" style="float:right; margin-right:10px;">{{{hf_timestamp_post this}}}</span>
-</div>
-<div class="hf_post">
-    {{content}}
-</div>
-{{#if comments.length}}
-<div class="jumbotron">
-    {{#each comments}}
-        <div class="hf_comment">
-            <div class="hf_timestamp">{{{hf_timestamp_post this}}}</div>
-            {{{hf_user_link author}}}
-            {{{hf_comment this}}}
-        </div>
-    {{/each}}
-</div>
-{{/if}}
 <div class="hf_padding">
+    <div class="hf_post">
+        <div class="hf_author">
+            {{{hf_user_link author}}}
+
+        </div>
+        <div class="hf_text">
+            {{content}}
+            {{{hf_timestamp_post this}}}
+        </div>
+    </div>
+    <div class="hf_comments">
+        {{#each comments}}
+            <div class="hf_comment">
+                {{{hf_user_link author}}}
+                {{content}}
+                {{{hf_timestamp_post this}}}
+            </div>
+        {{else}}
+            <div class="hf_empty">
+                No one has commented yet. Be the first to comment.
+            </div>
+        {{/each}}
+    </div>
     <form onsubmit="hf_control.create_comment(this);return false;" name = "comment" style="padding: 3px;">
         <textarea class="form-control" name="content"></textarea>
         <input type="hidden" name="chunk_name" value="{{__meta.chunk_name}}" />
