@@ -67,6 +67,7 @@ hf_service.create_group = function(group_name, description, public_group, public
     assert(typeof group_name == "string");
     assert(typeof description == 'string');
     assert(group_name.length > 0);
+    assert(public_group <= public_thread);
     assert(hf.is_function(callback) || callback == undefined);
 
     var group_hash = hf.generate_hash(
@@ -408,20 +409,24 @@ hf_service.add_user_to_group = function(user_hash, group_hash, callback)
                     //add user to group
                     group_json['users'].push(user_hash);
 
-                    //send notification to user
-                    var shared_chunk_infos = {
-                        'name': group_json['shared_chunk']['name'],
-                        'type': '/group/shared_chunk',
-                        'symetric_key': group_json['shared_chunk']['key']
-                    };
+                    if(!group_json['group']['public']){
+                        //send notification to user
+                        var shared_chunk_infos = {
+                            'name': group_json['shared_chunk']['name'],
+                            'type': '/group/shared_chunk',
+                            'symetric_key': group_json['shared_chunk']['key']
+                        };
 
-                    hf_service.save_group_chunks(group_json,function(success){
-                        if(success){
-                            hf_service.send_group_infos_to_user(user_hash, group_hash, shared_chunk_infos,callback);
-                        }else{
-                            callback(false);
-                        }
-                    });
+                        hf_service.save_group_chunks(group_json,function(success){
+                            if(success){
+                                hf_service.send_group_infos_to_user(user_hash, group_hash, shared_chunk_infos,callback);
+                            }else{
+                                callback(false);
+                            }
+                        });
+                    }else{
+                        hf_service.save_group_chunks(group_json,callback);
+                    }
                 }else{
                     callback(false);
                 }
