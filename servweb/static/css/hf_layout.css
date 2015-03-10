@@ -89,6 +89,12 @@
     padding: 0px 0px 10px 0px;
 }
 
+.hf_layout_cell .hf_notification .hf_date
+{
+    float: right;
+    display: inline-block;
+}
+
 .hf_layout_cell .hf_notification .hf_text
 {
     padding: 0 20px;

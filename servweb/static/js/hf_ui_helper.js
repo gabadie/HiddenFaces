@@ -69,6 +69,10 @@ Handlebars.registerHelper('hf_chunk', function(chunk, options){
     return out;
 });
 
+Handlebars.registerHelper('hf_timestamp', function(timestamp){
+    return '<div class="hf_date">' + timestamp + ' </div>';
+});
+
 Handlebars.registerHelper('hf_timestamp_post', function(timestamp){
     return '<div class="hf_date">'+timestamp['date']+' </div>';
 });
