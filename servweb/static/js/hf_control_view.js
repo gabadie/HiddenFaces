@@ -250,8 +250,24 @@ hf_control.signed_in.route('/profile/', function (){
             var message_html = hf_ui.template('send_message.html',
                 {'user_hash': user_hash}
             );
+            var add_contact = hf_ui.template('form/add_from_user_profile.html',
+                public_chunk
+            );
 
-            document.getElementById('hf_page_main_content').innerHTML += message_html;
+            document.getElementById('hf_page_main_content').innerHTML = (html + add_contact + message_html);
+
+            return;
+        }
+        else if(hf_service.is_contact(user_hash))
+        {
+           var message_html = hf_ui.template('send_message.html',
+                {'user_hash': user_hash}
+            );
+            var no_post = hf_ui.template('form/no_post.html',
+                public_chunk
+            );
+
+            document.getElementById('hf_page_main_content').innerHTML = (html + no_post + message_html);
 
             return;
         }
@@ -262,8 +278,11 @@ hf_control.signed_in.route('/profile/', function (){
                 var message_html = hf_ui.template('send_message.html',
                     {'user_hash': user_hash}
                 );
+                var add_contact = hf_ui.template('form/add_from_user_profile.html',
+                    public_chunk
+                );
 
-                document.getElementById('hf_page_main_content').innerHTML += message_html;
+                document.getElementById('hf_page_main_content').innerHTML = (html + add_contact + message_html);
 
             }
             else

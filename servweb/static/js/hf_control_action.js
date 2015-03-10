@@ -18,7 +18,6 @@ hf_control.add_contact_to_circle = function(contact_user_hash, circle_hash)
     });
 }
 
-
 // -------------------------------------------------------------------- SEND MESSAGE
 hf_control.send_message = function(domElem)
 {
