@@ -416,7 +416,7 @@ hf_service.define_notification('/notification/subscription', {
  * Sends a request of subscription for a group
  *
  * @params <group_hash>: group's hash
- * @params <message>: message to send to the admin
+ * @params <message>: message to send to the group
  * @param <callback>: the callback once the notification has been pushed
  *      @param <success>: true or false
  *      function my_callback(success)

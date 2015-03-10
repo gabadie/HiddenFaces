@@ -262,7 +262,10 @@ test_hf_populate.create_groups = function()
         })(i)
         hf_service.disconnect();
     }
-    test_utils.assert_success(3 * test_hf_populate.group_count);
+    test_utils.assert(test_hf_populate.groups_hash.length == test_hf_populate.group_count,
+        'Not all the groups have been created'
+    );
+    test_utils.assert_success(3 * test_hf_populate.group_count + 1);
 }
 
 test_hf_populate.subscription_requests = function()
@@ -271,6 +274,7 @@ test_hf_populate.subscription_requests = function()
     {
         var from;
         var to;
+        hf_service.login_user(test_hf_populate.user_profile[0]);
 
         do{
             hf_service.disconnect();
@@ -290,7 +294,7 @@ test_hf_populate.subscription_requests = function()
         hf_service.disconnect();
     }
 
-    test_utils.assert_success(test_hf_populate.message_count);
+    test_utils.assert_success(test_hf_populate.subscription_count);
 }
 
 test_hf_populate.post_into_circle = function()
@@ -426,6 +430,8 @@ test_hf_populate.main = function()
     test_utils.run(test_hf_populate.send_messages, 'test_hf_populate.send_messages', true);
     test_utils.run(test_hf_populate.add_symetric_users_contacts, 'test_hf_populate.add_symetric_users_contacts', true);
     test_utils.run(test_hf_populate.add_asymetric_users_contacts, 'test_hf_populate.add_asymetric_users_contacts', true);
+    test_utils.run(test_hf_populate.create_groups,'test_hf_populate.create_groups',true);
+    test_utils.run(test_hf_populate.subscription_requests,'test_hf_populate.subscription_requests',true);
     test_utils.run(test_hf_populate.post_into_circle, 'test_hf_populate.post_into_circle', true);
     test_utils.run(test_hf_populate.comment_posts,'test_hf_populate.comment_posts',true);
     test_utils.run(test_hf_populate.pull_fresh_user_notifications, 'test_hf_populate.pull_fresh_user_notifications', true);
