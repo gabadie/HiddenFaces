@@ -198,38 +198,41 @@ hf_service.append_post_to_threads = function(post_name, post_key, threads_list,c
                 assert(typeof threads_list[i]['thread_chunk_name'] == "string");
                 assert(typeof threads_list[i]['symetric_key'] == "string");
 
-                hf_service.certify(hf_service.user_private_chunk,
-                    threads_list[i]['thread_chunk_name'],
-                    post_part_hash,
-                    hf.hash(stringified_post_info),
-                    function(success){
-                        iteration--;
+                (function(i){
+                    hf_service.certify(hf_service.user_private_chunk,
+                        threads_list[i]['thread_chunk_name'],
+                        post_part_hash,
+                        hf.hash(stringified_post_info),
+                        function(success){
+                            iteration--;
 
-                        if(!success){
-                            if(callback)
-                                callback(false);
-                            console.info('cannot certify post in thread');
-                            return;
-                        }
-                        transaction.extend_data_chunk(
-                            threads_list[i]['thread_chunk_name'],
-                            hf_service.user_chunks_owner(),
-                            threads_list[i]['symetric_key'],
-                            [stringified_post_info]
-                        );
+                            if(!success){
+                                if(callback)
+                                    callback(false);
+                                console.info('cannot certify post in thread');
+                                return;
+                            }
 
-                        if(iteration == 0){
-                            transaction.commit(function(json_message){
-                                if (json_message['status'] != 'ok'){
-                                    if(callback)
-                                        callback(null);
-                                }else if (callback){
-                                    callback(post_info);
-                                }
-                            });
+                            transaction.extend_data_chunk(
+                                threads_list[i]['thread_chunk_name'],
+                                hf_service.user_chunks_owner(),
+                                threads_list[i]['symetric_key'],
+                                [stringified_post_info]
+                            );
+
+                            if(iteration == 0){
+                                transaction.commit(function(json_message){
+                                    if (json_message['status'] != 'ok'){
+                                        if(callback)
+                                            callback(null);
+                                    }else if (callback){
+                                        callback(post_info);
+                                    }
+                                });
+                            }
                         }
-                    }
-                );
+                    );
+                })(i)
             }
         }
     );
@@ -587,4 +590,36 @@ hf_service.merge_posts_lists = function(posts_lists)
     }
 
     return posts_list;
+}
+
+/*
+ * quick sort (algo quick sort) comments by date
+ *
+ * @param <comments>: the list of comment
+ * @returns a list of sorted comments
+ */
+hf_service.qsort_comments = function(comments)
+{
+    if(comments.length == 0)
+    {
+        return [];
+    }
+
+    var pivot = comments[0];
+    var left = [];
+    var right = [];
+
+    for(var i = 1; i < comments.length; i++)
+    {
+        if (comments[i]['date'] < pivot['date'])
+        {
+            left.push(comments[i]);
+        }
+        else
+        {
+            right.push(comments[i]);
+        }
+    }
+
+    return hf_service.qsort_comments(left).concat(pivot, hf_service.qsort_comments(right));
 }

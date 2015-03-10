@@ -70,7 +70,8 @@ Handlebars.registerHelper('hf_chunk', function(chunk, options){
 });
 
 Handlebars.registerHelper('hf_timestamp_post', function(timestamp){
-    return '<div style="text-align:right;color:black; ">'+timestamp['date']+' </div>';
+    var date_format = "{{dd}} {{Month}} {{yyyy}} at {{hh}}:{{mm}}";
+    return hf.generate_full_date(date_format, timestamp['date']);
 });
 
 Handlebars.registerHelper('hf_comment', function(comment, options) {

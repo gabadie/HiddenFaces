@@ -59,6 +59,7 @@
 
 .hf_layout_cell .hf_author
 {
+    display: block;
     padding: 20px 30px 10px 30px;
 }
 
@@ -144,5 +145,11 @@
     border-bottom-width: 1px;
     border-bottom-style: solid;
     border-bottom-color: white;
+}
+
+.hf_layout_cell .hf_timestamp
+{
+    text-align: right;
+    font-weight: bold;
 }
 

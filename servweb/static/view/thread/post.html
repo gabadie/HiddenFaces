@@ -1,5 +1,6 @@
 <div class="hf_author">
     {{#hf_user_link author}}{{/hf_user_link}}
+    <span class="hf_timestamp" style="float:right; margin-right:10px;">{{{hf_timestamp_post this}}}</span>
 </div>
 <div class="hf_post">
     {{content}}
@@ -8,7 +9,7 @@
 <div class="jumbotron">
     {{#each comments}}
         <div class="hf_comment">
-            {{{hf_timestamp_post this}}}
+            <div class="hf_timestamp">{{{hf_timestamp_post this}}}</div>
             {{{hf_user_link author}}}
             {{{hf_comment this}}}
         </div>
