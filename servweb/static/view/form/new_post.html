@@ -4,7 +4,7 @@
         <div class="hf_title">Write what is on your mind... Privately.</div>
         <div>
             <form onsubmit="hf_control.create_post(this);return false;" style="padding: 3px;" onkeypress="return event.keyCode != 13;">
-                <textarea class="form-control" name="content" style="margin-bottom:10px;"></textarea>
+                <textarea class="form-control" name="content" style="margin-bottom:10px;" onkeypress="return hf_control.enter_type(this, event)"></textarea>
                 <input type="text" list="circles" id="hf_datalist_circles" placeholder="search your circle here" autocomplete="off" onkeypress="return hf_control.add_thread_list(event);"/>
                 <datalist id="circles">
                     {{#each circles}}

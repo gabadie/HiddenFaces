@@ -299,3 +299,12 @@ hf_control.delete_thread_list = function(dom)
     var divParent = spanParent.parentNode;
     divParent.removeChild(spanParent);
 }
+
+hf_control.enter_type = function(dom, event)
+{
+    if (event.keyCode == 13)
+    {
+        dom.value += "\n";
+        return;
+    }
+}
