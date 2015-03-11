@@ -310,13 +310,30 @@ hf_control.signed_in.route('/profile/', function (){
 hf_control.view_new_post = function(current_circle_hash, callback)
 {
     hf_service.list_circles(function(circles_list){
-        var template_context = {
-            'circles': circles_list
-        };
+        if (current_circle_hash != null && hf_service.is_circle_hash(current_circle_hash))
+        {
+            hf_service.get_circle(current_circle_hash, function(circle_current){
+                var template_context = {
+                    'circles': circles_list,
+                    'current_circle_name': circle_current['name']
+                };
 
-        var html = hf_ui.template('form/new_post.html', template_context);
+                var html = hf_ui.template('form/new_post.html', template_context);
 
-        callback(html);
+                callback(html);
+            });
+        }
+        else
+        {
+           var template_context = {
+                'circles': circles_list,
+            };
+
+            var html = hf_ui.template('form/new_post.html', template_context);
+
+            callback(html);
+        }
+
     });
 }
 
