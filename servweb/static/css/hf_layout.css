@@ -168,3 +168,39 @@
     text-align: right;
 }
 
+.hf_layout_cell .hf_list_circles
+{
+    margin:10px 0px 10px 0px;
+}
+
+.hf_layout_cell .hf_circle
+{
+    display: inline;
+    padding: 2px 5px 2px 5px;
+    background-color: #A8A8A1;
+    margin-right: 5px;
+}
+
+.hf_layout_cell .hf_circle_name
+{
+    margin-right: 10px;
+}
+
+.hf_layout_cell .hf_circle .hf_delete_icon:hover
+{
+    color: red;
+}
+
+.hf_layout_cell .hf_delete_icon
+{
+    font-size: 12px;
+}
+
+.hf_layout_cell .hf_delete_icon
+{
+    cursor: pointer;
+    padding: 2px;
+    background-color: ;
+}
+
+

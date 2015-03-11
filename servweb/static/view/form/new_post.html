@@ -2,33 +2,30 @@
 {{#hf_cell}}
     <div class="hf_padding">
         <div class="hf_title">Write what is on your mind... Privately.</div>
-        <form onsubmit="hf_control.create_post(this);return false;" style="padding: 3px;">
-            <textarea class="form-control" name="content"></textarea>
-            <table width="100%">
-                <tr>
-                    <td>
-                        {{#each circles}}
-                            <div class="checkbox">
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        name="circle/{{thread_chunk_name}}"
-                                        value="" />
-                                    {{name}}
-                                </label>
-                            </div>
-                        {{/each}}
-                    </td>
-                    <td width="200px" valign="bottom">
-                        <input
-                            type="submit"
-                            class="btn btn-default"
-                            name="submit"
-                            value="Post"
-                        />
-                    </td>
-                </tr>
-            </table>
-        </form>
+        <div>
+            <form onsubmit="hf_control.create_post(this);return false;" style="padding: 3px;" onkeypress="return event.keyCode != 13;">
+                <textarea class="form-control" name="content" style="margin-bottom:10px;"></textarea>
+                <input type="text" list="circles" id="hf_datalist_circles" placeholder="search your circle here" autocomplete="off" onkeypress="return hf_control.add_thread_list(event);"/>
+                <datalist id="circles">
+                    {{#each circles}}
+                        <option value="{{name}}" name="{{thread_chunk_name}}">{{name}}</option>
+                    {{/each}}
+                </datalist>
+                <div class="hf_list_circles" id="hf_list_circles">
+                    {{#if current_circle_name}}
+                        <span class="hf_circle form-control jscolor" style="color:blue;"><span class="hf_circle_name"> {{current_circle_name}} </span></span>
+                    {{/if}}
+                </div>
+                <div style="text-align: right;">
+                    <input
+                        style="padding: 5px 30px 5px 30px;"
+                        type="submit"
+                        class="btn btn-primary"
+                        name="submit"
+                        value="Post"
+                    />
+                </div>
+            </form>
+        </div>
     </div>
 {{/hf_cell}}
