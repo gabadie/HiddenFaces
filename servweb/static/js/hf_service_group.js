@@ -389,7 +389,7 @@ hf_service.add_user_to_group = function(user_hash, group_hash, callback)
     assert(hf.is_function(callback) || callback == undefined);
     assert(hf_service.is_group_admin(group_hash));
 
-    if (user_hash == admin_hash)
+    if (user_hash == hf_service.user_hash())
     {
         console.info('Cannot add user to specified group');
         if(callback)
