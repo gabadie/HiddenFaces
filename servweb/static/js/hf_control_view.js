@@ -165,7 +165,7 @@ hf_control.signed_in.route('/contacts', function () {
         };
 
         hf_ui.apply_template(
-            'list_contacts.html',
+            'list_users.html',
             params,
             document.getElementById('hf_page_main_content')
         );
@@ -187,7 +187,7 @@ hf_control.signed_in.route('/global/users', function () {
             }
 
             hf_ui.apply_template(
-                'list_contacts.html',
+                'list_users.html',
                 template_context,
                 document.getElementById('hf_page_main_content')
             );
