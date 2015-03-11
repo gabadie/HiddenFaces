@@ -39,6 +39,25 @@ hf.keys = function(obj)
 }
 
 /*
+ * Lists objects' values
+ *
+ * @param <obj>: the object to list values
+ *
+ * @return <obj>'s values
+ */
+hf.values = function(obj)
+{
+    var values = [];
+
+    for (var k in obj)
+    {
+        values.push(obj[k]);
+    }
+
+    return values;
+}
+
+/*
  * Tests if a function
  */
 hf.is_function = function(fn)

@@ -166,6 +166,8 @@ hf_service.create_group = function(group_name, description, public_group, public
                 false
             );
 
+            hf_service.publish_into_global_list(transaction, '/global/groups_list', group_hash);
+
             transaction.commit(function(json_message){
                 if (json_message['status'] != 'ok')
                 {

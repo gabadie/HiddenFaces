@@ -18,6 +18,20 @@ hf_ui.apply_template = function(template_name, params, domElement, callback)
 }
 
 /*
+ * @param <message_src_code>: string html source code
+ * @param <message_context>: parameters in this view
+ *
+ * @return: html content
+ */
+hf_ui.message_cell =function(message_src_code, message_context)
+{
+    assert(typeof message_src_code == 'string');
+
+    var template_src_code = '{{#hf_cell}}<div class="hf_padding">' + message_src_code + '</div>{{/hf_cell}}';
+    var compiled_template = Handlebars.compile(template_src_code);
+    return compiled_template(message_context);
+}
+/*
  * @param <template_name>: name of the view template
  * @param <template_context>: parameters in this view, in sort of json
  *

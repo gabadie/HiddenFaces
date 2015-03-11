@@ -194,11 +194,24 @@ hf_control.create_comment = function(commentDom)
 hf_control.create_post = function(postDom)
 {
     var postElms = hf.inputs_to_json(postDom);
-    var circles = hf_control.is_any_circle_checked(postElms);
+    var circles_hash = [];
+    var circles_selected = document.getElementsByClassName('hf_circle_name');
 
-    if(circles.length == 0)
+    for(var i = 0; i < circles_selected.length; i++)
     {
-        alert('You must post to at least a circle!')
+        if(!circles_selected[i].getAttribute('name'))
+        {
+            circles_hash.push(hf_control.current_view_url().split("/")[2]);
+        }
+        else
+        {
+            circles_hash.push(circles_selected[i].getAttribute('name'));
+        }
+    }
+
+    if (circles_hash.length == 0)
+    {
+        alert('you must select a group');
         return;
     }
 
@@ -210,9 +223,9 @@ hf_control.create_post = function(postDom)
 
     var post_appended = 0;
     var threads = [];
-    for(var i = 0; i < circles.length; i++)
+    for(var i = 0; i < circles_hash.length; i++)
     {
-        hf_service.get_circle(circles[i], function(circle){
+        hf_service.get_circle(circles_hash[i], function(circle){
             var symetric_key = hf_service.get_encryption_key(hf_service.user_private_chunk, circle['thread_chunk_name']);
             var thread = {
                 'thread_chunk_name': circle['thread_chunk_name'],
@@ -222,7 +235,7 @@ hf_control.create_post = function(postDom)
             threads.push(thread);
             post_appended++;
 
-            if(post_appended == circles.length)
+            if(post_appended == circles_hash.length)
             {
                 hf_service.create_post(postElms['content'].trim(), threads, function(success){
                     assert(success);
@@ -233,16 +246,65 @@ hf_control.create_post = function(postDom)
     }
 }
 
-hf_control.is_any_circle_checked = function(postElms)
+// -------------------------------------------------------------- test thread
+hf_control.add_thread_list = function(event)
 {
-    var circles = [];
-    for(var input in postElms)
+    if (event.keyCode != 13)
+        return ;
+
+    if(event.keyCode == 13)
     {
-        if (input.indexOf('circle') > -1 && postElms[input])
+        var circle = document.getElementById('hf_datalist_circles').value.trim();
+        var datalist = document.getElementById('circles');
+        var selected_value = null;
+        //selected option
+        for(var i = 0; i < datalist.options.length; i++)
         {
-            circles.push(input.split("/")[1]);
+            if(datalist.options[i].value == circle)
+                selected_value = datalist.options[i];
+        }
+
+        if(selected_value == null)
+        {
+            return;
+        }
+
+        if(selected_value != null)
+        {
+            var spans = document.getElementsByClassName('hf_circle_name');
+            // check selected value
+            for(var i = 0; i < spans.length; i++)
+            {
+                if(spans[i].innerHTML.trim() == circle)
+                {
+                    alert(spans[i].innerHTML.trim() +' is already added');
+                    document.getElementById('hf_datalist_circles').value = '';
+                    return;
+                }
+            }
+
+            var appendHTML = '<span class="hf_circle form-control jscolor">';
+            appendHTML += '<span class="hf_circle_name" name="'+selected_value.getAttribute('name')+'">'+circle+' </span>';
+            appendHTML += '<span class="hf_delete_icon" onclick="return hf_control.delete_thread_list(this);">X</span> </span>';
+            document.getElementById('hf_list_circles').innerHTML += appendHTML;
+
+            document.getElementById('hf_datalist_circles').value = '';
         }
     }
+}
 
-    return circles;
+hf_control.delete_thread_list = function(dom)
+{
+    var spanParent = dom.parentNode;
+    var divParent = spanParent.parentNode;
+    divParent.removeChild(spanParent);
+}
+
+hf_control.enter_type = function(dom, event)
+{
+    if (event.keyCode == 13)
+    {
+        dom.value += "\n";
+        return;
+    }
 }
