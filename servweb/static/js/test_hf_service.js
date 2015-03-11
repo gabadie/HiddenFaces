@@ -238,6 +238,40 @@ test_hf_service.get_user_public_chunk = function()
     test_utils.assert_success(3);
 }
 
+test_hf_service.get_users_public_chunks = function()
+{
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+    var users_hashes = [
+        hf_service.create_user(user_profile0),
+        hf_service.create_user(user_profile1)
+    ];
+
+    hf_service.reset_cache();
+    hf_service.get_users_public_chunks(users_hashes, function(users_public_chunks){
+        test_utils.assert(users_hashes[0] in users_public_chunks, 'users_hashes[0] should be in users_public_chunks');
+        test_utils.assert(users_hashes[1] in users_public_chunks, 'users_hashes[1] should be in users_public_chunks');
+    });
+
+    hf_service.reset_cache();
+    hf_service.get_users_public_chunks([users_hashes[0]], function(users_public_chunks){
+        test_utils.assert(users_hashes[0] in users_public_chunks, 'users_hashes[0] should be lonely in users_public_chunks');
+        test_utils.assert(!(users_hashes[1] in users_public_chunks), 'users_hashes[1] should not be in users_public_chunks');
+    });
+
+    hf_service.get_users_public_chunks(users_hashes, function(users_public_chunks){
+        test_utils.assert(users_hashes[0] in users_public_chunks, 'users_hashes[0] should be in users_public_chunks (partially cached)');
+        test_utils.assert(users_hashes[1] in users_public_chunks, 'users_hashes[1] should be in users_public_chunks (partially cached)');
+    });
+
+    hf_service.get_users_public_chunks(users_hashes, function(users_public_chunks){
+        test_utils.assert(users_hashes[0] in users_public_chunks, 'users_hashes[0] should be in users_public_chunks (fully cached)');
+        test_utils.assert(users_hashes[1] in users_public_chunks, 'users_hashes[1] should be in users_public_chunks (fully cached)');
+    });
+
+    test_utils.assert_success(8);
+}
+
 test_hf_service.login_user = function()
 {
     var user_profile0 = test_hf_service.john_smith_profile();
@@ -743,6 +777,7 @@ test_hf_service.main = function()
     // USER ACCOUNT TESTS
     test_utils.run(test_hf_service.create_user, 'test_hf_service.create_user');
     test_utils.run(test_hf_service.get_user_public_chunk, 'test_hf_service.get_user_public_chunk');
+    test_utils.run(test_hf_service.get_users_public_chunks, 'test_hf_service.get_users_public_chunks');
     test_utils.run(test_hf_service.login_user, 'test_hf_service.login_user');
     test_utils.run(test_hf_service.save_user_chunks, 'test_hf_service.save_user_chunks');
 
