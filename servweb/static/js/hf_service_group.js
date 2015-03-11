@@ -572,14 +572,14 @@ hf_service.list_users = function(group_hash,callback)
                         hf_service.get_users_public_chunks(group_shared_chunk['users'], callback);
 
                     }else{
-                        callback(null);
+                        callback([]);
 
                     }
                 });
             }
 
         }else{
-            callback(null);
+            callback([]);
 
         }
     });

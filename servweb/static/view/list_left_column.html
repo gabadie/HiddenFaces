@@ -9,5 +9,9 @@
 {{#each cells}}
     <a class="hf_list_item" onclick="return hf_control.view('{{view_path}}');">{{name}}</a>
 {{else}}
-    <div class="hf_empty">Empty.</div>
+    {{#if_eq title "Circles"}}
+        <div class="hf_empty">You have no circles yet</div>
+    {{else}}
+        <div class="hf_empty">You have no groups yet</div>
+    {{/if_eq}}
 {{/each}}
