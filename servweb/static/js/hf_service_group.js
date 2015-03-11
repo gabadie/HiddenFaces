@@ -389,6 +389,58 @@ hf_service.get_group_private_chunk = function(group_hash, callback)
         }
     );
 }
+
+/*
+ * Gets the thread's name and key of the specified group
+ * @param <group_hash>: the hash of the specified group
+ * @param <callback>: the function called once the response has arrived
+ * with paramter
+ *          {
+                'name': ,
+                'key':
+            },
+ */
+
+hf_service.get_thread_infos = function(group_hash,callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf.is_hash(group_hash));
+    assert(hf.is_function(callback));
+
+    var thread_info = {};
+
+    hf_service.get_group_public_chunk(group_hash, function(group_public_chunk){
+
+        if(group_public_chunk){
+
+            if(group_public_chunk['group']['public']){
+                assert(group_public_chunk['thread'] !== undefined);
+                thread_info['name'] = group_public_chunk['thread']['name'];
+                thread_info['key'] = group_public_chunk['thread']['key'];
+                callback(thread_info);
+
+            }else{
+                hf_service.get_group_shared_chunk(group_hash, function(group_shared_chunk){
+
+                    if(group_shared_chunk){
+                        assert(group_shared_chunk['thread'] !== undefined);
+                        thread_info['name'] = group_shared_chunk['thread']['name'];
+                        thread_info['key'] = group_shared_chunk['thread']['key'];
+                        callback(thread_info);
+
+                    }else{
+                        callback(null);
+
+                    }
+                });
+            }
+
+        }else{
+            callback(null);
+
+        }
+    });
+}
 /*
  * Saves group's public, shared and private chunks
  * @param <callback>: the function called once done
