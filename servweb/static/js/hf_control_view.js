@@ -160,7 +160,8 @@ hf_control.signed_in.route('/notifications', function(){
 hf_control.signed_in.route('/contacts', function () {
     hf_service.list_contacts(function(list_contacts) {
         var params = {
-            'contacts': list_contacts
+            'contacts': list_contacts,
+            'title': 'Your contacts'
         };
 
         hf_ui.apply_template(
@@ -176,7 +177,8 @@ hf_control.signed_in.route('/global/users', function () {
     hf_service.global_list('/global/users_list', function(users_hashes){
         hf_service.get_users_public_chunks(users_hashes, function(users_public_chunks) {
             var template_context = {
-                'contacts': hf.values(users_public_chunks)
+                'contacts': hf.values(users_public_chunks),
+                'title' : 'All users'
             };
 
             for (var i = 0; i < template_context['contacts'].length; i++)
@@ -222,11 +224,6 @@ hf_control.signed_in.route('/send_message/', function(){
 
 hf_control.signed_in.route('/profile', function (){
     var private_chunk = hf_service.user_private_chunk;
-
-    var params = {
-        'name': private_chunk['profile']['first_name'] + ' ' + private_chunk['profile']['last_name']
-    };
-
     var html = hf_ui.template(
         'header/user_profile.html',
         private_chunk
