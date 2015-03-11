@@ -250,46 +250,45 @@ hf_control.create_post = function(postDom)
 hf_control.add_thread_list = function(event)
 {
     if (event.keyCode != 13)
-        return ;
-
-    if(event.keyCode == 13)
     {
-        var circle = document.getElementById('hf_datalist_circles').value.trim();
-        var datalist = document.getElementById('circles');
-        var selected_value = null;
-        //selected option
-        for(var i = 0; i < datalist.options.length; i++)
-        {
-            if(datalist.options[i].value == circle)
-                selected_value = datalist.options[i];
-        }
+        return ;
+    }
 
-        if(selected_value == null)
-        {
-            return;
-        }
+    var circle = document.getElementById('hf_datalist_circles').value.trim();
+    var datalist = document.getElementById('circles');
+    var selected_value = null;
+    //selected option
+    for(var i = 0; i < datalist.options.length; i++)
+    {
+        if(datalist.options[i].value == circle)
+            selected_value = datalist.options[i];
+    }
 
-        if(selected_value != null)
+    if(selected_value == null)
+    {
+        return;
+    }
+
+    if(selected_value != null)
+    {
+        var spans = document.getElementsByClassName('hf_circle_name');
+        // check selected value
+        for(var i = 0; i < spans.length; i++)
         {
-            var spans = document.getElementsByClassName('hf_circle_name');
-            // check selected value
-            for(var i = 0; i < spans.length; i++)
+            if(spans[i].innerHTML.trim() == circle)
             {
-                if(spans[i].innerHTML.trim() == circle)
-                {
-                    alert(spans[i].innerHTML.trim() +' is already added');
-                    document.getElementById('hf_datalist_circles').value = '';
-                    return;
-                }
+                alert(spans[i].innerHTML.trim() +' is already added');
+                document.getElementById('hf_datalist_circles').value = '';
+                return;
             }
-
-            var appendHTML = '<span class="hf_circle form-control jscolor">';
-            appendHTML += '<span class="hf_circle_name" name="'+selected_value.getAttribute('name')+'">'+circle+' </span>';
-            appendHTML += '<span class="hf_delete_icon" onclick="return hf_control.delete_thread_list(this);">X</span> </span>';
-            document.getElementById('hf_list_circles').innerHTML += appendHTML;
-
-            document.getElementById('hf_datalist_circles').value = '';
         }
+
+        var appendHTML = '<span class="hf_circle form-control">';
+        appendHTML += '<span class="hf_circle_name" name="'+selected_value.getAttribute('name')+'">'+circle+' </span>';
+        appendHTML += '<span class="hf_delete_icon" onclick="return hf_control.delete_thread_list(this);">X</span> </span>';
+        document.getElementById('hf_list_circles').innerHTML += appendHTML;
+
+        document.getElementById('hf_datalist_circles').value = '';
     }
 }
 
