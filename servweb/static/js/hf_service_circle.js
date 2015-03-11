@@ -181,7 +181,6 @@ hf_service.list_circles_names = function(callback)
     callback(circles_names);
 }
 
-
 /*
  * Lists circle's threads names
  * @param <circle_hash>: circle's hash
@@ -208,4 +207,3 @@ hf_service.list_circle_threads_names = function(circle_hash, callback)
 
     callback(threads_names);
 }
-
