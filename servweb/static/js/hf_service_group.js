@@ -88,6 +88,7 @@ hf_service.create_group = function(group_name, description, public_group, public
         assert(shared_chunk_name != group_hash);
     }
 
+    var admin_hash = hf_service.user_hash();
     //Generates the unique thread of the group
     hf_service.create_thread(chunks_owner, true, public_thread, function(thread_info){
         assert(thread_info['status'] == "ok");
@@ -103,6 +104,7 @@ hf_service.create_group = function(group_name, description, public_group, public
                 'chunks_owner':  chunks_owner
             },
             'group': {
+                'admin' : admin_hash,
                 'public' : public_group,
                 'name' : group_name,
                 'description' : description
@@ -113,7 +115,7 @@ hf_service.create_group = function(group_name, description, public_group, public
                 'key': thread_info['symetric_key']
             },
             //users who had subscribed to the group. At the beginning only the admin
-            'users': [hf_service.user_hash()]
+            'users': [admin_hash]
         };
 
         var transaction = new hf_com.Transaction();
@@ -208,10 +210,15 @@ hf_service.export_group_public_chunk = function(group_private_chunk)
         },
         'system': {
         },
-        'group': group_private_chunk['group']
+        'group': {
+            'public' : group_private_chunk['group']['public'],
+            'name' : group_private_chunk['group']['name'],
+            'description' : group_private_chunk['group']['description']
+        }
     };
     if(group_private_chunk['group']['public']){
         public_chunk['users'] = hf.clone(group_private_chunk['users']);
+        public_chunk['group']['admin'] = group_private_chunk['group']['admin'];
     }
     if(group_private_chunk['thread']['public']){
         public_chunk['thread'] = group_private_chunk['thread'];
@@ -382,7 +389,7 @@ hf_service.add_user_to_group = function(user_hash, group_hash, callback)
     assert(hf.is_function(callback) || callback == undefined);
     assert(hf_service.is_group_admin(group_hash));
 
-    if (user_hash == hf_service.user_hash())
+    if (user_hash == admin_hash)
     {
         console.info('Cannot add user to specified group');
         if(callback)
