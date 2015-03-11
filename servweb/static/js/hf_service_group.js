@@ -7,7 +7,7 @@ hf_service.init_groups_repository = function(repository_chunk)
 {
     assert(!('groups' in repository_chunk));
     repository_chunk['groups'] = {
-        'subscribed_to': [],
+        'subscribed_to': {},
         'admin_of': {}
     };
 }
@@ -47,7 +47,7 @@ hf_service.already_subscribed = function(group_hash)
     assert(hf_service.is_connected());
 
     var private_chunk = hf_service.user_private_chunk;
-    return (private_chunk['groups']['subscribed_to'].indexOf(group_hash) >= 0);
+    return (group_hash in private_chunk['groups']['subscribed_to']);
 }
 /*
  * Creates a group
@@ -82,8 +82,10 @@ hf_service.create_group = function(group_name, description, public_group, public
     var private_chunk_key = hf_com.generate_AES_key('DhPbtSt56xJIqLuJjQJh');
     assert(private_chunk_name != group_hash);
 
+    var shared_chunk_name = null;
+
     if(!public_group){
-        var shared_chunk_name = hf.generate_hash('CqfS9YVGZOh6NMjzf2On');
+        shared_chunk_name = hf.generate_hash('CqfS9YVGZOh6NMjzf2On');
         var shared_chunk_key = hf_com.generate_AES_key('pBIphpwpPhTJdZItrDKL');
         assert(shared_chunk_name != group_hash);
     }
@@ -177,7 +179,7 @@ hf_service.create_group = function(group_name, description, public_group, public
                     hf_service.store_key(user_private_chunk, private_chunk_name, private_chunk_key);
 
                     user_private_chunk['groups']['admin_of'][group_hash] = private_chunk_name;
-                    user_private_chunk['groups']['subscribed_to'].push(group_hash);
+                    user_private_chunk['groups']['subscribed_to'][group_hash] = shared_chunk_name;
 
                     hf_service.save_user_chunks(function(success){
                         if(success && callback){
@@ -290,6 +292,43 @@ hf_service.get_group_public_chunk = function(group_hash, callback)
 
         callback(public_chunk);
     });
+}
+
+/*
+ * Gets a group's shared chunk
+ *
+ * @param <group_hash>: the group's hash
+ * @param <callback>: the function called once the response has arrived
+ *      @param <public_chunk>: is the group's shared chunk or null otherwise.
+ *      function my_callback(private_chunk)
+ */
+hf_service.get_group_shared_chunk = function(group_hash, callback)
+{
+    assert(hf.is_function(callback));
+    assert(hf.is_hash(group_hash));
+    assert(hf_service.already_subscribed(group_hash));
+
+    var user_private_chunk = hf_service.user_private_chunk;
+    var group_shared_chunk_name = user_private_chunk['groups']['subscribed_to'][group_hash];
+
+    if(!group_shared_chunk_name){
+        callback(null);
+    }
+    var group_shared_chunk_key = hf_service.get_decryption_key(user_private_chunk, group_shared_chunk_name);
+
+    //get group private chunk
+    hf_com.get_data_chunk(
+        group_shared_chunk_name,
+        group_shared_chunk_key,
+        function(json_message){
+            if(json_message['chunk_content'][0] !== 'undefined'){
+                var group_json = JSON.parse(json_message['chunk_content'][0]);
+                callback(group_json);
+            }else{
+                callback(null);
+            }
+        }
+    );
 }
 
 /*
@@ -457,15 +496,16 @@ hf_service.list_groups = function(callback)
     var groups = hf_service.user_private_chunk['groups']['subscribed_to'];
     var content = [];
 
-    if (groups.length === 0) {
+    var nb_groups = Object.keys(groups).length;
+    if (nb_groups === 0) {
         callback(content);
         return ;
     }
 
-    var iteration = groups.length;
+    var iteration = nb_groups;
 
-    for(var i = 0; i < groups.length; i++) {
-        hf_service.get_group_public_chunk(groups[i], function(group_public_chunk){
+    for(var group_hash in groups) {
+        hf_service.get_group_public_chunk(group_hash, function(group_public_chunk){
         if(group_public_chunk){
                 content.push(group_public_chunk);
             }
@@ -476,6 +516,45 @@ hf_service.list_groups = function(callback)
             }
         });
     }
+}
+
+/*
+ * Lists groups' public chunks the user has subscribes to
+ * @param <callback>: the function called once the response has arrived
+ *      @param <public_chunks>: the contacts' public chunk
+ *      function my_callback(public_chunks)
+ */
+hf_service.list_users = function(group_hash,callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf_service.is_hash(group_hash));
+    assert(hf.is_function(callback));
+
+    hf_service.get_group_public_chunk(group_hash, function(group_public_chunk){
+
+        if(group_public_chunk){
+
+            if(group_public_chunk['group']['public']){
+                hf_service.get_users_public_chunks(group_public_chunk['users'], callback);
+
+            }else{
+                hf_service.get_group_shared_chunk(group_hash, function(group_shared_chunk){
+
+                    if(group_shared_chunk){
+                        hf_service.get_users_public_chunks(group_shared_chunk['users'], callback);
+
+                    }else{
+                        callback(null);
+
+                    }
+                });
+            }
+
+        }else{
+            callback(null);
+
+        }
+    });
 }
 
 //------------------------------------------------------------------- GROUP NOTIFICATIONS
@@ -520,7 +599,7 @@ hf_service.subscribe_to_group = function(group_hash, message, callback)
             hf_service.push_notification(group_public_chunk, notification_json, function(success){
                 if(success){
                     var private_chunk = hf_service.user_private_chunk;
-                    private_chunk['groups']['subscribed_to'].push(group_hash);
+                    private_chunk['groups']['subscribed_to'][group_hash] = null;
                     hf_service.save_user_chunks(callback);
                 }else{
                     callback(false);
@@ -555,7 +634,7 @@ hf_service.define_notification('/notification/group_shared_chunk_infos', {
 
         if (shared_chunk_infos['type'] == '/group/shared_chunk')
         {
-            if (user_groups_list.indexOf(group_hash) < 0)
+            if (!(group_hash in user_groups_list))
             {
                 user_groups_list.push(group_hash);
             }
@@ -565,7 +644,9 @@ hf_service.define_notification('/notification/group_shared_chunk_infos', {
             assert(false, 'unexpected type');
         }
 
+        user_private_chunk['groups']['subscribed_to'][group_hash] = shared_chunk_infos['name'];
         hf_service.store_key(user_private_chunk, shared_chunk_infos['name'], shared_chunk_infos['symetric_key']);
+        hf_service.save_user_chunks();
 
         return 'discard';
     },
