@@ -113,6 +113,48 @@
     padding: 0px 10px 10px 10px;
 }
 
+/* ------------------------------------ FORM */
+
+.hf_layout_cell .hf_form_autocomplete
+{
+    background-color: #FFFFFF;
+    border: 1px solid #EEEEEE;
+    border-radius: 3px;
+    width: 100%;
+}
+
+.hf_layout_cell .hf_form_autocomplete .hf_list_circles
+{
+    padding: 10px;
+    cursor: default;
+}
+
+.hf_layout_cell .hf_form_autocomplete .hf_circle
+{
+    display: inline;
+    padding: 5px 10px;
+    margin-right: 10px;
+}
+
+.hf_layout_cell .hf_form_autocomplete .hf_delete_icon
+{
+    font-size: 12px;
+    margin-left: 10px;
+}
+
+.hf_layout_cell .hf_form_autocomplete .hf_delete_icon
+{
+    cursor: pointer;
+    padding: 2px;
+    background-color: ;
+}
+
+.hf_layout_cell .hf_form_autocomplete .hf_circle:hover .hf_delete_icon
+{
+    color: red;
+}
+
+
 /* -------------------------------------------------------------------- POSTS */
 .hf_layout_cell .hf_post .hf_author
 {
@@ -174,41 +216,6 @@
 {
     display: block;
     width: 100%;
-}
-
-.hf_layout_cell .hf_list_circles
-{
-    margin:10px 0px 10px 0px;
-}
-
-.hf_layout_cell .hf_circle
-{
-    display: inline;
-    padding: 2px 5px 2px 5px;
-    background-color: #A8A8A1;
-    margin-right: 5px;
-}
-
-.hf_layout_cell .hf_circle_name
-{
-    margin-right: 10px;
-}
-
-.hf_layout_cell .hf_circle .hf_delete_icon:hover
-{
-    color: red;
-}
-
-.hf_layout_cell .hf_delete_icon
-{
-    font-size: 12px;
-}
-
-.hf_layout_cell .hf_delete_icon
-{
-    cursor: pointer;
-    padding: 2px;
-    background-color: ;
 }
 
 .hf_layout_cell .hf_notification .hf_action_bar button
