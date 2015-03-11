@@ -250,9 +250,11 @@ hf_control.signed_in.route('/profile/', function (){
             var message_html = hf_ui.template('send_message.html',
                 {'user_hash': user_hash}
             );
-            var add_contact = hf_ui.template('form/add_from_user_profile.html',
-                public_chunk
-            );
+            var add_contact = hf_ui.message_cell(
+                '{{{hf_user_link this}}} doesn'+'t exist in your contacts list.' +
+                '<div class="hf_action_bar" align="right">'+
+                    '{{{hf_user_add_contact this}}}'+
+                '</div>', public_chunk);
 
             document.getElementById('hf_page_main_content').innerHTML = (html + add_contact + message_html);
 
@@ -263,9 +265,8 @@ hf_control.signed_in.route('/profile/', function (){
            var message_html = hf_ui.template('send_message.html',
                 {'user_hash': user_hash}
             );
-            var no_post = hf_ui.template('form/no_post.html',
-                public_chunk
-            );
+            var no_post = hf_ui.message_cell('{{{hf_user_link this}}} hasn'+'t shared any post yet.', public_chunk)
+            ;
 
             document.getElementById('hf_page_main_content').innerHTML = (html + no_post + message_html);
 
@@ -278,9 +279,11 @@ hf_control.signed_in.route('/profile/', function (){
                 var message_html = hf_ui.template('send_message.html',
                     {'user_hash': user_hash}
                 );
-                var add_contact = hf_ui.template('form/add_from_user_profile.html',
-                    public_chunk
-                );
+                var add_contact = hf_ui.message_cell(
+                    '{{{hf_user_link this}}} doesn'+'t exist in your contacts list.' +
+                    '<div class="hf_action_bar" align="right">'+
+                        '{{{hf_user_add_contact this}}}'+
+                    '</div>', public_chunk);
 
                 document.getElementById('hf_page_main_content').innerHTML = (html + add_contact + message_html);
 
