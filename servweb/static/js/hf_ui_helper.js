@@ -27,7 +27,7 @@ Handlebars.registerHelper('hf_user_link', function(user_public_chunk, options){
 Handlebars.registerHelper('hf_user_add_contact', function(user_public_chunk, options){
     var user_hash = user_public_chunk['__meta']['user_hash'];
 
-    if (hf_service.is_contact(user_hash))
+    if (hf_service.user_hash() == user_hash || hf_service.is_contact(user_hash))
     {
         return '';
     }
@@ -85,7 +85,7 @@ Handlebars.registerHelper('if_eq', function(a, b, opts) {
 Handlebars.registerHelper('hf_group_link', function(group){
     var out = '';
     out += '<a class="hf_user_link"';
-    out += 'onclick="hf_control.view(\'/group/'+group['__meta']['group_hash']+'\')">';
+    out += 'onclick="return hf_control.view(\'/group/'+group['__meta']['group_hash']+'\');">';
     out += group['group']['name']
     out += '</a>';
 

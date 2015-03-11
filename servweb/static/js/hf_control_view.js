@@ -127,11 +127,12 @@ hf_control.circle_contacts = function(circle_hash)
             var params = {
 
                 'circle_hash': circle_hash,
-                'contacts': list_contacts
-            }
+                'contacts': list_contacts,
+                'title' : 'Your contacts.'
+            };
 
             var circle_header_html = hf_ui.template('header/circle_header.html', circle);
-            var list_contacts = hf_ui.template('list_contacts_circle.html',params);
+            var list_contacts = hf_ui.template('list_users.html',params);
 
             document.getElementById('hf_page_main_content').innerHTML = (
                 circle_header_html + list_contacts
@@ -143,15 +144,21 @@ hf_control.circle_contacts = function(circle_hash)
 // -------------------------------------------------------- NOTIFICATIONS' VIEWS
 
 hf_control.signed_in.route('/notifications', function(){
+    var domElem = document.getElementById('hf_page_main_content');
+
+    domElem.innerHTML = hf_ui.template(
+        "header/notification_header.html",
+        {}
+    );
+
     hf_service.list_user_notifications(function(notifications_list){
-        var template_param = {
+        var template_context = {
             'chunks': notifications_list
         };
 
-        hf_ui.apply_template(
+        domElem.innerHTML += hf_ui.template(
             "list_chunks.html",
-            template_param,
-            document.getElementById('hf_page_main_content')
+            template_context
         );
     });
 });
@@ -165,7 +172,7 @@ hf_control.signed_in.route('/contacts', function () {
         };
 
         hf_ui.apply_template(
-            'list_contacts.html',
+            'list_users.html',
             params,
             document.getElementById('hf_page_main_content')
         );
@@ -187,7 +194,7 @@ hf_control.signed_in.route('/global/users', function () {
             }
 
             hf_ui.apply_template(
-                'list_contacts.html',
+                'list_users.html',
                 template_context,
                 document.getElementById('hf_page_main_content')
             );
@@ -477,7 +484,30 @@ hf_control.refresh_left_column = function()
         );
     });
 
-    hf_ui.apply_template(
+    hf_service.list_groups(function(groups_list){
+        var template_context = {
+            'title': 'Groups',
+            //'title_view_path': '/circles',
+            'cells': []
+        };
+
+        for (var i = 0; i < groups_list.length; i++)
+        {
+            var group_cell = {
+                'name':         groups_list[i]['group']['name']
+                //'view_path':    '/circle/' + circles_list[i]['thread_chunk_name']
+            };
+
+            template_context['cells'].push(group_cell);
+        }
+
+        document.getElementById('hf_left_column_groups').innerHTML = hf_ui.template(
+            "list_left_column.html",
+            template_context
+        );
+    });
+
+    /*hf_ui.apply_template(
         "list_left_column.html",
         {
             'title': 'Groups',
@@ -497,5 +527,5 @@ hf_control.refresh_left_column = function()
             ]
         },
         document.getElementById('hf_left_column_groups')
-    );
+    );*/
 }
