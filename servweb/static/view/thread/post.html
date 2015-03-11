@@ -1,12 +1,11 @@
 <div class="hf_padding">
     <div class="hf_post">
+        {{{hf_date this.date}}}
         <div class="hf_author">
             {{{hf_user_link author}}}
-
         </div>
         <div class="hf_text">
             {{content}}
-            {{{hf_timestamp_post this}}}
         </div>
     </div>
     <div class="hf_comments">
@@ -14,7 +13,7 @@
             <div class="hf_comment">
                 {{{hf_user_link author}}}
                 {{content}}
-                {{{hf_timestamp_post this}}}
+                {{{hf_date this.date}}}
             </div>
         {{else}}
             <div class="hf_empty">

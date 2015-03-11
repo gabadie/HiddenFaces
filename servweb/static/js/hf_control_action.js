@@ -18,7 +18,6 @@ hf_control.add_contact_to_circle = function(contact_user_hash, circle_hash)
     });
 }
 
-
 // -------------------------------------------------------------------- SEND MESSAGE
 hf_control.send_message = function(domElem)
 {
@@ -299,4 +298,13 @@ hf_control.delete_thread_list = function(dom)
     var spanParent = dom.parentNode;
     var divParent = spanParent.parentNode;
     divParent.removeChild(spanParent);
+}
+
+hf_control.enter_type = function(dom, event)
+{
+    if (event.keyCode == 13)
+    {
+        dom.value += "\n";
+        return;
+    }
 }
