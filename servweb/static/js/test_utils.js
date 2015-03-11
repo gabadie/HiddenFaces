@@ -162,11 +162,21 @@ test_utils.drop_database = function()
         if (status != 200)
         {
             test_utils.failure("test_hf_com.drop_database() failed (status == " + status + ")");
+            return;
         }
         else if (json["status"] != "ok")
         {
             test_utils.failure("test_hf_com.drop_database() failed");
+            return;
         }
+
+        hf_service.init_global(function(success){
+            if (success != true)
+            {
+                test_utils.failure("hf_service.init_global() failed");
+                return;
+            }
+        });
     });
 }
 

@@ -176,6 +176,8 @@ hf_service.create_user = function(user_profile, callback)
             false
         );
 
+        hf_service.publish_into_global_list(transaction, '/global/users_list', user_hash);
+
         transaction.commit(function(json_message){
             if (json_message['status'] != 'ok')
             {
@@ -270,6 +272,80 @@ hf_service.get_user_public_chunk = function(user_hash, callback)
         hf_service.users_public_chunks[user_hash] = public_chunk;
 
         callback(public_chunk);
+    });
+}
+
+/*
+ * Gets severals user's public chunks
+ *
+ * @param <users_hashes>: the users' hashes
+ * @param <callback>: the function called once the response has arrived
+ *      @param <users_public_chunks>: map(<user_hash> -> <user_public_chunk>).
+ *      function my_callback(users_public_chunks)
+ */
+hf_service.get_users_public_chunks = function(users_hashes, callback)
+{
+    assert(hf.is_function(callback));
+
+    var transaction = null;
+    var users_public_chunks = {};
+
+    for (var i = 0; i < users_hashes.length; i++)
+    {
+        var user_hash = users_hashes[i];
+
+        assert(hf.is_hash(user_hash));
+
+        if (user_hash in users_public_chunks)
+        {
+            continue;
+        }
+        else if (user_hash in hf_service.users_public_chunks)
+        {
+            users_public_chunks[user_hash] = hf_service.users_public_chunks[user_hash];
+            continue;
+        }
+
+        users_public_chunks[user_hash] = null;
+
+        if (transaction == null)
+        {
+            transaction = new hf_com.Transaction();
+        }
+
+        transaction.get_data_chunk(user_hash, '');
+    }
+
+    if (transaction == null)
+    {
+        callback(users_public_chunks);
+        return;
+    }
+
+    transaction.commit(function(json_message){
+        if (json_message['status'] != 'ok')
+        {
+            return callback(null);
+        }
+
+        var missing_public_chunks = json_message['chunk']
+        var missing_public_chunks_names = hf.keys(missing_public_chunks);
+
+        for (var i = 0; i < missing_public_chunks_names.length; i++)
+        {
+            var user_hash = missing_public_chunks_names[i];
+
+            if (user_hash in users_public_chunks)
+            {
+                continue;
+            }
+
+            var user_public_chunk = JSON.parse(missing_public_chunks[user_hash]);
+
+            users_public_chunks[user_hash] = user_public_chunk;
+        }
+
+        callback(users_public_chunks)
     });
 }
 
