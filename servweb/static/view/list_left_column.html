@@ -1,6 +1,17 @@
 
-<span class="hf_title">{{title}}</span>
+{{#if title_view_path}}
+    <a class="hf_title" onclick="return hf_control.view('{{title_view_path}}');"
+    >{{title}}</a>
+{{else}}
+    <span class="hf_title">{{title}}</span>
+{{/if}}
 
 {{#each cells}}
-<a class="hf_list_item" onclick="return hf_control.view('{{view_path}}');">{{name}}</a>
+    <a class="hf_list_item" onclick="return hf_control.view('{{view_path}}');">{{name}}</a>
+{{else}}
+    {{#if_eq title "Circles"}}
+        <div class="hf_empty">You have no circles yet</div>
+    {{else}}
+        <div class="hf_empty">You have no groups yet</div>
+    {{/if_eq}}
 {{/each}}

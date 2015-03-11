@@ -1,15 +1,16 @@
 
 from flask import Flask, render_template, jsonify, request, Response
-import xmlrpclib
-import os.path
+
+import fnmatch
 import json
+import os
 import socket
-import time
-
-
 import subprocess
-from subprocess import Popen, PIPE
 import tempfile
+import time
+import xmlrpclib
+
+from subprocess import Popen, PIPE
 from sys import platform as _platform
 from itertools import islice
 
@@ -66,6 +67,35 @@ def generate_rsa_keys():
     return private_key, public_key
 
 
+def load_views_templates():
+    template_path_dir = os.path.abspath('{}/static/view/'.format(
+        os.path.dirname(os.path.abspath(__file__))
+    ))
+
+    templates_json = []
+
+    for root, dirnames, filenames in os.walk(template_path_dir):
+        for filename in fnmatch.filter(filenames, '*.html'):
+            template_path = os.path.join(root,filename)
+
+            assert os.path.exists(template_path)
+
+            template_json = {
+                'name': os.path.relpath(template_path, template_path_dir),
+                'source': ''
+            }
+
+
+            template_json['name'] = template_json['name'].replace("\\","/")
+
+            with open(template_path) as myFile:
+                template_json['source'] = myFile.read()
+
+            templates_json.append(template_json)
+
+    return templates_json
+
+
 # ------------------------------------------------------------------------------ INDEX
 
 @app.route("/")
@@ -75,37 +105,6 @@ def index_page():
 @app.route("/test.html")
 def test_page():
     return render_template('index.html', test=True)
-
-
-# ------------------------------------------------------------------------------ TEMPLATE
-
-@app.route("/template/",methods=['POST'])
-def read_page():
-    request_params = request.get_json()
-
-    answer = {
-        'status' : 'ok'
-    }
-
-    template_name = request_params['template_name']
-
-    try:
-        template_source = ''
-        template_path = os.path.abspath('{}/static/view/{}'.format(
-            os.path.dirname(os.path.abspath(__file__)),
-            template_name
-        ))
-
-        with open(template_path) as myFile:
-            template_source = myFile.read()
-
-        answer['template_source'] = template_source
-
-    except Exception as e:
-        print e
-        answer['status'] = 'failed'
-
-    return jsonify(answer)
 
 
 # ------------------------------------------------------------------------------ DATA CHUNK
@@ -145,6 +144,9 @@ def get_data_chunk():
 
     elif request_params['operation'] == 'generate_rsa_keys':
         answer["private_key"], answer["public_key"] = generate_rsa_keys()
+
+    elif request_params['operation'] == 'views_templates':
+        answer['templates'] = load_views_templates()
 
     else:
         answer['error'] = 'unknown operation'

@@ -23,10 +23,11 @@ Handlebars.registerHelper('hf_user_link', function(user_public_chunk, options){
     return out;
 });
 
+
 Handlebars.registerHelper('hf_user_add_contact', function(user_public_chunk, options){
     var user_hash = user_public_chunk['__meta']['user_hash'];
 
-    if (hf_service.is_contact(user_hash))
+    if (hf_service.user_hash() == user_hash || hf_service.is_contact(user_hash))
     {
         return '';
     }
@@ -40,4 +41,56 @@ Handlebars.registerHelper('hf_user_add_contact', function(user_public_chunk, opt
     return out;
 });
 
-hf_service.is_contact
+Handlebars.registerHelper('hf_add_contact_to_circle', function(contact, circle_hash){
+
+    if (hf_service.is_contact_into_circle(contact['__meta']['user_hash'], circle_hash))
+        return '';
+
+    var out = '<div style="float:right;"><button ';
+    out += 'class="btn btn-default" style="float:right;" ';
+    out += 'onclick="return hf_control.add_contact_to_circle(\''+contact['__meta']['user_hash']+ '\',\'' + circle_hash+'\');"';
+    out += '>Add to circle </button></div>';
+
+    return out;
+});
+
+Handlebars.registerHelper('hf_chunk', function(chunk, options){
+    var template_name = chunk['__meta']['type'].substring(1) + '.html';
+
+    if (hf_ui.templatesCaches.has(template_name))
+    {
+        return hf_ui.template(template_name, this);
+    }
+
+    var out = '<textarea class="hf_code">';
+    out += JSON.stringify(this, null, 4);
+    out += '</textarea>'
+
+    return out;
+});
+
+Handlebars.registerHelper('hf_date', function(timestamp){
+    var date_format = "{{Month}} {{dd}}, {{yyyy}} at {{hh}}:{{mm}}";
+
+    return '<div class="hf_date">' + hf.generate_full_date(date_format, timestamp) + ' </div>';
+});
+
+Handlebars.registerHelper('if_eq', function(a, b, opts) {
+    if(a == b)
+        return opts.fn(this);
+    else
+        return opts.inverse(this);
+});
+
+Handlebars.registerHelper('hf_group', function(group){
+    var out = '';
+    out += '<a class="hf_user_link"';
+    out += 'onclick="hf_control.view(\'/group/'+group['__meta']['group_hash']+'\')">';
+    out += group['group']['name']
+    out += '</a>';
+
+    out += '<div class="hf_description">';
+    out += group['group']['description'];
+    out += '</div>' ;
+    return out;
+});

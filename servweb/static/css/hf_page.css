@@ -7,6 +7,8 @@
     top: 0;
     left: 0;
     width: 100%;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.8);
+    z-index: 11;
 }
 
 #hf_page_top_bar, #hf_page_top_bar .hf_sublist
@@ -52,6 +54,7 @@
     border-bottom-right-radius: 3px;
     border-bottom-left-radius:  3px;
     min-width: 150px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.8);
 }
 
 #hf_page_top_bar li:hover .hf_sublist
@@ -104,6 +107,7 @@
     width: 100%;
     display: block;
     font-weight: bolder;
+    font-size: inherit;
 }
 
 #hf_page_left_column .hf_list_item
@@ -111,6 +115,7 @@
     padding: 2px 30px;
     width: 100%;
     display: block;
+    border: none;
 }
 
 #hf_page_left_column a
@@ -127,4 +132,11 @@
 {
     background: #61513C;
     color: #FFF9F1;
+}
+
+#hf_page_left_column .hf_empty
+{
+    width: 100%;
+    text-align: center;
+    padding: 20px 0 60px 0;
 }

@@ -68,30 +68,144 @@ test_hf_service.john_smith_profile = function(id)
     }
 }
 
-test_hf_service.user_example_post = function(user_hash)
+test_hf_service.user_example_post = function()
 {
-    return {
-        '__meta': {
-            'type': '/post',
-            'author_user_hash': user_hash
-        },
-        'content': "I'm new in HiddenFaces. What should I do first?"
-    }
+    return "I'm new in HiddenFaces. What should I do first?";
 }
 
+test_utils.threads_example = function()
+{
+    var user_profile = test_hf_service.john_smith_profile();
+    hf_service.create_user(user_profile);
+
+    var owner_hash = hf.generate_hash("cWDb8suW3i");
+
+    //user connexion
+    hf_service.login_user(user_profile, null);
+    test_utils.assert(hf_service.is_connected(), 'should be connected after');
+
+    var thread1_info = null;
+    var thread2_info = null;
+
+    //threads list creation
+    hf_service.create_thread(owner_hash,true,false,function(thread_info){
+            test_utils.assert(thread_info['status'] == "ok");
+            thread1_info = thread_info;
+        });
+    hf_service.create_thread(owner_hash,true,true,function(thread_info){
+            test_utils.assert(thread_info['status'] == "ok");
+            thread2_info = thread_info;
+        });
+
+    test_utils.assert(thread1_info != null);
+    test_utils.assert(thread2_info != null);
+    return [thread1_info,thread2_info];
+}
+
+test_utils.create_uncertified_post = function(threads_list)
+{
+    assert(hf_service.is_connected());
+
+    var owner_hash = hf_service.user_chunks_owner();
+    var user_hash = hf_service.user_hash();
+
+    var part_hash = hf.generate_hash('uGzvkgD6lr6WlMTbvhWK\n');
+    var post_chunk_name =
+        hf.generate_hash('ERmO4vptXigWBnDUjnEN\n');
+    var post_chunk_content = {
+        '__meta': {
+            'type': '/thread/post',
+            'chunk_name': post_chunk_name,
+            'part_hash' : part_hash,
+            'author_user_hash': user_hash
+        },
+        'date': hf.get_date_time(),
+        'content': 'uncertified post'
+    };
+
+    var stringified_post_content = JSON.stringify(post_chunk_content);
+
+    var symetric_key = '';
+
+    var post_info = null;
+    // Creates the post's chunk
+    hf_com.create_data_chunk(
+        post_chunk_name,
+        owner_hash,
+        symetric_key,
+        [stringified_post_content],
+        true,
+        function(json_message){
+
+            post_info = {
+                'status' :  json_message['status'],
+                'post_chunk_name':   post_chunk_name,
+                'symetric_key':   symetric_key
+            };
+
+            if(threads_list)
+                hf_service.append_post_to_threads(post_chunk_name,symetric_key, threads_list);
+        }
+    );
+    assert(post_info != null);
+    return post_info;
+}
+
+hf_service.uncertified_comment = function(post_chunk_name,post_chunk_key)
+{
+    assert(hf.is_hash(post_chunk_name));
+    assert(hf_com.is_AES_key(post_chunk_key) || post_chunk_key == '');
+
+    var transaction = new hf_com.Transaction();
+
+    var part_hash = hf.generate_hash('tZsSPDK94TJZhhGHF2j8\n');
+    var user_hash = hf_service.user_hash();
+    var comment_json = {
+        '__meta': {
+            'type': '/comment',
+            'part_hash' : part_hash,
+            'author_user_hash': user_hash
+        },
+        'date': hf.get_date_time(),
+        'content': 'uncertified comment'
+    };
+    var stringified_comment = JSON.stringify(comment_json);
+
+    transaction.extend_data_chunk(
+        post_chunk_name,
+        hf_service.user_chunks_owner(),
+        post_chunk_key,
+        [stringified_comment]
+    );
+
+    var return_value = null;
+    transaction.commit(function(json_message){
+        return_value = (json_message['status'] == 'ok');
+    });
+    assert(return_value != null);
+    return return_value;
+}
 
 // ---------------------------------------------------------- USER ACCOUNT TESTS
 
-test_hf_service.create_account = function()
+test_hf_service.create_user = function()
 {
     var user_profile0 = test_hf_service.john_smith_profile();
 
-    hf_service.create_user(user_profile0, function(user_hash){
+    var user_hash0 = hf_service.create_user(user_profile0, function(user_hash){
         test_utils.assert(hf.is_hash(user_hash));
     });
 
     test_utils.assert(!hf_service.is_connected(), 'no-one should be signed in after sign up');
-    test_utils.assert_success(2);
+
+    hf_service.global_list('/global/users_list', function(global_users_list){
+        test_utils.assert(
+            global_users_list.indexOf(user_hash0) >= 0,
+            'user_hash0 should be in the global users list'
+        );
+    });
+
+    test_utils.assert_success(3);
 }
 
 test_hf_service.get_user_public_chunk = function()
@@ -122,6 +236,40 @@ test_hf_service.get_user_public_chunk = function()
     });
 
     test_utils.assert_success(3);
+}
+
+test_hf_service.get_users_public_chunks = function()
+{
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+    var users_hashes = [
+        hf_service.create_user(user_profile0),
+        hf_service.create_user(user_profile1)
+    ];
+
+    hf_service.reset_cache();
+    hf_service.get_users_public_chunks(users_hashes, function(users_public_chunks){
+        test_utils.assert(users_hashes[0] in users_public_chunks, 'users_hashes[0] should be in users_public_chunks');
+        test_utils.assert(users_hashes[1] in users_public_chunks, 'users_hashes[1] should be in users_public_chunks');
+    });
+
+    hf_service.reset_cache();
+    hf_service.get_users_public_chunks([users_hashes[0]], function(users_public_chunks){
+        test_utils.assert(users_hashes[0] in users_public_chunks, 'users_hashes[0] should be lonely in users_public_chunks');
+        test_utils.assert(!(users_hashes[1] in users_public_chunks), 'users_hashes[1] should not be in users_public_chunks');
+    });
+
+    hf_service.get_users_public_chunks(users_hashes, function(users_public_chunks){
+        test_utils.assert(users_hashes[0] in users_public_chunks, 'users_hashes[0] should be in users_public_chunks (partially cached)');
+        test_utils.assert(users_hashes[1] in users_public_chunks, 'users_hashes[1] should be in users_public_chunks (partially cached)');
+    });
+
+    hf_service.get_users_public_chunks(users_hashes, function(users_public_chunks){
+        test_utils.assert(users_hashes[0] in users_public_chunks, 'users_hashes[0] should be in users_public_chunks (fully cached)');
+        test_utils.assert(users_hashes[1] in users_public_chunks, 'users_hashes[1] should be in users_public_chunks (fully cached)');
+    });
+
+    test_utils.assert_success(8);
 }
 
 test_hf_service.login_user = function()
@@ -194,333 +342,82 @@ test_hf_service.save_user_chunks = function()
     //hf_service.disconnect();
 }
 
-test_hf_service.add_contact = function() {
-    var user_profile0 = test_hf_service.john_smith_profile(0);
-    var user_profile1 = test_hf_service.john_smith_profile(1);
-    var user_profile2 = test_hf_service.john_smith_profile(2);
-
-    var user_hash0 = hf_service.create_user(user_profile0);
-    var user_hash1 = hf_service.create_user(user_profile1);
-    var user_hash2 = hf_service.create_user(user_profile2);
-
-    hf_service.login_user(user_profile0);
-
-    hf_service.add_contact(user_hash1, function() {
-        test_utils.assert(
-            user_hash1 in hf_service.user_private_chunk['contacts'],
-            'user_hash1 should be added into contacts'
-        );
-        test_utils.assert(
-            !(user_hash2 in hf_service.user_private_chunk['contacts']),
-            'user_hash2 should not be added into contacts'
-        );
-    });
-
-    hf_service.add_contact(user_hash2, function() {
-        test_utils.assert(
-            user_hash1 in hf_service.user_private_chunk['contacts'],
-            'user_hash1 should already be in contacts'
-        );
-        test_utils.assert(
-            user_hash1 in hf_service.user_private_chunk['contacts'],
-            'user_hash2 should be added into contacts'
-        );
-    });
-
-    hf_service.add_contact("blabla", function(data) {
-        test_utils.assert(data == false, "blabla is not a hash");
-    });
-
-    test_utils.assert_success(5);
-}
-
-test_hf_service.is_contact = function()
-{
-    var user_profile0 = test_hf_service.john_smith_profile(0);
-    var user_profile1 = test_hf_service.john_smith_profile(1);
-    var user_profile2 = test_hf_service.john_smith_profile(2);
-
-    var user_hash0 = hf_service.create_user(user_profile0);
-    var user_hash1 = hf_service.create_user(user_profile1);
-    var user_hash2 = hf_service.create_user(user_profile2);
-
-    hf_service.login_user(user_profile0);
-
-    test_utils.assert(hf_service.is_contact(user_hash1) == false, 'user_hash1 should not be a contact');
-    test_utils.assert(hf_service.is_contact(user_hash2) == false, 'user_hash2 should not be a contact');
-
-    hf_service.add_contact(user_hash1);
-
-    test_utils.assert(hf_service.is_contact(user_hash1) == true, 'user_hash1 should be a contact');
-    test_utils.assert(hf_service.is_contact(user_hash2) == false, 'user_hash2 should be a contact');
-}
-
-test_hf_service.list_contacts = function()
+test_hf_service.list_contacts_threads_names = function()
 {
     //create all users
     var user_profile0 = test_hf_service.john_smith_profile(0);
     var user_profile1 = test_hf_service.john_smith_profile(1);
+    var user_profile2 = test_hf_service.john_smith_profile(2);
 
     var user_hash0 = hf_service.create_user(user_profile0);
     var user_hash1 = hf_service.create_user(user_profile1);
-
-    var user_profile2 = test_hf_service.john_smith_profile(2);
     var user_hash2 = hf_service.create_user(user_profile2);
 
-    //user0 is logged
+    var chunks_infos1 = [
+        {
+            'name': hf.hash('chunk1'),
+            'type': '/thread',
+            'symetric_key': 'AES\nworld'
+        }
+    ];
+
+    var chunks_infos2 = [
+        {
+            'name': hf.hash('chunk0'),
+            'type': '/thread',
+            'symetric_key': 'AES\nhello'
+        },
+        {
+            'name': hf.hash('chunk1'),
+            'type': '/thread',
+            'symetric_key': 'AES\nworld'
+        }
+    ];
+
     hf_service.login_user(user_profile0);
-
-    hf_service.list_contacts(function(data) {
-        test_utils.assert(Object.keys(data).length == 0, "there is no contact");
-    });
-
     hf_service.add_contact(user_hash1);
     hf_service.add_contact(user_hash2);
 
-    //construct expected result
-    var expected_content = [];
-    hf_service.get_user_public_chunk(user_hash1, function() {
-        expected_content.push(hf_service.users_public_chunks[user_hash1])
+    hf_service.list_contacts_threads_names(function(threads_names){
+        test_utils.assert(threads_names.length == 0, 'should not have threads')
     });
 
-    hf_service.get_user_public_chunk(user_hash2, function() {
-        expected_content.push(hf_service.users_public_chunks[user_hash2])
+    hf_service.list_contact_threads_names(user_hash1, function(threads_names){
+        test_utils.assert(threads_names.length == 0, 'user 1 should not have threads')
     });
 
-    //actual result
-    hf_service.list_contacts(function(data) {
-        test_utils.assert(JSON.stringify(expected_content) === JSON.stringify(data), "get all contacts content is ok");
+    hf_service.list_contact_threads_names(user_hash2, function(threads_names){
+        test_utils.assert(threads_names.length == 0, 'user 1 should not have threads')
     });
-
-    test_utils.assert_success(2);
-}
-
-
-// --------------------------------------------------------- NOTIFICATIONS TESTS
-
-hf_service.define_notification('/notification/testing/manual', {
-    automation: null,
-    resolve: hf_service.resolve_notification_author
-});
-
-test_hf_service.push_notification = function()
-{
-    var user_profile0 = test_hf_service.john_smith_profile();
-    var user_hash0 = hf_service.create_user(user_profile0);
-
-    hf_service.login_user(user_profile0);
-
-    var notification = {
-        '__meta': {
-            'type': '/notification/testing/manual',
-            'author_user_hash': hf_service.user_hash()
-        },
-        'content': 'Hi John! How are you?'
-    };
-
-    hf_service.get_user_public_chunk(user_hash0, function(user_public_chunk){
-        hf_com.get_data_chunk(
-            user_public_chunk['system']['protected_chunk']['name'],
-            '',
-            function(json_message){
-                test_utils.assert(json_message['chunk_content'].length == 0);
-            }
-        );
-
-        hf_service.push_notification(user_hash0, notification, function(success){
-            test_utils.assert(success == true, 'notification push with success')
-        });
-
-        hf_com.get_data_chunk(
-            user_public_chunk['system']['protected_chunk']['name'],
-            '',
-            function(json_message){
-                test_utils.assert(json_message['chunk_content'].length == 1);
-            }
-        );
-    });
-
-    test_utils.assert_success(3);
-}
-
-test_hf_service.notification_automation_util = function(send_notification_callback)
-{
-    var user_profile0 = test_hf_service.john_smith_profile(0);
-    var user_profile1 = test_hf_service.john_smith_profile(1);
-
-    var user_hash0 = hf_service.create_user(user_profile0);
-    var user_hash1 = hf_service.create_user(user_profile1);
-
-    hf_service.login_user(user_profile0);
-
-    var assert_count = send_notification_callback(user_hash1);
 
     hf_service.disconnect();
+
     hf_service.login_user(user_profile1);
+    hf_service.add_contact(user_hash0);
+    hf_service.send_chunks_infos_to_contacts([user_hash0], chunks_infos1, test_utils.callbackSuccess);
+    hf_service.disconnect();
 
-    hf_com.get_data_chunk(
-        hf_service.user_public_chunk()['system']['protected_chunk']['name'],
-        '',
-        function(json_message){
-            test_utils.assert(
-                json_message['chunk_content'].length > 0,
-                'looks like the notification has not been sent to user_profile1'
-            );
-        }
-    );
-
-    hf_service.pull_fresh_notifications();
-
-    hf_com.get_data_chunk(
-        hf_service.user_public_chunk()['system']['protected_chunk']['name'],
-        '',
-        function(json_message){
-            test_utils.assert(
-                json_message['chunk_content'].length == 0,
-                'hf_service.pull_fresh_notifications() failed should clean the protected chunk'
-            );
-        }
-    );
-
-    test_utils.assert(
-        hf_service.user_private_chunk['notifications'].length == 0,
-        'hf_service.pull_fresh_notifications() should not modify the user\'s private chunk'
-    );
-
-    test_utils.assert_success(assert_count + 3);
-}
-
-test_hf_service.notification_automation_sanity = function()
-{
-    test_hf_service.notification_automation_util(function(user_hash){
-        var original_notification = {
-            '__meta': {
-                'type': '/notification/testing/automated',
-                'author_user_hash': hf_service.user_hash()
-            }
-        };
-
-        hf_service.define_notification('/notification/testing/automated', {
-            automation: function(notification_json) {
-                test_utils.assert(
-                    notification_json['__meta']['type'] == '/notification/testing/automated',
-                    'corrupted notification type'
-                );
-                test_utils.assert(
-                    notification_json['__meta']['author_user_hash'] == original_notification['__meta']['author_user_hash'],
-                    'corrupted notification author'
-                );
-            },
-            resolve: null
-        });
-
-        hf_service.push_notification(user_hash, original_notification, function(success){
-            test_utils.assert(success == true, 'notification push with success')
-        });
-
-        return 3;
-    });
-}
-
-test_hf_service.list_notifications = function()
-{
-    var user_profile0 = test_hf_service.john_smith_profile(0);
-    var user_hash0 = hf_service.create_user(user_profile0);
-
-    var original_notification = {
-        '__meta': {
-            'type': '/notification/testing/manual',
-            'author_user_hash': user_hash0
-        }
-    };
+    hf_service.login_user(user_profile2);
+    hf_service.add_contact(user_hash0);
+    hf_service.send_chunks_infos_to_contacts([user_hash0], chunks_infos2, test_utils.callbackSuccess);
+    hf_service.disconnect();
 
     hf_service.login_user(user_profile0);
+    hf_service.pull_fresh_user_notifications();
 
-    hf_service.list_notifications(function(notifications_list){
-        test_utils.assert(notifications_list.length == 0, 'should not have any notifications');
+    hf_service.list_contacts_threads_names(function(threads_names){
+        test_utils.assert(threads_names.length == 3, 'should have 3 threads')
     });
 
-    hf_service.push_notification(user_hash0, original_notification, function(success){
-        test_utils.assert(success == true, 'should push a testing notification');
+    hf_service.list_contact_threads_names(user_hash1, function(threads_names){
+        test_utils.assert(threads_names.length == 1, 'user 1 should have 1 thread')
     });
 
-    hf_service.push_notification(user_hash0, original_notification, function(success){
-        test_utils.assert(success == true, 'should push another testing notification');
+    hf_service.list_contact_threads_names(user_hash2, function(threads_names){
+        test_utils.assert(threads_names.length == 2, 'user 1 should have 2 threads')
     });
 
-    hf_service.list_notifications(function(notifications_list){
-        test_utils.assert(notifications_list.length == 2, 'should have two notifications');
-        test_utils.assert('author' in notifications_list[0], 'should have author resolved');
-        test_utils.assert(
-            hf.is_hash(notifications_list[0]['__meta']['hash']),
-            'notification[\'__meta\'][\'hash\'] should be a hash'
-        );
-    });
-
-    test_utils.assert_success(6);
-}
-
-test_hf_service.delete_notification = function()
-{
-    var user_profile0 = test_hf_service.john_smith_profile(0);
-    var user_hash0 = hf_service.create_user(user_profile0);
-
-    var original_notification = {
-        '__meta': {
-            'type': '/notification/testing/manual',
-            'author_user_hash': user_hash0
-        }
-    };
-
-    hf_service.login_user(user_profile0);
-
-    hf_service.delete_notification(hf.generate_hash(''), function(success){
-        test_utils.assert(success == false, 'deleting a non existing notification should fail');
-    });
-
-    hf_service.push_notification(user_hash0, original_notification, function(success){
-        test_utils.assert(success == true, 'should push a testing notification');
-    });
-
-    hf_service.push_notification(user_hash0, original_notification, function(success){
-        test_utils.assert(success == true, 'should push another testing notification');
-    });
-
-    hf_service.list_notifications(function(notifications_list){
-        test_utils.assert(notifications_list.length == 2, 'should have two notifications');
-
-        hf_service.delete_notification(notifications_list[0]['__meta']['hash'], function(success){
-            test_utils.assert(success == true, 'deleting existing notification should success');
-        });
-    });
-
-    hf_service.list_notifications(function(notifications_list){
-        test_utils.assert(notifications_list.length == 1, 'should have one notification');
-    });
-
-    test_utils.assert_success(6);
-}
-
-test_hf_service.send_message = function()
-{
-    var message = 'hello, could you add me as friend, DDD';
-    var user_profile0 = test_hf_service.john_smith_profile(0);
-    var user_profile1 = test_hf_service.john_smith_profile(1);
-
-    var user_hash0 = hf_service.create_user(user_profile0);
-    var user_hash1 = hf_service.create_user(user_profile1);
-
-    hf_service.login_user(user_profile0);
-
-    hf_service.send_message(user_hash1, message, function(success) {
-        test_utils.assert(success == true, "sent message must have successed");
-    });
-
-    hf_service.send_message(user_hash0, message, function(success) {
-        test_utils.assert(success == false, "sent message must have failed");
-    });
-
-    test_utils.assert_success(2);
+    test_utils.assert_success(8);
 }
 
 
@@ -588,96 +485,283 @@ test_hf_service.keys_repository = function()
         hf_service.get_decryption_key(fake_chunk, chunk_name[3]) == test_hf_com.fake_RSA_private_key(3),
         'invalid chunk_name[3]\'s decryption key'
     );
-}
 
-test_hf_service.send_chunks_keys = function()
-{
-    test_hf_service.notification_automation_util(function(user_hash){
-        var chunks_keys = {};
+    hf_service.store_key(fake_chunk, chunk_name[3], '');
 
-        chunks_keys[hf.hash('chunk0')] = 'AES\nhello';
-        chunks_keys[hf.hash('chunk1')] = 'AES\nworld';
-
-        hf_service.send_chunks_keys([user_hash], chunks_keys, function(success){
-            test_utils.assert(success == true, 'notification push with success')
-        });
-
-        return 1;
-    });
+    test_utils.assert(
+        hf_service.get_encryption_key(fake_chunk, chunk_name[3]) == '',
+        'chunk_name[3]\'s encryption key should be an empty string'
+    );
+    test_utils.assert(
+        hf_service.get_decryption_key(fake_chunk, chunk_name[3]) == '',
+        'chunk_name[3]\'s decryption key should be an empty string'
+    );
 }
 
 
-// ------------------------------------------------------- THREADS & POSTS TESTS
+// ------------------------------------------------- REGISTRY TESTS
 
-test_hf_service.post_message = function()
+test_hf_service.is_valide_chunk = function()
 {
-    var user_profile = test_hf_service.john_smith_profile();
-    var user_hash = hf_service.create_user(user_profile);
+    //__meta is absent
+    var private_chunk = {};
+    var valide = hf_service.is_valide_chunk(private_chunk);
+    test_utils.assert(valide == false, "private chunk has no __meta tag");
+    // type is absent in __meta
+    private_chunk['__meta'] = {};
+    valide = hf_service.is_valide_chunk(private_chunk);
+    test_utils.assert(valide == false, "private_chunk['__meta'] has no 'type' tag");
 
-    //user connexion
-    hf_service.login_user(user_profile, null);
-    test_utils.assert(hf_service.is_connected(), 'should be connected after');
-
-    //post creation
-    var post_content = test_hf_service.user_example_post(user_hash);
-    var post_info = hf_service.create_post(user_hash,post_content);
-
-    test_utils.assert(typeof post_info['post_chunk_name'] == "string");
-    test_utils.assert(typeof post_info['symetric_key'] == "string");
+    // meta type is not in registry
+    private_chunk['__meta']['type'] = '/user/some_chunk';
+    valide = hf_service.is_valide_chunk(private_chunk);
+    test_utils.assert(valide == false, "private_chunk['__meta'] is wrong");
 
     test_utils.assert_success(3);
 }
 
-test_hf_service.create_thread = function()
+test_hf_service.is_valide_profile = function()
 {
-    var user_profile = test_hf_service.john_smith_profile();
-    var user_hash = hf_service.create_user(user_profile);
+    var chunk_profile = {};
 
-    //user connexion
-    hf_service.login_user(user_profile, null);
-    test_utils.assert(hf_service.is_connected(), 'should be connected after');
+    // emtpy chunk_profile
+    var valide = hf_service.is_valide_profile(chunk_profile);
+    test_utils.assert(valide == false, 'chunk_profile is empty');
 
-    var thread_info = hf_service.create_thread(user_hash,true);
-    test_utils.assert(typeof thread_info['thread_chunk_name'] == "string");
-    test_utils.assert(typeof thread_info['symetric_key'] == "string");
+    // chunk_profile has no last_name key
+    chunk_profile['first_name'] = '';
+    valide = hf_service.is_valide_profile(chunk_profile);
+    test_utils.assert(valide == false, 'chunk_profile has no last name');
 
-    test_utils.assert_success(3);
+    // chunk_profile has empty first_name and last_name
+    chunk_profile['last_name'] = '';
+    valide = hf_service.is_valide_profile(chunk_profile);
+    test_utils.assert(valide == false, 'chunk_profile has empty first_name && last_name');
+    valide = hf_service.is_valide_private_profile(chunk_profile);
+    test_utils.assert(valide == false, 'private chunk_profile has false commun party ');
+
+    // chunk_profile is well formatted
+    chunk_profile['first_name'] = 'john';
+    chunk_profile['last_name'] = 'smith';
+    valide = hf_service.is_valide_profile(chunk_profile);
+    test_utils.assert(valide == true, 'chunk_profile is well formatted');
+    valide = hf_service.is_valide_private_profile(chunk_profile);
+    test_utils.assert(valide == false, 'private chunk_profile has no key');
+
+    // ------------- Test for private chunk -------------------
+    // empty email
+    chunk_profile['email'] = '';
+    valide = hf_service.is_valide_private_profile(chunk_profile);
+    test_utils.assert(valide == false, 'private chunk_profile has empty key');
+
+    // well formatted
+    chunk_profile['email'] = 'john@smith.com';
+    valide = hf_service.is_valide_private_profile(chunk_profile);
+    test_utils.assert(valide == true, 'private chunk_profile is well formatted');
+
+    test_utils.assert_success(8);
 }
 
-test_hf_service.append_post_to_threads = function()
+test_hf_service.is_valide_meta = function()
 {
-    var user_profile = test_hf_service.john_smith_profile();
-    var user_hash = hf_service.create_user(user_profile);
+    var chunk_meta = {};
 
-    //user connexion
-    hf_service.login_user(user_profile, null);
-    test_utils.assert(hf_service.is_connected(), 'should be connected after');
+    // empty chunk_meta
+    var valide = hf_service.is_valide_meta(chunk_meta);
+    test_utils.assert(valide == false, 'chunk_meta is empty');
 
-    //threads map creation
-    var thread1_info = hf_service.create_thread(user_hash,true);
-    var thread2_info = hf_service.create_thread(user_hash,true);
-    var threads_map = [thread1_info,thread2_info];
+    // chunk_meta has no chunk_name
+    var random_user_hash = hf.generate_hash('randomsalt');
+    chunk_meta['user_hash'] = 'abcd';
+    valide = hf_service.is_valide_meta(chunk_meta);
+    test_utils.assert(valide == false, 'chunk_meta has no chunk_name tag');
 
-    //post creation
-    var post_content = test_hf_service.user_example_post(user_hash);
-    var post_info = hf_service.create_post(user_hash,post_content);
+    // chunk_meta has user_hash and chunk_name but wrong format (not hash)
+    var random_chunk_name = hf.generate_hash('randomsalt');
+    chunk_meta['chunk_name'] = 'abcd';
+    valide = hf_service.is_valide_meta(chunk_meta);
+    test_utils.assert(valide == false, 'chunk_meta has 2 wrong hashes');
 
-    hf_service.append_post_to_threads(post_info, threads_map);
+    // chunk_meta's chunk_name is not hash
+    chunk_meta['user_hash'] = random_user_hash;
+    valide = hf_service.is_valide_meta(chunk_meta);
+    test_utils.assert(valide == false, 'chunk_meta has chunk_name wrong hash');
+    valide = hf_service.is_valide_private_meta(chunk_meta);
+    test_utils.assert(valide == false, 'private_chunk_meta is wrong because commun chunk_meta is wrong');
 
-    hf_com.get_data_chunk(
-            thread1_info['thread_chunk_name'],
-            thread1_info['symetric_key'],
-            function(json_message){
-                test_utils.assert(json_message['chunk_content'].length == 1);
+    // chunk_meta is well formatted
+    chunk_meta['chunk_name'] = random_chunk_name;
+    valide = hf_service.is_valide_meta(chunk_meta);
+    test_utils.assert(valide == true, 'chunk_meta is well formatted');
+
+    // private chunk meta test, there is no key
+    valide = hf_service.is_valide_private_meta(chunk_meta);
+    test_utils.assert(valide == false, 'private_chunk_meta has no key tag');
+
+    // empty key
+    chunk_meta['key'] = '';
+    valide = hf_service.is_valide_private_meta(chunk_meta);
+    test_utils.assert(valide == false, 'private_chunk_meta has an empty key');
+
+    // private chunk_meta is well formatted
+    chunk_meta['key'] = 'random_key';
+    valide = hf_service.is_valide_private_meta(chunk_meta);
+    test_utils.assert(valide == true, 'private_chunk_meta is well formatted');
+
+    test_utils.assert_success(9);
+}
+
+test_hf_service.is_valide_system = function()
+{
+    var chunk_system = {};
+
+    // empty chunk_system
+    var valide = hf_service.is_valide_system(chunk_system);
+    test_utils.assert(valide == false, 'chunk_system is empty');
+
+    // empty protected_chunk
+    chunk_system['protected_chunk'] = {};
+    valide = hf_service.is_valide_system(chunk_system);
+    test_utils.assert(valide == false, 'chunk_system["protected_chunk"] is empty');
+
+    // there is no public_key key
+    chunk_system['protected_chunk']['name'] = '';
+    valide = hf_service.is_valide_system(chunk_system);
+    test_utils.assert(valide == false, 'chunk_system["protected_chunk"] has no public_key');
+
+    // empty values
+    chunk_system['protected_chunk']['public_key'] = '';
+    valide = hf_service.is_valide_system(chunk_system);
+    test_utils.assert(valide == false, 'chunk_system["protected_chunk"] has name and public_key are empty');
+
+    //public_key is empty
+    chunk_system['protected_chunk']['name'] = 'name';
+    valide = hf_service.is_valide_system(chunk_system);
+    test_utils.assert(valide == false, 'public_key is empty');
+
+    // name is'n hash
+    chunk_system['protected_chunk']['public_key'] = 'RSA_public_key';
+    valide = hf_service.is_valide_system(chunk_system);
+    test_utils.assert(valide == false, 'name is not hash');
+
+    // commun party is well formatted
+    chunk_system['protected_chunk']['name'] = hf.generate_hash('randomhash');
+    valide = hf_service.is_valide_system(chunk_system);
+    test_utils.assert(valide == true, 'chunk_system is well formatted');
+
+    // private chunk_system has no chunks_owner
+    valide = hf_service.is_valide_private_system(chunk_system);
+    test_utils.assert(valide == false, 'chunk_system has no chunks_owner');
+
+    // private chunk has wrong chunks_owner type
+    chunk_system['chunks_owner'] = 'random_hash';
+    chunk_system['protected_chunk']['private_key'] = 'RSA_private_key';
+    valide = hf_service.is_valide_private_system(chunk_system);
+    test_utils.assert(valide == false, 'chunks_owner wrong hash type');
+
+    // private chunk well formatted
+    chunk_system['chunks_owner'] = hf.generate_hash("randomsalt");
+    valide = hf_service.is_valide_private_system(chunk_system);
+    test_utils.assert(valide == true, 'private_chunk is well formatted');
+
+    test_utils.assert_success(10);
+}
+
+test_hf_service.is_valide_private_chunk = function()
+{
+    var user_profile0 = test_hf_service.john_smith_profile();
+    var user_hash0 = hf_service.create_user(user_profile0);
+
+    hf_service.login_user(user_profile0, null);
+
+
+    var private_chunk = {
+            '__meta': {
+                'type':         '/user/private_chunk',
+                'user_hash':    'user_hash',
+                'chunk_name':   'private_chunk_name',
+                'key':          'private_chunk_key'
+            },
+            'profile': {
+                'first_name':   'john',
+                'last_name':    'smith',
+                'email':        '',
+            },
+            'system': {
+                'protected_chunk': {
+                    'name':         'protected_chunk_name',
+                    'private_key':  'protected_chunk_private_key',
+                    'public_key':   'protected_chunk_public_key'
+                },
+                'chunks_owner':  'chunks_owner'
             }
-        );
-    hf_com.get_data_chunk(
-            thread1_info['thread_chunk_name'],
-            thread1_info['symetric_key'],
-            function(json_message){
-                test_utils.assert(json_message['chunk_content'].length == 1);
+        };
+
+
+    test_utils.assert(hf_service.is_valide_private_chunk(private_chunk) == false, 'private chunk misses a lots');
+
+    var user_private_chunk = hf_service.user_private_chunk;
+    private_chunk['__meta']['user_hash'] = user_private_chunk['__meta']['user_hash'];
+    private_chunk['__meta']['chunk_name'] = user_private_chunk['__meta']['chunk_name'];
+    private_chunk['notifications'] = user_private_chunk['notifications'];
+    private_chunk['contacts'] = user_private_chunk['contacts'];
+    private_chunk['keykeeper'] = user_private_chunk['keykeeper'];
+    private_chunk['circles'] = user_private_chunk['circles'];
+
+    test_utils.assert(hf_service.is_valide_private_chunk(private_chunk) == false, 'private profile is wrong');
+
+    private_chunk['profile']['email'] = user_private_chunk['profile']['email'];
+    test_utils.assert(hf_service.is_valide_private_chunk(private_chunk) == false, 'private system is wrong');
+
+    private_chunk['system']['protected_chunk']['name'] = user_private_chunk['system']['protected_chunk']['name'];
+    test_utils.assert(hf_service.is_valide_private_chunk(private_chunk) == false, 'private chunks chunks_owner is wrong');
+
+    private_chunk['system']['chunks_owner'] = user_private_chunk['system']['chunks_owner'];
+    test_utils.assert(hf_service.is_valide_private_chunk(private_chunk) == true, 'private chunk is well formatted');
+
+
+    test_utils.assert_success(5);
+}
+
+test_hf_service.is_valide_public_chunk = function()
+{
+    var user_profile0 = test_hf_service.john_smith_profile();
+    var user_hash0 = hf_service.create_user(user_profile0);
+
+    hf_service.login_user(user_profile0, null);
+
+    var user_private_chunk = hf_service.user_private_chunk;
+
+    var public_chunk = {
+        '__meta': {
+            'type':         '/user/public_chunk',
+            'user_hash':    user_private_chunk['__meta']['user_hash'],
+            'chunk_name':   user_private_chunk['__meta']['user_hash']
+        }
+
+    };
+
+    var is_valide = hf_service.is_validate_public_chunk(public_chunk);
+    test_utils.assert(is_valide == false, 'public chunk has no profile && system');
+
+    public_chunk['profile'] =  {
+            'first_name':   user_private_chunk['profile']['first_name'],
+            'last_name':    user_private_chunk['profile']['last_name'],
+            'email':        ''
+        };
+
+    is_valide = hf_service.is_validate_public_chunk(public_chunk);
+    test_utils.assert(is_valide == false, 'public chunk has no system');
+
+    public_chunk['system'] =  {
+            'protected_chunk': {
+                'name':         user_private_chunk['system']['protected_chunk']['name'],
+                'public_key':   user_private_chunk['system']['protected_chunk']['public_key']
             }
-        );
+        };
+
+    is_valide = hf_service.is_validate_public_chunk(public_chunk);
+    test_utils.assert(is_valide == true, 'public chunk is well formatted');
 
     test_utils.assert_success(3);
 }
@@ -687,28 +771,67 @@ test_hf_service.append_post_to_threads = function()
 
 test_hf_service.main = function()
 {
+    // GLOBAL FEATURES TESTS
+    test_utils.run(test_hf_service.publish_into_global_list, 'test_hf_service.publish_into_global_list');
+
     // USER ACCOUNT TESTS
-    test_utils.run(test_hf_service.create_account, 'test_hf_service.create_account');
+    test_utils.run(test_hf_service.create_user, 'test_hf_service.create_user');
     test_utils.run(test_hf_service.get_user_public_chunk, 'test_hf_service.get_user_public_chunk');
+    test_utils.run(test_hf_service.get_users_public_chunks, 'test_hf_service.get_users_public_chunks');
     test_utils.run(test_hf_service.login_user, 'test_hf_service.login_user');
     test_utils.run(test_hf_service.save_user_chunks, 'test_hf_service.save_user_chunks');
-    test_utils.run(test_hf_service.add_contact, "test_hf_service.add_contact");
-    test_utils.run(test_hf_service.is_contact, "test_hf_service.is_contact");
-    test_utils.run(test_hf_service.list_contacts,"test_hf_service.list_contacts");
 
     // NOTIFICATIONS TESTS
-    test_utils.run(test_hf_service.push_notification, 'test_hf_service.push_notification');
+    test_utils.run(test_hf_service.push_user_notification, 'test_hf_service.push_user_notification');
     test_utils.run(test_hf_service.notification_automation_sanity, 'test_hf_service.notification_automation_sanity');
-    test_utils.run(test_hf_service.list_notifications, 'test_hf_service.list_notifications');
-    test_utils.run(test_hf_service.delete_notification, 'test_hf_service.delete_notification');
+    test_utils.run(test_hf_service.list_user_notifications, 'test_hf_service.list_user_notifications');
+    test_utils.run(test_hf_service.delete_user_notification, 'test_hf_service.delete_user_notification');
     test_utils.run(test_hf_service.send_message, "test_hf_service.send_message");
 
     // KEYKEEPER TESTS
     test_utils.run(test_hf_service.keys_repository, 'test_hf_service.keys_repository');
-    test_utils.run(test_hf_service.send_chunks_keys, 'test_hf_service.send_chunks_keys');
 
-    // THREADS & POSTS TESTS
+    // CONTACTS TESTS
+    test_utils.run(test_hf_service.add_contact, "test_hf_service.add_contact");
+    test_utils.run(test_hf_service.is_contact, "test_hf_service.is_contact");
+    test_utils.run(test_hf_service.list_contacts,"test_hf_service.list_contacts");
+    test_utils.run(test_hf_service.list_contacts_threads_names, "test_hf_service.list_contacts_threads_names");
+    test_utils.run(test_hf_service.send_chunks_infos_to_contacts, 'test_hf_service.send_chunks_infos_to_contacts');
+
+    // THREADS & POSTS & COMMENTS TESTS
     test_utils.run(test_hf_service.post_message, 'test_hf_service.post_message');
     test_utils.run(test_hf_service.create_thread, 'test_hf_service.create_thread');
     test_utils.run(test_hf_service.append_post_to_threads, 'test_hf_service.append_post_to_threads');
+    test_utils.run(test_hf_service.list_posts_thread, 'test_hf_service.list_posts_thread');
+    test_utils.run(test_hf_service.merge_posts_lists, 'test_hf_service.merge_posts_lists');
+    test_utils.run(test_hf_service.comment_post, 'test_hf_service.comment_post');
+
+    // CIRCLES
+    test_utils.run(test_hf_service.create_circle, 'test_hf_service.create_circle');
+    test_utils.run(test_hf_service.add_contact_to_circle, 'test_hf_service.add_contact_to_circle');
+    test_utils.run(test_hf_service.is_contact_into_circle, 'test_hf_service.is_contact_into_circle');
+    test_utils.run(test_hf_service.list_circles, 'test_hf_service.list_circles');
+    test_utils.run(test_hf_service.list_circles_names, 'test_hf_service.list_circles_names');
+    test_utils.run(test_hf_service.list_circle_threads_names, 'test_hf_service.list_circle_threads_names');
+
+    //GROUPS
+    test_utils.run(test_hf_service.create_group,'test_hf_service.create_group');
+    test_utils.run(test_hf_service.add_user_to_group,'test_hf_service.add_user_to_group');
+    test_utils.run(test_hf_service.subscribe_to_group,'test_hf_service.subscribe_to_group');
+    test_utils.run(test_hf_service.group_notifications, 'test_hf_service.group_notifications');
+
+    // REGISTRY TESTES
+    test_utils.run(test_hf_service.is_valide_chunk,"test_hf_service.is_valide_chunk");
+    test_utils.run(test_hf_service.is_valide_profile,'test_hf_service.is_valide_profile');
+    test_utils.run(test_hf_service.is_valide_meta,'test_hf_service.is_valide_meta');
+    test_utils.run(test_hf_service.is_valide_system,'test_hf_service.is_valide_system');
+    test_utils.run(test_hf_service.is_valide_private_chunk,'test_hf_service.is_valide_private_chunk');
+    test_utils.run(test_hf_service.is_valide_public_chunk,'test_hf_service.is_valide_public_chunk');
+
+    //CHUNKS VERIFICATION
+    test_utils.run(test_hf_service.verify_certification, 'test_hf_service.verify_certification');
+    test_utils.run(test_hf_service.verify_post_certification,'test_hf_service.verify_post_certification');
+    test_utils.run(test_hf_service.verify_append_posts_certification,'test_hf_service.verify_append_posts_certification');
+    test_utils.run(test_hf_service.verify_comment_certification,'test_hf_service.verify_comment_certification');
+    test_utils.run(test_hf_service.list_certified_posts_comments, 'test_hf_service.list_certified_posts_comments ');
 }

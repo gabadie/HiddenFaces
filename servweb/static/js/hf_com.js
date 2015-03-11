@@ -117,6 +117,8 @@ hf_com.Transaction = function()
             if (status != 200)
             {
                 alert(status);
+                if (callback != null)
+                    callback(null);
                 return;
             }
 
@@ -347,6 +349,8 @@ hf_com.get_data_chunk = function(chunk_name, decryption_key, callback)
         if (status != 200)
         {
             alert(status);
+            if(callback)
+                callback(null);
             return;
         }
 
@@ -386,7 +390,11 @@ hf_com.delete_data_chunk = function(chunk_name, access_as, callback)
  */
 hf_com.generate_AES_key = function(salt)
 {
-    return 'AES\n' + hf.generate_hash(salt);
+    var key = 'AES\n' + hf.generate_hash(salt);
+
+    assert(hf_com.is_AES_key(key));
+
+    return key;
 }
 
 /*
@@ -404,6 +412,8 @@ hf_com.generate_RSA_key = function(callback)
         if(status != 200)
         {
             alert(status);
+            if(callback)
+                callback(null);
             return;
         }
 
@@ -467,6 +477,8 @@ hf_com.get_key = function(encryption_key) {
  */
 hf_com.is_key_type = function(key, key_type)
 {
+    assert(typeof key == 'string');
+
     var splitted_key = key.split("\n")[0];
     return (splitted_key.trim().toUpperCase() === key_type.toUpperCase());
 }

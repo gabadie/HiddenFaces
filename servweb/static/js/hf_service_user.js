@@ -104,10 +104,6 @@ hf_service.create_user = function(user_profile, callback)
         '2lbfAs5v1yguvf2ETM7S\n' +
         user_profile['email']
     );
-    var protected_chunk_name = hf.generate_hash(
-        'qUaMF8HtvLUtsXArCfhU\n' +
-        user_profile['email']
-    );
     var user_hash = hf.generate_hash(
         'fWdFPoyxE4uNoTKoBswp\n' +
         user_profile['email']
@@ -119,50 +115,48 @@ hf_service.create_user = function(user_profile, callback)
             hf_service.user_private_chunk_key(user_profile);
 
     assert(private_chunk_name != user_hash);
-    assert(protected_chunk_name != user_hash);
-    assert(private_chunk_name != protected_chunk_name);
 
-    hf_com.generate_RSA_key(function(protected_chunk_private_key, protected_chunk_public_key)
-    {
-        // Generates the user's private chunk's content
-        var private_chunk = {
-            '__meta': {
-                'type':         '/user/private_chunk',
-                'user_hash':    user_hash,
-                'chunk_name':   private_chunk_name,
-                'key':          private_chunk_key
-            },
-            'profile': {
-                'first_name':   user_profile['first_name'],
-                'last_name':    user_profile['last_name'],
-                'email':        user_profile['email'],
-            },
-            'system': {
-                'protected_chunk': {
-                    'name':         protected_chunk_name,
-                    'private_key':  protected_chunk_private_key,
-                    'public_key':   protected_chunk_public_key
-                },
-                'chunks_owner':  chunks_owner
-            },
+    // Generates the user's private chunk's content
+    var private_chunk = {
+        '__meta': {
+            'type':         '/user/private_chunk',
+            'user_hash':    user_hash,
+            'chunk_name':   private_chunk_name,
+            'key':          private_chunk_key
+        },
+        'profile': {
+            'first_name':   user_profile['first_name'],
+            'last_name':    user_profile['last_name'],
+            'email':        user_profile['email'],
+        },
+        'system': {
+            'chunks_owner':  chunks_owner
+        },
+        'certifications' : {
+        },
 
-            /*
-             * pending notifications that have already been fetched but don't have
-             * automated process and are waiting for the user to be processed.
-             */
-            'notifications': [ ],
+        'contacts': {},
 
-            'contacts': {
-            },
-            'circles': []
-        };
+        /*
+         * user's circles are agregations for contacts so that he can post
+         * message to only some of his friends.
+         */
+        'circles': {}
+    };
 
-        hf_service.init_key_repository(private_chunk);
+    var transaction = new hf_com.Transaction();
+
+    hf_service.init_key_repository(private_chunk);
+    hf_service.init_groups_repository(private_chunk);
+    hf_service.init_notification_repository(private_chunk, transaction, function(success){
+        if (!success)
+        {
+            callback(null);
+            return;
+        }
 
         // Generates the user's public chunk's content
         var public_chunk = hf_service.export_user_public_chunk(private_chunk);
-
-        var transaction = new hf_com.Transaction();
 
         // Creates the user's private chunk
         transaction.create_data_chunk(
@@ -182,14 +176,7 @@ hf_service.create_user = function(user_profile, callback)
             false
         );
 
-        // Creates the user's protected chunk
-        transaction.create_data_chunk(
-            protected_chunk_name,
-            chunks_owner,
-            '',
-            [],
-            true
-        );
+        hf_service.publish_into_global_list(transaction, '/global/users_list', user_hash);
 
         transaction.commit(function(json_message){
             if (json_message['status'] != 'ok')
@@ -232,12 +219,11 @@ hf_service.export_user_public_chunk = function(user_private_chunk)
             'email':        ''
         },
         'system': {
-            'protected_chunk': {
-                'name':         user_private_chunk['system']['protected_chunk']['name'],
-                'public_key':   user_private_chunk['system']['protected_chunk']['public_key']
-            }
-        }
+        },
+        'certifications' : hf.clone(user_private_chunk['certifications'])
     };
+
+    hf_service.export_public_notification_repository(user_private_chunk, public_chunk);
 
     return public_chunk;
 }
@@ -286,6 +272,85 @@ hf_service.get_user_public_chunk = function(user_hash, callback)
         hf_service.users_public_chunks[user_hash] = public_chunk;
 
         callback(public_chunk);
+    });
+}
+
+/*
+ * Gets severals user's public chunks
+ *
+ * @param <users_hashes>: the users' hashes
+ * @param <callback>: the function called once the response has arrived
+ *      @param <users_public_chunks>: map(<user_hash> -> <user_public_chunk>).
+ *      function my_callback(users_public_chunks)
+ */
+hf_service.get_users_public_chunks = function(users_hashes, callback)
+{
+    assert(hf.is_function(callback));
+
+    var transaction = null;
+    var users_public_chunks = {};
+
+    for (var i = 0; i < users_hashes.length; i++)
+    {
+        var user_hash = users_hashes[i];
+
+        assert(hf.is_hash(user_hash));
+
+        if (user_hash in users_public_chunks)
+        {
+            continue;
+        }
+        else if (user_hash in hf_service.users_public_chunks)
+        {
+            users_public_chunks[user_hash] = hf_service.users_public_chunks[user_hash];
+            continue;
+        }
+
+        users_public_chunks[user_hash] = null;
+
+        if (transaction == null)
+        {
+            transaction = new hf_com.Transaction();
+        }
+
+        transaction.get_data_chunk(user_hash, '');
+    }
+
+    if (transaction == null)
+    {
+        callback(users_public_chunks);
+        return;
+    }
+
+    transaction.commit(function(json_message){
+        if (json_message['status'] != 'ok')
+        {
+            return callback(null);
+        }
+
+        var missing_public_chunks = json_message['chunk']
+        var missing_public_chunks_names = hf.keys(missing_public_chunks);
+
+        for (var i = 0; i < missing_public_chunks_names.length; i++)
+        {
+            var user_hash = missing_public_chunks_names[i];
+
+            if (users_public_chunks[user_hash] != null)
+            {
+                continue;
+            }
+
+            var user_public_chunk = JSON.parse(missing_public_chunks[user_hash]);
+
+            users_public_chunks[user_hash] = user_public_chunk;
+        }
+
+        for (var user_hash in users_public_chunks)
+        {
+            assert(users_public_chunks[user_hash] != null);
+        }
+
+        callback(users_public_chunks)
     });
 }
 
@@ -388,7 +453,8 @@ hf_service.get_user_login_cookie = function(user_login_profile)
 /*
  * Saves user's public and private chunks
  * @param <callback>: the function called once done
- *      function my_callback()
+ *      @param <success>: true or false
+ *      function my_callback(success)
  */
 hf_service.save_user_chunks = function(callback)
 {
@@ -419,11 +485,12 @@ hf_service.save_user_chunks = function(callback)
     );
 
     transaction.commit(function(json_message){
-        assert(json_message['status'] == 'ok');
-
         if (callback)
         {
-            callback();
+            if(json_message['status'] == 'ok')
+                callback(true);
+            else
+                callback(false);
         }
     })
 }
@@ -441,95 +508,4 @@ hf_service.is_user_hash = function(user_hash, callback)
     hf_service.get_user_public_chunk(user_hash, function(public_chunk) {
         callback(public_chunk != false);
     });
-}
-
-/*
- * @param <user_hash>: contact's user hash
- *
- * @returns true or false
- */
-hf_service.is_contact = function(user_hash)
-{
-    assert(hf_service.is_connected());
-    assert(hf.is_hash(user_hash));
-    assert(user_hash != hf_service.user_hash());
-
-    return user_hash in hf_service.user_private_chunk['contacts'];
-}
-
-/*
- * @param <user_hash>: contact's user hash
- * @param <callback>: the function called once the response has arrived
- *      @param <success>: true or false
- *      function my_callback(success)
- */
-hf_service.add_contact = function(user_hash, callback)
-{
-    assert(hf_service.is_connected());
-    assert(hf.is_function(callback) || callback == undefined);
-
-    if (user_hash == hf_service.user_hash() || (user_hash in hf_service.user_private_chunk['contacts']))
-    {
-        assert(hf.is_function(callback));
-        callback(false);
-        return ;
-    }
-
-    hf_service.is_user_hash(user_hash, function(is_user_hash)
-    {
-        if (!is_user_hash)
-        {
-            callback(false);
-            return;
-        }
-
-        hf_service.user_private_chunk['contacts'][user_hash] = {
-            'circles': []
-        };
-
-        hf_service.save_user_chunks(function()
-        {
-            if (callback)
-            {
-                callback(true);
-            }
-        });
-    });
-}
-
-/*
- * Lists contact's public chunks
- * @param <callback>: the function called once the response has arrived
- *      @param <public_chunks>: the contacts' public chunk
- *      function my_callback(public_chunks)
- */
-hf_service.list_contacts = function(callback)
-{
-    assert(hf_service.is_connected());
-    assert(hf.is_function(callback));
-
-    var contacts = hf_service.user_private_chunk['contacts'];
-    var objCount = Object.keys(contacts).length;
-    var content=[];
-
-    if (objCount === 0) {
-        callback(content);
-        return ;
-    }
-
-    var iteration = 0;
-
-    for(var contact in contacts) {
-        hf_service.get_user_public_chunk(contact, function(public_chunk) {
-            if (public_chunk)
-            {
-                content.push(public_chunk);
-            }
-
-            iteration++;
-            if (iteration == objCount) {
-                callback(content);
-            }
-        });
-    }
 }
