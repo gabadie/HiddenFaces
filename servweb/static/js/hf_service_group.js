@@ -565,10 +565,6 @@ hf_service.define_notification('/notification/group_shared_chunk_infos', {
             assert(false, 'unexpected type');
         }
 
-        /*
-         * TODO: we should check that we can still open this document in
-         * the notification's validation (issue #27).
-         */
         hf_service.store_key(user_private_chunk, shared_chunk_infos['name'], shared_chunk_infos['symetric_key']);
 
         return 'discard';
