@@ -193,6 +193,23 @@ hf_control.signed_in.route('/global/users', function () {
     });
 });
 
+// ------------------------------------------------------ GROUPS' USERS
+hf_control.signed_in.route('/global/groups', function(){
+    hf_service.global_list('/global/groups_list', function(groups_hashes){
+        hf_service.get_group_public_chunks(groups_hashes, function(groups){
+            var template = {
+                'groups': groups
+            };
+
+            hf_ui.apply_template(
+                'list_groups.html',
+                template,
+                document.getElementById('hf_page_main_content')
+            );
+        });
+    });
+});
+
 // ------------------------------------------------------ MESSAGES' VIEWS
 hf_control.signed_in.route('/send_message', function(){
     var template_context = {

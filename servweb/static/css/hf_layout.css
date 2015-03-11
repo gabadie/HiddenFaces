@@ -89,11 +89,6 @@
     vertical-align: middle;
 }
 
-.hf_layout_cell .hf_list_item div
-{
-    display: inline-block;
-}
-
 .hf_layout_cell .hf_contact_btn
 {
     display: table-cell;
@@ -216,3 +211,8 @@
     display: inline-block;
 }
 
+.hf_layout_cell .hf_description
+{
+    display: block;
+    font-size: 12px;
+}
