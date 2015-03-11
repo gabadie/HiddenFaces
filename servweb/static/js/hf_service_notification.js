@@ -143,8 +143,10 @@ hf_service.push_notification = function(public_repository_chunk, notification_js
     assert('protected_chunk' in public_repository_chunk['system']);
     assert(typeof notification_json['__meta']['type'] == 'string');
     assert(notification_json['__meta']['type'] in hf_service.notification_interface);
-    assert(notification_json['__meta']['author_user_hash'] == hf_service.user_hash());
+    assert((notification_json['__meta']['author_user_hash'] == hf_service.user_hash()) || hf_service.is_group_admin(notification_json['__meta']['author_user_hash']));
     assert(hf.is_function(callback));
+
+    notification_json['__meta']['date'] = hf.get_date_time();
 
     // appends the notification to the end of <user_hash>'s protected file
     hf_com.append_data_chunk(
@@ -549,6 +551,19 @@ hf_service.list_user_notifications = function(callback)
             return;
         }
 
+        notifications_list.sort(function(notification_a, notification_b){
+            if (notification_a['__meta']['date'] > notification_b['__meta']['date'])
+            {
+                return -1;
+            }
+            else if (notification_a['__meta']['date'] < notification_b['__meta']['date'])
+            {
+                return 1;
+            }
+
+            return 0;
+        });
+
         callback(notifications_list)
     });
 }
@@ -623,3 +638,4 @@ hf_service.send_message = function(user_hash, message, callback)
 
     hf_service.push_user_notification(user_hash, notification_json, callback);
 }
+
