@@ -165,3 +165,56 @@ test_hf_service.subscribe_to_group = function(){
     );
     test_utils.assert_success(10);
 }
+
+test_hf_service.group_notifications = function(){
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+
+    var user_hash0 = hf_service.create_user(user_profile0);
+    var user_hash1 = hf_service.create_user(user_profile1);
+
+    hf_service.login_user(user_profile0);
+
+    //group creation
+    var group_info = test_hf_service.group_examples();
+    var subscription_message = 'I would like to subscribe to this group';
+    hf_service.create_group(
+        group_info['name'],
+        group_info['description'],
+        false, false,
+        function(group_hash){
+            test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
+            hf_service.disconnect();
+
+            //users subscriptions
+            hf_service.login_user(user_profile1);
+            hf_service.subscribe_to_group(group_hash, subscription_message, function(success){
+                test_utils.assert(success == true, 'user_profile1 cannot subscribe to the group');
+                hf_service.list_groups(function(group_list){
+                    test_utils.assert(group_list.length == 1,
+                        'user_profile1 hasn\'t subscribed to 1 group but '+group_list.length
+                    );
+                });
+            });
+            hf_service.disconnect();
+
+            //add users
+            hf_service.login_user(user_profile0);
+            hf_service.add_user_to_group(user_hash1, group_hash, function(success){
+                test_utils.assert(success == true,'Cannot add user_hash1 to group');
+            });
+            hf_service.disconnect();
+
+            //process automatic notifications
+            hf_service.login_user(user_profile1);
+            hf_service.pull_fresh_user_notifications(function(success){
+                test_utils.assert(success == true, 'Cannot execute automatic notifications');
+            });
+            //list group's users
+            hf_service.list_users(group_hash,function(users_chunks){
+                test_utils.assert(Object.keys(users_chunks).length == 2, 'The number of group\'s users is not 2 but '+Object.keys(users_chunks).length);
+            });
+        }
+    );
+    test_utils.assert_success(6);
+}
