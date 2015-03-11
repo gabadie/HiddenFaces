@@ -251,18 +251,17 @@ test_hf_populate.create_groups = function()
 
         var group_info = test_hf_service.group_examples(i);
 
-        (function(user_id){
-            hf_service.create_group(
-                group_info['name'],
-                group_info['description'],
-                false, false,
-                function(group_hash){
-                    test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
-                    test_utils.assert(hf_service.is_group_admin(group_hash));
-                    test_hf_populate.groups_hash_and_admin[group_hash] = user_id;
-                }
-            );
-        })(user_id)
+        hf_service.create_group(
+            group_info['name'],
+            group_info['description'],
+            i < test_hf_populate.group_count / 4, i < test_hf_populate.group_count / 2,
+            function(group_hash){
+                test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
+                test_utils.assert(hf_service.is_group_admin(group_hash));
+                test_hf_populate.groups_hash_and_admin[group_hash] = user_id;
+            }
+        );
+
         hf_service.disconnect();
     }
     test_utils.assert(Object.keys(test_hf_populate.groups_hash_and_admin).length == test_hf_populate.group_count,

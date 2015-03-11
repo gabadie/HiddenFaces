@@ -81,8 +81,8 @@ test_hf_service.add_user_to_group = function() {
             });
             //verify group's users
             hf_service.get_group_private_chunk(group_hash, function(group_json){
-                test_utils.assert(hf_service.already_subscribed(user_hash1,group_json) == true,'user_hash1 is not a group user');
-                test_utils.assert(hf_service.already_subscribed(user_hash2,group_json) == true, 'user_hash2 is not a group user');
+                test_utils.assert(hf_service.already_user(user_hash1,group_json) == true,'user_hash1 is not a group user');
+                test_utils.assert(hf_service.already_user(user_hash2,group_json) == true, 'user_hash2 is not a group user');
             });
         }
     );
@@ -111,18 +111,33 @@ test_hf_service.subscribe_to_group = function(){
             test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
             hf_service.subscribe_to_group(group_hash, subscription_message, function(success){
                 test_utils.assert(success == false, 'Admin could subscribe to the group');
+                hf_service.list_groups(function(group_list){
+                    test_utils.assert(group_list.length == 1,
+                        'Admin hasn\'t subscribed to 1 group but '+group_list.length
+                    );
+                });
             });
             hf_service.disconnect();
 
             hf_service.login_user(user_profile1);
             hf_service.subscribe_to_group(group_hash, subscription_message, function(success){
                 test_utils.assert(success == true, 'user_profile1 cannot subscribe to the group');
+                hf_service.list_groups(function(group_list){
+                    test_utils.assert(group_list.length == 1,
+                        'user_profile1 hasn\'t subscribed to 1 group but '+group_list.length
+                    );
+                });
             });
             hf_service.disconnect();
 
             hf_service.login_user(user_profile2);
             hf_service.subscribe_to_group(group_hash, subscription_message, function(success){
                 test_utils.assert(success == true, 'user_profile2 cannot subscribe to the group');
+                hf_service.list_groups(function(group_list){
+                    test_utils.assert(group_list.length == 1,
+                        'user_profile2 hasn\'t subscribed to 1 group but '+group_list.length
+                    );
+                });
             });
             hf_service.disconnect();
 
@@ -143,5 +158,5 @@ test_hf_service.subscribe_to_group = function(){
             });
         }
     );
-    test_utils.assert_success(7);
+    test_utils.assert_success(10);
 }

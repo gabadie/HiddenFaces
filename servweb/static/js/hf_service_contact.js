@@ -153,7 +153,7 @@ hf_service.define_notification('/notification/contact_chunks_infos', {
 /*
  * Sends chunks' keys to severals contacts.
  *
- * @param <users_hashes>: the users' hashes to send the chunks' keys
+ * @param <contacts_hashes>: the users' hashes to send the chunks' keys
  * @param <chunks_infos>: the chunks' infos to send
  *      [
  *          {
@@ -169,7 +169,7 @@ hf_service.define_notification('/notification/contact_chunks_infos', {
  */
 hf_service.send_chunks_infos_to_contacts = function(contacts_hashes, chunks_infos, callback)
 {
-    assert(hf_service.is_connected(), "user not connected in hf_service.send_contact_request");
+    assert(hf_service.is_connected());
     assert(contacts_hashes.length > 0);
     assert(chunks_infos.length > 0);
     assert(hf.is_function(callback));
