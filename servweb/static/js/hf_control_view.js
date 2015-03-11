@@ -229,7 +229,7 @@ hf_control.signed_in.route('/profile', function (){
 
     var html = hf_ui.template(
         'header/user_profile.html',
-        params
+        private_chunk
     );
 
     document.getElementById('hf_page_main_content').innerHTML = html;
