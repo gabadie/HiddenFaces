@@ -171,6 +171,28 @@ hf_control.signed_in.route('/contacts', function () {
     });
 });
 
+// ------------------------------------------------------ CONTACTS' USERS
+hf_control.signed_in.route('/global/users', function () {
+    hf_service.global_list('/global/users_list', function(users_hashes){
+        hf_service.get_users_public_chunks(users_hashes, function(users_public_chunks) {
+            var template_context = {
+                'contacts': hf.values(users_public_chunks)
+            };
+
+            for (var i = 0; i < template_context['contacts'].length; i++)
+            {
+                assert(template_context['contacts'][i] != null);
+            }
+
+            hf_ui.apply_template(
+                'list_contacts.html',
+                template_context,
+                document.getElementById('hf_page_main_content')
+            );
+        });
+    });
+});
+
 // ------------------------------------------------------ MESSAGES' VIEWS
 hf_control.signed_in.route('/send_message', function(){
     var template_context = {
