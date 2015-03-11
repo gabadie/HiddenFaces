@@ -212,6 +212,28 @@ hf_control.signed_in.route('/global/groups', function(){
     });
 });
 
+hf_control.signed_in.route('/group', function(){
+    var current_url_arrs = hf_control.current_view_url().split("/");
+    var group_hash = current_url_arrs[2];
+    var domElem = document.getElementById("hf_page_main_content");
+    hf_service.get_group_public_chunk(group_hash, function(public_chunk){
+        var header_html = hf_ui.template('header/group_header.html', public_chunk);
+        domElem.innerHTML += header_html;
+
+        // hf_control.view_new_post(circle_hash, function(new_post_html){
+
+        //     domElem.innerHTML += new_post_html;
+
+            // hf_service.list_circle_threads_names(circle_hash, function(threads_names){
+            //     hf_control.view_threads(threads_names, function(posts_html){
+            //         domElem.innerHTML += posts_html;
+            //     });
+            // });
+        // });
+    });
+
+});
+
 // ------------------------------------------------------ MESSAGES' VIEWS
 hf_control.signed_in.route('/send_message', function(){
     var template_context = {

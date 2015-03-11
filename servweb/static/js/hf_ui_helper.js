@@ -82,7 +82,7 @@ Handlebars.registerHelper('if_eq', function(a, b, opts) {
         return opts.inverse(this);
 });
 
-Handlebars.registerHelper('hf_group', function(group){
+Handlebars.registerHelper('hf_group_link', function(group){
     var out = '';
     out += '<a class="hf_user_link"';
     out += 'onclick="hf_control.view(\'/group/'+group['__meta']['group_hash']+'\')">';
