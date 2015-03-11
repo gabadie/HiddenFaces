@@ -83,10 +83,11 @@ hf_service.create_group = function(group_name, description, public_group, public
     assert(private_chunk_name != group_hash);
 
     var shared_chunk_name = null;
+    var shared_chunk_key;
 
     if(!public_group){
         shared_chunk_name = hf.generate_hash('CqfS9YVGZOh6NMjzf2On');
-        var shared_chunk_key = hf_com.generate_AES_key('pBIphpwpPhTJdZItrDKL');
+        shared_chunk_key = hf_com.generate_AES_key('pBIphpwpPhTJdZItrDKL');
         assert(shared_chunk_name != group_hash);
     }
 
@@ -179,6 +180,8 @@ hf_service.create_group = function(group_name, description, public_group, public
                     var user_private_chunk = hf_service.user_private_chunk;
 
                     hf_service.store_key(user_private_chunk, private_chunk_name, private_chunk_key);
+                    if(!public_group)
+                        hf_service.store_key(user_private_chunk, shared_chunk_name, shared_chunk_key);
 
                     user_private_chunk['groups']['admin_of'][group_hash] = private_chunk_name;
                     user_private_chunk['groups']['subscribed_to'][group_hash] = shared_chunk_name;
@@ -521,7 +524,7 @@ hf_service.list_groups = function(callback)
 }
 
 /*
- * Lists groups' public chunks the user has subscribes to
+ * Lists the users public chunks if visible by the current user
  * @param <callback>: the function called once the response has arrived
  *      @param <public_chunks>: the contacts' public chunk
  *      function my_callback(public_chunks)
@@ -529,7 +532,7 @@ hf_service.list_groups = function(callback)
 hf_service.list_users = function(group_hash,callback)
 {
     assert(hf_service.is_connected());
-    assert(hf_service.is_hash(group_hash));
+    assert(hf.is_hash(group_hash));
     assert(hf.is_function(callback));
 
     hf_service.get_group_public_chunk(group_hash, function(group_public_chunk){
@@ -537,12 +540,14 @@ hf_service.list_users = function(group_hash,callback)
         if(group_public_chunk){
 
             if(group_public_chunk['group']['public']){
+                assert(group_public_chunk['users'] !== undefined);
                 hf_service.get_users_public_chunks(group_public_chunk['users'], callback);
 
             }else{
                 hf_service.get_group_shared_chunk(group_hash, function(group_shared_chunk){
 
                     if(group_shared_chunk){
+                        assert(group_shared_chunk['users'] !== undefined);
                         hf_service.get_users_public_chunks(group_shared_chunk['users'], callback);
 
                     }else{
