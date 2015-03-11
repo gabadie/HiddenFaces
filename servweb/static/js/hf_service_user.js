@@ -335,7 +335,7 @@ hf_service.get_users_public_chunks = function(users_hashes, callback)
         {
             var user_hash = missing_public_chunks_names[i];
 
-            if (user_hash in users_public_chunks)
+            if (users_public_chunks[user_hash] != null)
             {
                 continue;
             }
@@ -343,6 +343,11 @@ hf_service.get_users_public_chunks = function(users_hashes, callback)
             var user_public_chunk = JSON.parse(missing_public_chunks[user_hash]);
 
             users_public_chunks[user_hash] = user_public_chunk;
+        }
+
+        for (var user_hash in users_public_chunks)
+        {
+            assert(users_public_chunks[user_hash] != null);
         }
 
         callback(users_public_chunks)
