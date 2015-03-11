@@ -81,3 +81,16 @@ Handlebars.registerHelper('if_eq', function(a, b, opts) {
     else
         return opts.inverse(this);
 });
+
+Handlebars.registerHelper('hf_group', function(group){
+    var out = '';
+    out += '<a class="hf_user_link"';
+    out += 'onclick="hf_control.view(\'/group/'+group['__meta']['group_hash']+'\')">';
+    out += group['group']['name']
+    out += '</a>';
+
+    out += '<div class="hf_description">';
+    out += group['group']['description'];
+    out += '</div>' ;
+    return out;
+});

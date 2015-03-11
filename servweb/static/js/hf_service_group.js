@@ -299,6 +299,27 @@ hf_service.get_group_public_chunk = function(group_hash, callback)
     });
 }
 
+hf_service.get_group_public_chunks = function(group_hashes, callback)
+{
+    var nb_public_chunks = 0;
+    var group_chunks = [];
+    for(var i = 0; i < group_hashes.length; i++)
+    {
+        hf_service.get_group_public_chunk(group_hashes[i], function(public_group_chunk){
+            if(public_group_chunk)
+            {
+                group_chunks.push(public_group_chunk);
+                nb_public_chunks++;
+            }
+
+            if (nb_public_chunks == group_hashes.length)
+            {
+                callback(group_chunks);
+            }
+        });
+    }
+}
+
 /*
  * Gets a group's shared chunk
  *

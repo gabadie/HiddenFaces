@@ -5,7 +5,12 @@ body
     color: #61513C;
 }
 
-a, label
+div, span table, tr, td
+{
+    cursor: default;
+}
+
+a, label, button
 {
     cursor: pointer;
 }
