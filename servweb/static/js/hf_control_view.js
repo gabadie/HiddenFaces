@@ -143,15 +143,21 @@ hf_control.circle_contacts = function(circle_hash)
 // -------------------------------------------------------- NOTIFICATIONS' VIEWS
 
 hf_control.signed_in.route('/notifications', function(){
+    var domElem = document.getElementById('hf_page_main_content');
+
+    domElem.innerHTML = hf_ui.template(
+        "header/notification_header.html",
+        {}
+    );
+
     hf_service.list_user_notifications(function(notifications_list){
-        var template_param = {
+        var template_context = {
             'chunks': notifications_list
         };
 
-        hf_ui.apply_template(
+        domElem.innerHTML += hf_ui.template(
             "list_chunks.html",
-            template_param,
-            document.getElementById('hf_page_main_content')
+            template_context
         );
     });
 });
