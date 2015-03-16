@@ -150,7 +150,15 @@ hf_service.define_notification('/notification/contact_chunks_infos', {
     resolve: hf_service.resolve_notification_author
 });
 
-hf_service.send_contacts_infos_to_contacts = function(contacts_hashes, chunks_infos, callback){
+hf_service.send_contacts_infos_to_contacts = function(contacts_hashes, chunks_infos, callback)
+{
+    assert(hf_service.is_connected());
+
+    for (var i = 0; i < contacts_hashes.length; i++)
+    {
+        assert(hf_service.is_contact(contacts_hashes[i]));
+    }
+
     hf_service.send_chunks_infos_to_contacts(contacts_hashes, chunks_infos, '/notification/contact_chunks_infos', callback);
 }
 
