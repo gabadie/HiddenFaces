@@ -40,7 +40,7 @@ test_hf_service.create_discussion_posts = function()
         test_utils.assert(success == true,'cannot create discussion');
     });
 
-    hf_service.create_discussion_post('first message', discussion_hash, function(success){
+    hf_service.append_post_to_discussion('first message', discussion_hash, function(success){
         test_utils.assert(success == true, 'cannot post into discussion');
     });
 
@@ -103,4 +103,46 @@ test_hf_service.add_peers_to_discussion = function() {
         test_utils.assert(peers_list.length == 4, "Nb of peers is " + peers_list.length + " instead of 4");
     });
     test_utils.assert_success(9);
+}
+
+test_hf_service.peers_conversation = function() {
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+
+    var user_hash0 = hf_service.create_user(user_profile0);
+    var user_hash1 = hf_service.create_user(user_profile1);
+
+    hf_service.login_user(user_profile0);
+
+    //discussion creation
+    var discussion_hash = hf_service.create_discussion(test_hf_service.discussion_names[0], function(success){
+        test_utils.assert(success == true);
+    });
+    test_utils.assert(hf.is_hash(discussion_hash), 'Invalid discussion hash');
+
+    //adding peer
+    hf_service.add_peers_to_discussion(discussion_hash, [user_hash1], function(success){
+        test_utils.assert(success == true,'Cannot add user_hash1 to discussion');
+    });
+
+    hf_service.append_post_to_discussion('Hi! Would you like to go to the cinema on friday night?', discussion_hash, function(success){
+        test_utils.assert(success == true, 'cannot post into discussion');
+    });
+    hf_service.disconnect();
+
+    hf_service.login_user(user_profile1);
+    hf_service.pull_fresh_user_notifications(function(success){
+        test_utils.assert(success == true, 'Cannot execute automatic notifications');
+    });
+    hf_service.append_post_to_discussion('Yes why not!', discussion_hash, function(success){
+        test_utils.assert(success == true, 'cannot post into discussion');
+    });
+    hf_service.disconnect();
+
+    hf_service.login_user(user_profile0);
+    hf_service.list_posts(discussion_hash,function(posts_list){
+        test_utils.assert(posts_list.length == 2, 'Nb of posts is ' + posts_list.length + ' instead of 2');
+    });
+
+    test_utils.assert_success(7);
 }

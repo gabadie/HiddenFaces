@@ -82,7 +82,7 @@ hf_service.create_discussion = function(discussion_name, callback)
  * @param <callback>: the function called once the response has arrived with parameter
             true or false
  */
-hf_service.create_discussion_post = function(message, discussion_hash, callback)
+hf_service.append_post_to_discussion = function(message, discussion_hash, callback)
 {
     assert(hf_service.is_connected());
     assert(hf_service.is_discussion_hash(discussion_hash));
