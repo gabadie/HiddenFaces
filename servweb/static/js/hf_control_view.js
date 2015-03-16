@@ -264,29 +264,26 @@ hf_control.group_thread = function(group_hash)
         var header_html = hf_ui.template('header/group_header.html', public_chunk);
         domElem.innerHTML = header_html;
 
-        if(!hf_service.already_subcribed(group_hash)) {
-            return;
+        if(hf_service.already_subscribed(group_hash)) {
+            hf_control.view_new_group_post(group_hash, function(new_post_html){
+
+                domElem.innerHTML += new_post_html;
+                var chunks_names = [];
+                try
+                {
+                    chunks_names.push(public_chunk['thread']['name']);
+                }
+                catch(err){
+
+                }
+                finally
+                {
+                    hf_control.view_threads(chunks_names, function(posts_html){
+                        domElem.innerHTML += posts_html;
+                    });
+                }
+            });
         }
-
-        hf_control.view_new_group_post(group_hash, function(new_post_html){
-
-            domElem.innerHTML += new_post_html;
-            var chunks_names = [];
-            try
-            {
-                chunks_names.push(public_chunk['thread']['name']);
-            }
-            catch(err){
-
-            }
-            finally
-            {
-                hf_control.view_threads(chunks_names, function(posts_html){
-                    domElem.innerHTML += posts_html;
-                });
-            }
-
-        });
     });
 }
 
