@@ -94,6 +94,7 @@ hf_service.add_peer_to_discussion = function(discussion_hash, peer_hash, callbac
         hf_service.save_user_chunks(function(success)
         {
             if(success){
+
                 var discussion_info = {
                     'type':             '/thread',
                     'name':             discussion_hash,
@@ -101,7 +102,8 @@ hf_service.add_peer_to_discussion = function(discussion_hash, peer_hash, callbac
                     'discussion_name':  discussion['name'],
                     'peers':            discussion['peers']
                 };
-                hf_service.send_discussions_infos_to_peers([peer_hash],[discussion_info],callback);
+
+                hf_service.send_discussions_infos_to_peers(discussion['peers'],[discussion_info],callback);
             }else{
                 callback(false);
             }
