@@ -151,8 +151,24 @@ hf_service.add_peers_to_discussion = function(discussion_hash, peers_hashes, cal
                             'discussion_name':  discussion['name'],
                             'peers':            discussion['peers']
                         };
+                        hf_service.send_discussions_infos_to_peers(discussion['peers'],[discussion_info], function(success){
+                            if(success){
 
-                        hf_service.send_discussions_infos_to_peers(discussion['peers'],[discussion_info],callback);
+                                var message = hf_service.user_private_chunk['profile']['first_name'] + ' just added ';
+                                //getting peers' names
+                                hf_service.get_users_public_chunks(peers_hashes,function(public_chunks_map){
+
+                                    for(hash in public_chunks_map){
+                                        message += public_chunks_map[hash]['profile']['first_name'] + ' ';
+                                    }
+
+                                    message += 'to the conversation';
+                                    hf_service.append_post_to_discussion(message, discussion_hash,callback);
+                                });
+                            }else{
+                                callback(false);
+                            }
+                        });
                     }else{
                         callback(false);
                     }
