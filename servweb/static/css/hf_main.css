@@ -12,7 +12,7 @@ div, span, table, tr, td
     margin: 0;
 }
 
-a, label, button
+a, label, button, a *
 {
     cursor: pointer;
 }

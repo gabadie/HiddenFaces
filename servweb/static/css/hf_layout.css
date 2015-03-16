@@ -70,6 +70,28 @@
     font-weight: bolder;
 }
 
+.hf_layout_cell .hf_user_link span
+{
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    margin-right: 20px;
+    vertical-align: middle;
+    text-align: middle;
+    overflow: hidden;
+    border: 1px solid #EEEEEE;
+    box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.3);
+}
+
+.hf_layout_cell .hf_user_link span img
+{
+    display: block;
+    margin: auto;
+    min-width: 100%;
+    min-height: 100%;
+    width: 100%;
+}
+
 .hf_layout_cell .hf_date
 {
     color: #BBBBBB;
