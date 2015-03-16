@@ -76,6 +76,29 @@ hf_service.create_discussion = function(discussion_name, callback)
 }
 
 /*
+ * Creates a post in the discussion
+ *
+ * @param <discussion_hash>: the discussion's hash
+ * @param <callback>: the function called once the response has arrived with parameter
+            true or false
+ */
+hf_service.create_discussion_post = function(message, discussion_hash, callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf_service.is_discussion_hash(discussion_hash));
+    assert(hf.is_function(callback) || callback == undefined);
+
+    var discussion_infos = {
+        'thread_chunk_name' : discussion_hash,
+        'symetric_key' : hf_service.get_decryption_key(hf_service.user_private_chunk, discussion_hash)
+    };
+
+    hf_service.create_post(message,[discussion_infos],function(post_info){
+        callback(post_info !== null);
+    });
+}
+
+/*
  * Adds many peers to a discussion
  * @param <discussion_hash>: the hash of the specified discussion
  * @param <peers_hashes>: peers' user hash
@@ -185,7 +208,6 @@ hf_service.list_peers = function(discussion_hash,callback)
 hf_service.define_notification('/notification/discussion_chunks_infos', {
     automation: function(notification_json)
     {
-        console.info('pulling discussion notification');
         assert(hf_service.is_connected());
 
         var peer_hash = notification_json['__meta']['author_user_hash'];
