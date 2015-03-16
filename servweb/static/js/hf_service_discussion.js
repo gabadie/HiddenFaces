@@ -109,6 +109,43 @@ hf_service.add_peer_to_discussion = function(discussion_hash, peer_hash, callbac
     });
 }
 
+/*
+ * Lists discussion's peers
+ * @param <callback>: the function called once the response has arrived
+ *      @param <public_chunks>: the peers' public chunk
+ *      function my_callback(public_chunks)
+ */
+hf_service.list_peers = function(discussion_hash,callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf.is_function(callback));
+    assert(hf_service.is_discussion_hash(discussion_hash));
+
+    var peers = hf_service.user_private_chunk['discussions'][discussion_hash]['peers'];
+    var content=[];
+
+    var iteration = peers.length;
+
+    if (iteration === 0) {
+        callback(content);
+        return;
+    }
+
+    for(var i = 0; i < peers.length; i++) {
+        hf_service.get_user_public_chunk(peers[i], function(public_chunk) {
+            if (public_chunk)
+            {
+                content.push(public_chunk);
+            }
+
+            iteration--;
+            if (iteration === 0) {
+                callback(content);
+            }
+        });
+    }
+}
+
 
 //------------------------------------------------------------------------- DISCUSSION'S NOTIFICATIONS
 /*
