@@ -345,8 +345,9 @@ hf_service.get_group_shared_chunk = function(group_hash, callback)
     var user_private_chunk = hf_service.user_private_chunk;
     var group_shared_chunk_name = user_private_chunk['groups']['subscribed_to'][group_hash];
 
-    if(!group_shared_chunk_name){
+    if(!hf.is_hash(group_shared_chunk_name)){
         callback(null);
+        return;
     }
     var group_shared_chunk_key = hf_service.get_decryption_key(user_private_chunk, group_shared_chunk_name);
 

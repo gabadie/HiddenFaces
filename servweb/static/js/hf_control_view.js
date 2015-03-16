@@ -334,6 +334,7 @@ hf_control.signed_in.route('/profile', function (){
 });
 
 hf_control.signed_in.route('/profile/', function (){
+    var domElem = document.getElementById('hf_page_main_content');
     var viewUrl = hf_control.current_view_url();
     var user_hash = viewUrl.split("/")[2];
 
@@ -352,60 +353,55 @@ hf_control.signed_in.route('/profile/', function (){
             return hf_control.view('/');
         }
 
-        var html = hf_ui.template(
+        domElem.innerHTML = hf_ui.template(
             'header/user_profile.html',
             public_chunk
         );
-
-        document.getElementById('hf_page_main_content').innerHTML = html;
 
         if (!hf_service.is_contact(user_hash))
         {
             var message_html = hf_ui.template('send_message.html',
                 {'user_hash': user_hash}
             );
+
             var add_contact = hf_ui.message_cell(
-                '{{{hf_user_link this}}} doesn'+'t exist in your contacts list.' +
+                '{{{hf_user_link this}}} is not in in your contacts list.' +
                 '<div class="hf_action_bar" align="right">'+
                     '{{{hf_user_add_contact this}}}'+
                 '</div>', public_chunk);
 
-            document.getElementById('hf_page_main_content').innerHTML = (html + add_contact + message_html);
-
-            return;
-        }
-        else if(hf_service.is_contact(user_hash))
-        {
-           var message_html = hf_ui.template('send_message.html',
-                {'user_hash': user_hash}
-            );
-            var no_post = hf_ui.message_cell('{{{hf_user_link this}}} hasn'+'t shared any post yet.', public_chunk)
-            ;
-
-            document.getElementById('hf_page_main_content').innerHTML = (html + no_post + message_html);
+            domElem.innerHTML += add_contact + message_html;
 
             return;
         }
 
         hf_service.list_contact_threads_names(user_hash, function(contacts_threads_names){
-            if(contacts_threads_names.length == 0)
+            if (contacts_threads_names.length == 0)
             {
                 var message_html = hf_ui.template('send_message.html',
                     {'user_hash': user_hash}
                 );
-                var add_contact = hf_ui.message_cell(
-                    '{{{hf_user_link this}}} doesn'+'t exist in your contacts list.' +
-                    '<div class="hf_action_bar" align="right">'+
-                        '{{{hf_user_add_contact this}}}'+
-                    '</div>', public_chunk);
+                var no_post = hf_ui.message_cell(
+                    '{{{hf_user_link this}}} hasn\'t shared any post yet.',
+                    public_chunk
+                );
 
-                document.getElementById('hf_page_main_content').innerHTML = (html + add_contact + message_html);
-
+                domElem.innerHTML += no_post + message_html;
             }
             else
             {
                 hf_control.view_threads(contacts_threads_names, function(posts_html){
-                    document.getElementById('hf_page_main_content').innerHTML += posts_html;
+                    if (posts_html == '')
+                    {
+                        domElem.innerHTML += hf_ui.message_cell(
+                            '{{{hf_user_link this}}} hasn\'t posted yet.',
+                            public_chunk
+                        );
+
+                        return;
+                    }
+
+                    domElem.innerHTML += posts_html;
                 });
             }
         });

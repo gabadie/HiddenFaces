@@ -75,6 +75,12 @@ Handlebars.registerHelper('hf_date', function(timestamp){
     return '<div class="hf_date">' + hf.generate_full_date(date_format, timestamp) + ' </div>';
 });
 
+Handlebars.registerHelper('hf_markdown', function(markdown_code){
+    assert(typeof markdown_code == 'string');
+
+    return '<div class="hf_markdown">' + markdown.toHTML(markdown_code) + '</div>';
+});
+
 Handlebars.registerHelper('if_eq', function(a, b, opts) {
     if(a == b)
         return opts.fn(this);

@@ -128,7 +128,7 @@ test_hf_service.send_chunks_infos_to_contacts = function()
 
     hf_service.login_user(user_profile0);
     hf_service.add_contact(user_hash1);
-    hf_service.send_chunks_infos_to_contacts([user_hash1], chunks_infos, function(success){
+    hf_service.send_contacts_infos_to_contacts([user_hash1], chunks_infos, function(success){
         test_utils.assert(success == true, 'notification pushed with success')
     });
     hf_service.disconnect();
