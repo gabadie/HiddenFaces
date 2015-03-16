@@ -1,0 +1,17 @@
+{{#hf_cell}}
+    <div class="hf_padding">
+        <div class="hf_title">Your contacts.</div>
+        {{#each contacts}}
+
+            <div class="hf_list_item">
+                {{{hf_user_link this}}}
+            </div>
+            <div>
+                    {{{hf_user_add_contact}}}
+            </div>
+        {{else}}
+            <div class="hf_empty">You don't have any contact.</div>
+        {{/each}}
+    </div>
+{{/hf_cell}}
+

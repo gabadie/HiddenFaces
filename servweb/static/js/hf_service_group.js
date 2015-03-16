@@ -299,6 +299,14 @@ hf_service.get_group_public_chunk = function(group_hash, callback)
     });
 }
 
+/*
+ * Gets a list of public chunk from list of group hash
+ *
+ * @param <group_hashes>: list of group hash
+ * @param <callback>: the function called once the response has arrived
+ *      @param <public_chunk>: is the group's public chunk or null otherwise.
+ *      function my_callback(public_chunk)
+ */
 hf_service.get_group_public_chunks = function(group_hashes, callback)
 {
     var nb_public_chunks = 0;

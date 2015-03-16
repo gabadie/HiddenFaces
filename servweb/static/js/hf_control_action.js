@@ -307,3 +307,31 @@ hf_control.enter_type = function(dom, event)
         return;
     }
 }
+
+// ------------------------------------------------------------------------ POST TO GROUP
+
+hf_control.thread_post = function(dom)
+{
+    var content_arrs = hf.inputs_to_json(dom);
+    var post_content = content_arrs['content'].trim();
+    if(!post_content)
+    {
+        alert('you must write something!');
+        return;
+    }
+
+    var group_info = hf_service.get_thread_infos(hf_control.current_view_url().split("/")[2], function(group){
+        var thread = {
+            'thread_chunk_name': group['name'],
+            'symetric_key': group['key']
+        }
+
+        hf_service.create_post(post_content, [thread], function(success){
+            if(success)
+            {
+                assert(success);
+                hf_control.refresh_view();
+            }
+        });
+    });
+}

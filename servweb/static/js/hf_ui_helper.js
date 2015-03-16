@@ -84,13 +84,35 @@ Handlebars.registerHelper('if_eq', function(a, b, opts) {
 
 Handlebars.registerHelper('hf_group_link', function(group){
     var out = '';
-    out += '<a class="hf_user_link"';
+    out += '<a class="hf_user_link" ';
     out += 'onclick="return hf_control.view(\'/group/'+group['__meta']['group_hash']+'\');">';
-    out += group['group']['name']
+    out += group['group']['name'];
     out += '</a>';
 
     out += '<div class="hf_description">';
     out += group['group']['description'];
     out += '</div>' ;
+    return out;
+});
+
+Handlebars.registerHelper('hf_group_header', function(group) {
+    var out = '<div class="hf_title">Group: '+ group['group']['name'];
+    var group_hash = group['__meta']['group_hash'];
+    if (hf_service.already_subscribed(group_hash))
+    {
+        out += '<button class = "btn btn-default" style="float:right;"';
+        out += 'onclick="return hf_control.view(\'/group/'+group_hash+'/contacts'+ '\')";>';
+        out += 'Show contacts </button>';
+    }
+    else
+    {
+        out += '<button class = "btn btn-default" style="float:right;"';
+        out += 'onclick="return hf_control.view(\'/group/'+group_hash+'/contacts'+ '\')";>';
+        out += 'Subcribe</button>';
+    }
+
+    out +=  '</div><div style="font-size:12px;">'
+            + group['group']['description']
+            +' </div>'
     return out;
 });
