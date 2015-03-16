@@ -103,7 +103,7 @@ test_hf_service.add_peers_to_discussion = function() {
         test_utils.assert(success == true, 'Cannot execute automatic notifications');
     });
     hf_service.list_peers(discussion_hash,function(peers_list){
-        test_utils.assert(Object.keys(peers_list).length == 4, "Nb of peers is " + peers_list.length + " instead of 4");
+        test_utils.assert(Object.keys(peers_list).length == 4, "Nb of peers is " + Object.keys(peers_list).length + " instead of 4");
     });
     test_utils.assert_success(10);
 }
@@ -228,11 +228,12 @@ test_hf_service.leave_discussion = function() {
     test_utils.assert(hf.is_hash(discussion_hash), 'Invalid discussion hash');
 
     //adding peers
-    hf_service.add_peers_to_discussion(discussion_hash, [user_hash1], function(success){
-        test_utils.assert(success == true,'Cannot add user_hash1 to discussion');
+    hf_service.add_peers_to_discussion(discussion_hash, [user_hash1,user_hash2,user_hash3], function(success){
+        test_utils.assert(success == true,'Cannot add peers to discussion');
     });
-    hf_service.add_peers_to_discussion(discussion_hash, [user_hash0], function(success){
-        test_utils.assert(success == false,'Could add user_hash0 to discussion');
+    //verify peer list
+    hf_service.list_peers(discussion_hash,function(peers_list){
+        test_utils.assert(Object.keys(peers_list).length == 4, "Nb of peers is " + Object.keys(peers_list).length + " instead of 4");
     });
 
     hf_service.disconnect();
@@ -241,26 +242,18 @@ test_hf_service.leave_discussion = function() {
     hf_service.pull_fresh_user_notifications(function(success){
         test_utils.assert(success == true, 'Cannot execute automatic notifications');
     });
-    hf_service.add_peers_to_discussion(discussion_hash, [user_hash2,user_hash3], function(success){
-        test_utils.assert(success == true,'Cannot add user_hash2 and user_hash3 to discussion');
-    });
-    hf_service.list_posts(discussion_hash,function(posts_list){
-        test_utils.assert(posts_list.length == 2, 'Nb of posts is ' + posts_list.length + ' instead of 2');
-    });
-
-    //verify peer list
-    hf_service.list_peers(discussion_hash,function(peers_list){
-        test_utils.assert(Object.keys(peers_list).length == 4, "Nb of peers is " + Object.keys(peers_list).length + " instead of 4");
+    hf_service.leave_discussion(discussion_hash,function(success){
+        test_utils.assert(success == true, 'Cannot leave group');
     });
 
     hf_service.disconnect();
 
-    hf_service.login_user(user_profile0);
+    hf_service.login_user(user_profile2);
     hf_service.pull_fresh_user_notifications(function(success){
         test_utils.assert(success == true, 'Cannot execute automatic notifications');
     });
     hf_service.list_peers(discussion_hash,function(peers_list){
-        test_utils.assert(Object.keys(peers_list).length == 4, "Nb of peers is " + peers_list.length + " instead of 4");
+        test_utils.assert(Object.keys(peers_list).length == 3, "Nb of peers is " + Object.keys(peers_list).length + " instead of 3");
     });
-    test_utils.assert_success(10);
+    test_utils.assert_success(8);
 }

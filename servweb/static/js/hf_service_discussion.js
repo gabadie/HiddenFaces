@@ -277,7 +277,8 @@ hf_service.leave_discussion = function(discussion_hash,callback)
     assert(hf.is_function(callback) || callback == undefined);
     assert(hf_service.is_discussion_hash(discussion_hash));
 
-    var peers = hf_service.user_private_chunk['discussions'][discussion_hash]['peers'];
+    var discussion = hf_service.user_private_chunk['discussions'][discussion_hash];
+    var peers = discussion['peers'];
     peers.splice(peers.indexOf(hf_service.user_hash()),1);
 
     var discussion_info = {
@@ -289,7 +290,7 @@ hf_service.leave_discussion = function(discussion_hash,callback)
     };
 
     hf_service.store_key(hf_service.user_private_chunk, discussion_hash, '');
-    delete hf_service.user_private_chunk['discussions'][discussion_hash];
+    delete discussion;
 
     hf_service.save_user_chunks(function(success){
         if(success){

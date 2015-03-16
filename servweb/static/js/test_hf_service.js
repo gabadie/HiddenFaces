@@ -673,6 +673,7 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.create_discussion_posts,'test_hf_service.create_discussion_posts');
     test_utils.run(test_hf_service.peers_conversation,'test_hf_service.peers_conversation');
     test_utils.run(test_hf_service.list_discussions, 'test_hf_service.list_discussions');
+    test_utils.run(test_hf_service.leave_discussion,'test_hf_service.leave_discussion');
 
     // REGISTRY TESTES
     test_utils.run(test_hf_service.is_valide_chunk,"test_hf_service.is_valide_chunk");
