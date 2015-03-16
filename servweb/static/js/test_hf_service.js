@@ -394,12 +394,12 @@ test_hf_service.list_contacts_threads_names = function()
 
     hf_service.login_user(user_profile1);
     hf_service.add_contact(user_hash0);
-    hf_service.send_chunks_infos_to_contacts([user_hash0], chunks_infos1, test_utils.callbackSuccess);
+    hf_service.send_contacts_infos_to_contacts([user_hash0], chunks_infos1, test_utils.callbackSuccess);
     hf_service.disconnect();
 
     hf_service.login_user(user_profile2);
     hf_service.add_contact(user_hash0);
-    hf_service.send_chunks_infos_to_contacts([user_hash0], chunks_infos2, test_utils.callbackSuccess);
+    hf_service.send_contacts_infos_to_contacts([user_hash0], chunks_infos2, test_utils.callbackSuccess);
     hf_service.disconnect();
 
     hf_service.login_user(user_profile0);

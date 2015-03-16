@@ -468,6 +468,57 @@ test_hf_populate.comment_posts = function()
     test_utils.assert_success(assert_count);
 }
 
+test_hf_populate.post_into_group = function()
+{
+    for (var i = 0; i < test_hf_populate.post_count; i++)
+    {
+        var user_id = test_hf_populate.rand_user_id();
+
+        hf_service.login_user(test_hf_populate.user_profile[user_id]);
+
+        var group_chunk = null;
+
+        hf_service.list_groups(function(groups_list){
+            var nb_groups = groups_list.length;
+
+            if(nb_groups > 0){
+                var group_id = test_hf_populate.rand() % nb_groups;
+                group_chunk = groups_list[group_id];
+
+                test_utils.assert(
+                    hf.is_hash(group_chunk['__meta']['group_hash']),
+                    'user ' + user_id + '\'s group hash is not a hash'
+                );
+            }
+        });
+
+        if(group_chunk != null){
+            var group_hash = group_chunk['__meta']['group_hash'];
+            var message = 'Hey guys, what\'s new about ' + group_chunk['group']['name'] + '? ' + i + ' thanx XD';
+
+            hf_service.get_thread_infos(group_hash,function(thread_info){
+                if(thread_info !== null){
+                    test_utils.assert('name' in thread_info,'thread info doesn\'t contain name field');
+                    test_utils.assert('key' in thread_info,'thread info doesn\'t contain name field');
+
+                    var thread_json = {
+                        'thread_chunk_name': thread_info['name'],
+                        'symetric_key': thread_info['key']
+                    };
+                    hf_service.create_post(message, [thread_json], function(json_message){
+                        test_utils.assert(
+                            json_message != null,
+                            'post ' + user_id + '\'s creation should success'
+                        );
+                    });
+                }
+            });
+        }
+
+        hf_service.disconnect();
+    }
+}
+
 test_hf_populate.pull_fresh_user_notifications = function()
 {
     for (var i = 0; i < test_hf_populate.profile_count; i++)
@@ -497,4 +548,5 @@ test_hf_populate.main = function()
     test_utils.run(test_hf_populate.post_into_circle, 'test_hf_populate.post_into_circle', true);
     test_utils.run(test_hf_populate.comment_posts,'test_hf_populate.comment_posts',true);
     test_utils.run(test_hf_populate.pull_fresh_user_notifications, 'test_hf_populate.pull_fresh_user_notifications', true);
+    test_utils.run(test_hf_populate.post_into_group, 'test_hf_populate.post_into_group', true);
 }

@@ -80,8 +80,7 @@ hf_service.add_contact_to_circle = function(contact_user_hash, circle_hash, call
     {
         assert(contact_infos['circles'].indexOf(circle_hash) >= 0);
 
-        if (callback)
-            callback(false);
+        callback(false);
         return;
     }
 
@@ -97,7 +96,7 @@ hf_service.add_contact_to_circle = function(contact_user_hash, circle_hash, call
             'symetric_key': hf_service.get_decryption_key(hf_service.user_private_chunk, circle_hash)
         };
 
-        hf_service.send_chunks_infos_to_contacts([contact_user_hash], [chunk_info], callback);
+        hf_service.send_contacts_infos_to_contacts([contact_user_hash], [chunk_info], callback);
     });
 }
 

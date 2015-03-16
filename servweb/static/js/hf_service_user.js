@@ -148,6 +148,8 @@ hf_service.create_user = function(user_profile, callback)
 
     hf_service.init_key_repository(private_chunk);
     hf_service.init_groups_repository(private_chunk);
+    //hf_service.init_discussions_repository(private_chunk);
+
     hf_service.init_notification_repository(private_chunk, transaction, function(success){
         if (!success)
         {
