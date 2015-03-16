@@ -23,6 +23,21 @@ hf_service.is_discussion_hash = function(discussion_hash)
 }
 
 /*
+ * @param <discussion_hash>: discussion's hash to test
+ * @param <user_hash>: user's hash of peer
+ *
+ * @returns true or false
+ */
+hf_service.is_discussion_peer = function(discussion_hash, user_hash)
+{
+    assert(hf_service.is_connected());
+    assert(hf_service.is_discussion_hash(discussion_hash));
+    assert(hf.is_hash(user_hash));
+
+    return (hf_service.user_private_chunk['discussions'][discussion_hash]['peers'].indexOf(user_hash) >=0);
+}
+
+/*
  * Creates a private discussion thread
  *
  * @param <discussion_name>: the name chosen for the discussion
@@ -97,8 +112,11 @@ hf_service.add_peers_to_discussion = function(discussion_hash, peers_hashes, cal
                 return;
             }
             iteration--;
-            discussion['peers'].push(peer_hash);
 
+            if(!hf_service.is_discussion_peer(discussion_hash,peer_hash))
+                discussion['peers'].push(peer_hash);
+
+            //once all the peers have been added
             if(iteration == 0){
                 hf_service.save_user_chunks(function(success){
                     if(success){
