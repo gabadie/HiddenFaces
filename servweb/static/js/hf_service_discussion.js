@@ -40,13 +40,14 @@ hf_service.is_discussion_peer = function(discussion_hash, user_hash)
 /*
  * Creates a private discussion thread
  *
- * @param <discussion_name>: the name chosen for the discussion
+ * @param <discussion_name>: the name chosen for the discussion.
  * @param <callback>: the function called once the response has arrived with parameter
             true or false
  */
 hf_service.create_discussion = function(discussion_name, callback)
 {
     assert(hf_service.is_connected());
+    assert(typeof discussion_name == 'string' || discussion_name == null);
     assert(hf.is_function(callback) || callback == undefined);
 
     var discussion_hash = null;
@@ -162,7 +163,7 @@ hf_service.add_peers_to_discussion = function(discussion_hash, peers_hashes, cal
                                         message += public_chunks_map[hash]['profile']['first_name'] + ' ';
                                     }
 
-                                    message += 'to the conversation';
+                                    message += 'to the discussion';
                                     hf_service.append_post_to_discussion(message, discussion_hash,callback);
                                 });
                             }else{
@@ -180,9 +181,9 @@ hf_service.add_peers_to_discussion = function(discussion_hash, peers_hashes, cal
 }
 
 /*
- * Lists discussion's peers
+ * Gets the map hash-public_chunk of discussion's peers
  * @param <callback>: the function called once the response has arrived
- *      @param <public_chunks>: the peers' public chunk
+ *      @param <public_chunks>: the peers' hash-public chunk
  *      function my_callback(public_chunks)
  */
 hf_service.list_peers = function(discussion_hash,callback)
@@ -192,7 +193,7 @@ hf_service.list_peers = function(discussion_hash,callback)
     assert(hf_service.is_discussion_hash(discussion_hash));
 
     var peers = hf_service.user_private_chunk['discussions'][discussion_hash]['peers'];
-    var content=[];
+    var content = {};
 
     var iteration = peers.length;
 
@@ -205,7 +206,7 @@ hf_service.list_peers = function(discussion_hash,callback)
         hf_service.get_user_public_chunk(peers[i], function(public_chunk) {
             if (public_chunk)
             {
-                content.push(public_chunk);
+                content[peers[i]] = public_chunk;
             }
 
             iteration--;
@@ -213,6 +214,60 @@ hf_service.list_peers = function(discussion_hash,callback)
                 callback(content);
             }
         });
+    }
+}
+
+/*
+ * Lists user's discussions hashes-names
+ * @param <callback>: the function called once the response has arrived
+ *      @param <discussions_list>: the discussions hashes
+ *      function my_callback(discussions_list)
+ */
+hf_service.list_discussions = function(callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf.is_function(callback));
+
+    var discussion_map = {};
+    var iteration = Object.keys(hf_service.user_private_chunk['discussions']).length;
+    if(iteration === 0){
+        callback(discussion_map);
+        return;
+    }
+
+    for(var discussion_hash in hf_service.user_private_chunk['discussions']){
+
+        var discussion_name = hf_service.user_private_chunk['discussions'][discussion_hash]['name'];
+        iteration--;
+        if(discussion_name == null){
+            hf_service.list_peers(discussion_hash,function(public_chunks_map){
+
+                var peers_hashes = Object.keys(public_chunks_map);
+
+                for(hash in public_chunks_map){
+                    if(hash != hf_service.user_hash()){
+                        discussion_name = public_chunks_map[hash]['profile']['first_name'] + ' ' + public_chunks_map[hash]['profile']['last_name'];
+                        break;
+                    }
+                }
+                if(peers_hashes.length > 2){
+                    discussion_name += ', (+' + (peers_hashes.length - 2) + ')';
+                }
+
+                discussion_map[discussion_hash] = discussion_name;
+
+                if(iteration === 0){
+                    callback(discussion_map);
+                }
+
+            });
+        }else{
+            discussion_map[discussion_hash] = discussion_name;
+
+            if(iteration === 0){
+                callback(discussion_map);
+            }
+        }
     }
 }
 
