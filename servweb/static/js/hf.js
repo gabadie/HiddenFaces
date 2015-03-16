@@ -195,6 +195,59 @@ hf.inputs_to_json = function(domElement)
 }
 
 /*
+ * Get an from's input from form DOM and the input name
+ *
+ * @param <domForm>: the form's DOM element
+ * @param <inputName>: the form's input name
+ */
+hf.form_input = function(domForm, inputName)
+{
+    assert(typeof inputName == 'string');
+
+    var inputs = domForm.getElementsByTagName('input');
+    var domImput = null;
+
+    for (var i = 0; i < inputs.length; i++)
+    {
+        if (inputs[i].name == inputName)
+        {
+            domImput = inputs[i];
+            break;
+        }
+    }
+
+    assert(domImput != null);
+
+    return domImput;
+}
+
+/*
+ * Get an uri from a input type=file
+ *
+ * @param <domElement>: the file input's DOM
+ * @param <callback>: the callback once done
+ *      @param <uri>: the file's uri
+ *      function my_callback(uri)
+ */
+hf.input_to_uri = function(domElement, callback)
+{
+    assert(hf.is_function(callback));
+
+    var file = domElement.files[0];
+
+    if (!file)
+    {
+        return callback(null);
+    }
+
+    var fileReader = new FileReader();
+    fileReader.onload = function(event) {
+        callback(event.target.result);
+    };
+    fileReader.readAsDataURL(file);
+}
+
+/*
  * Creates a cookie
  *
  * @param <name>: the cookie's name
