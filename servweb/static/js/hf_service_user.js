@@ -116,6 +116,12 @@ hf_service.create_user = function(user_profile, callback)
 
     assert(private_chunk_name != user_hash);
 
+    var public_markdown = (
+        'Hello World.\n' +
+        '*You can modify this using markdown syntax\n' +
+        '*See more on http://en.wikipedia.org/wiki/Markdown'
+    );
+
     // Generates the user's private chunk's content
     var private_chunk = {
         '__meta': {
@@ -128,6 +134,7 @@ hf_service.create_user = function(user_profile, callback)
             'first_name':   user_profile['first_name'],
             'last_name':    user_profile['last_name'],
             'email':        user_profile['email'],
+            'public_markdown': public_markdown
         },
         'system': {
             'chunks_owner':  chunks_owner
@@ -218,7 +225,8 @@ hf_service.export_user_public_chunk = function(user_private_chunk)
         'profile': {
             'first_name':   user_private_chunk['profile']['first_name'],
             'last_name':    user_private_chunk['profile']['last_name'],
-            'email':        ''
+            'email':        '',
+            'public_markdown': user_private_chunk['profile']['public_markdown']
         },
         'system': {
         },
