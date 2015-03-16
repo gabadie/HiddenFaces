@@ -1,6 +1,8 @@
 {{#hf_cell}}
     <div class="hf_padding">
-        <div class="hf_title">{{title}}</div>
+        {{#if title}}
+            <div class="hf_title">{{title}}</div>
+        {{/if}}
         {{#each contacts}}
 
             <div class="hf_list_item">
