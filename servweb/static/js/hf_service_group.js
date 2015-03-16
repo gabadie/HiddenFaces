@@ -49,6 +49,16 @@ hf_service.already_subscribed = function(group_hash)
     var private_chunk = hf_service.user_private_chunk;
     return (group_hash in private_chunk['groups']['subscribed_to']);
 }
+
+hf_service.waiting_accept_subcribe = function(group_hash)
+{
+    assert(hf.is_hash(group_hash));
+    assert(hf_service.is_connected());
+
+    var private_chunk = hf_service.user_private_chunk;
+    console.log(private_chunk);
+}
+
 /*
  * Creates a group
  *
@@ -419,7 +429,6 @@ hf_service.get_thread_infos = function(group_hash,callback)
     var thread_info = {};
 
     hf_service.get_group_public_chunk(group_hash, function(group_public_chunk){
-
         if(group_public_chunk){
 
             if(group_public_chunk['group']['public']){

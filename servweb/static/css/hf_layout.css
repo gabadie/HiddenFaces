@@ -99,7 +99,6 @@
 
 .hf_layout_cell .btn-default
 {
-    display: block;
     vertical-align: middle;
 }
 
@@ -223,4 +222,15 @@
 {
     display: block;
     font-size: 12px;
+}
+
+/* ------------------------------------------------------------ GROUP */
+.hf_layout_cell .hf_group_public_private
+{
+    background-color: #5F9EA0;
+}
+
+.hf_layout_cell .hf_group_private
+{
+    background-color: #F08080;
 }
