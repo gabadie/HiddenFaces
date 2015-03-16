@@ -21,7 +21,7 @@ test_hf_service.group_examples = function(id)
 
     return {
         'name':   group_names[id],
-        'description':    'Discusion group about ' + group_names[id]
+        'description':    'Discussion group about ' + group_names[id]
     }
 }
 //-------------------------------------------------------------------------------- TESTS GROUPS
@@ -214,7 +214,11 @@ test_hf_service.group_notifications = function(){
             hf_service.list_users(group_hash,function(users_chunks){
                 test_utils.assert(Object.keys(users_chunks).length == 2, 'The number of group\'s users is not 2 but '+Object.keys(users_chunks).length);
             });
+            hf_service.get_thread_infos(group_hash, function(thread_infos){
+                test_utils.assert(thread_infos['name'] !== undefined, 'Cannot access thread name');
+                test_utils.assert(thread_infos['key'] !== undefined, 'Cannot access thread key');
+            });
         }
     );
-    test_utils.assert_success(6);
+    test_utils.assert_success(8);
 }
