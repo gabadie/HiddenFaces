@@ -34,6 +34,7 @@ hf_service.create_discussion = function(discussion_name, callback)
     assert(hf_service.is_connected());
     assert(hf.is_function(callback) || callback == undefined);
 
+    var discussion_hash = null;
     hf_service.create_thread(hf_service.user_chunks_owner(), true, false, function(thread_info){
         assert(thread_info['status'] == 'ok');
 
@@ -42,8 +43,7 @@ hf_service.create_discussion = function(discussion_name, callback)
 
         var discussion_infos = {
             'name':                 discussion_name,
-            'peers':                [hf_service.user_hash()],
-            'thread_chunk_name':    thread_chunk_name
+            'peers':                [hf_service.user_hash()]
         };
 
         var user_private_chunk = hf_service.user_private_chunk;
@@ -53,7 +53,11 @@ hf_service.create_discussion = function(discussion_name, callback)
         hf_service.store_key(user_private_chunk, thread_chunk_name, thread_chunk_key);
 
         hf_service.save_user_chunks(callback);
+
+        discussion_hash = thread_chunk_name;
     });
+
+    return discussion_hash;
 }
 
 /*
@@ -70,7 +74,7 @@ hf_service.add_peer_to_discussion = function(discussion_hash, peer_hash, callbac
     assert(hf_service.is_discussion_hash(discussion_hash));
     assert(hf.is_function(callback) || callback == undefined);
 
-    if (user_hash == hf_service.user_hash())
+    if (peer_hash == hf_service.user_hash())
     {
         assert(hf.is_function(callback));
         callback(false);
@@ -92,8 +96,8 @@ hf_service.add_peer_to_discussion = function(discussion_hash, peer_hash, callbac
             if(success){
                 var discussion_info = {
                     'type':             '/thread',
-                    'name':             discussion['thread_chunk_name'],
-                    'symetric_key':     hf_service.get_decryption_key(hf_service.user_private_chunk, discussion['thread_chunk_name']),
+                    'name':             discussion_hash,
+                    'symetric_key':     hf_service.get_decryption_key(hf_service.user_private_chunk, discussion_hash),
                     'discussion_name':  discussion['name'],
                     'peers':            discussion['peers']
                 };
@@ -116,25 +120,19 @@ hf_service.define_notification('/notification/discussion_chunks_infos', {
         assert(hf_service.is_connected());
 
         var peer_hash = notification_json['__meta']['author_user_hash'];
-
-        if (!hf_service.is_contact(peer_hash))
-        {
-            return 'continue';
-        }
-
         var user_private_chunk = hf_service.user_private_chunk;
         var chunks_infos = notification_json['chunks'];
 
         for (var i = 0; i < chunks_infos.length; i++)
         {
             var chunk_infos = chunks_infos[i];
+            assert('name' in chunk_infos);
 
             if (chunk_infos['type'] == '/thread')
             {
-                user_private_chunk['discussions'][thread_chunk_name] = {
+                user_private_chunk['discussions'][chunk_infos['name']] = {
                     'name':                 chunk_infos['discussion_name'],
-                    'peers':                chunk_infos['peers'],
-                    'thread_chunk_name':    chunk_infos['thread_name']
+                    'peers':                chunk_infos['peers']
                 };
             }
             else
@@ -142,10 +140,6 @@ hf_service.define_notification('/notification/discussion_chunks_infos', {
                 assert(false, 'unexpected type');
             }
 
-            /*
-             * TODO: we should check that we can still open this document in
-             * the notification's validation (issue #27).
-             */
             hf_service.store_key(user_private_chunk, chunk_infos['name'], chunk_infos['symetric_key']);
         }
 
@@ -175,5 +169,6 @@ hf_service.define_notification('/notification/discussion_chunks_infos', {
  */
 hf_service.send_discussions_infos_to_peers = function(peers_hashes, discussions_infos, callback)
 {
+    assert(hf_service.is_connected());
     hf_service.send_chunks_infos_to_contacts(peers_hashes, discussions_infos, '/notification/discussion_chunks_infos', callback);
 }

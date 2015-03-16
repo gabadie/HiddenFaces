@@ -822,6 +822,7 @@ test_hf_service.main = function()
 
     //DISCUSSIONS
     test_utils.run(test_hf_service.create_discussion,'test_hf_service.create_discussion');
+    test_utils.run(test_hf_service.add_peers_to_discussion,'test_hf_service.add_peers_to_discussion');
 
     // REGISTRY TESTES
     test_utils.run(test_hf_service.is_valide_chunk,"test_hf_service.is_valide_chunk");

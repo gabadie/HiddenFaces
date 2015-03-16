@@ -44,7 +44,6 @@ hf_service.reset_cache = function()
  */
 hf_service.send_chunks_infos_to_contacts = function(contacts_hashes, chunks_infos, notification_type, callback)
 {
-    assert(hf_service.is_connected());
     assert(contacts_hashes.length > 0);
     assert(chunks_infos.length > 0);
     assert(notification_type in hf_service.notification_interface);
@@ -60,11 +59,6 @@ hf_service.send_chunks_infos_to_contacts = function(contacts_hashes, chunks_info
         // for now we should only send threads keys
         assert(chunks_infos[i]['type'] == '/thread');
         assert(hf_com.is_AES_key(chunks_infos[i]['symetric_key']));
-    }
-
-    for (var i = 0; i < contacts_hashes.length; i++)
-    {
-        assert(hf_service.is_contact(contacts_hashes[i]));
     }
 
     var notification_json = {
