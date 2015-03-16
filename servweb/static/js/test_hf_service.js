@@ -342,6 +342,29 @@ test_hf_service.save_user_chunks = function()
     //hf_service.disconnect();
 }
 
+test_hf_service.change_user_login_profile = function()
+{
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+
+    var user_hash0 = hf_service.create_user(user_profile0);
+
+    hf_service.login_user(user_profile0);
+    hf_service.change_user_login_profile(user_profile1, test_utils.callbackSuccess);
+    hf_service.disconnect();
+
+    hf_service.login_user(user_profile0, function(user_hash){
+        test_utils.assert(user_hash == null, 'login as profile 0 should fail');
+    });
+
+    hf_service.login_user(user_profile1, function(user_hash){
+        test_utils.assert(user_hash == user_hash0, 'login as profile 1 should success');
+    });
+    hf_service.disconnect();
+
+    test_utils.assert_success(3);
+}
+
 test_hf_service.list_contacts_threads_names = function()
 {
     //create all users
@@ -780,6 +803,7 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.get_users_public_chunks, 'test_hf_service.get_users_public_chunks');
     test_utils.run(test_hf_service.login_user, 'test_hf_service.login_user');
     test_utils.run(test_hf_service.save_user_chunks, 'test_hf_service.save_user_chunks');
+    test_utils.run(test_hf_service.change_user_login_profile, 'test_hf_service.change_user_login_profile');
 
     // NOTIFICATIONS TESTS
     test_utils.run(test_hf_service.push_user_notification, 'test_hf_service.push_user_notification');

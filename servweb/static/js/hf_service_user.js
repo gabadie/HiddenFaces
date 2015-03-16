@@ -49,36 +49,67 @@ hf_service.user_public_chunk = function()
 }
 
 /*
+ * Compute the user's password hash
+ */
+hf_service.user_password_hash = function(password)
+{
+    assert(typeof password == "string");
+    assert(password.length > 0);
+
+    return hf.hash(
+        password + '\nmaOujnsBnIW2NRGT1PrX3ednAL1L9dua1vZUIPyKVnf3DbVj1LWRZfRSOG3TbktjOmyHa8Ix8CyWydME'
+    );
+}
+
+/*
+ * Compute a user's login hash with a given salt.
+ */
+hf_service.user_login_hash = function(user_login_profile, salt)
+{
+    assert(user_login_profile);
+    assert(typeof user_login_profile['email'] == "string");
+
+    var password_hash = null;
+
+    if ('password_hash' in user_login_profile)
+    {
+        assert(hf.is_hash(user_login_profile['password_hash']));
+
+        password_hash = user_login_profile['password_hash'];
+    }
+    else
+    {
+        password_hash = hf_service.user_password_hash(user_login_profile['password']);
+    }
+
+    assert(hf.is_hash(password_hash));
+
+    return hf.hash(
+        user_login_profile['email'] + '\n' +
+        password_hash + '\n' +
+        salt
+    );
+}
+
+/*
  * Gets the private chunk's name and key from the user's email and
- * password.
+ * password or password hash.
  *
  * @param <user_login_profile>: a map at least containing keys "email" and "password"
  */
 hf_service.user_private_chunk_name = function(user_login_profile)
 {
-    assert(typeof user_login_profile['email'] == "string", "email is not string");
-    assert(typeof user_login_profile['password'] == "string", "password is not string");
-
-    var salt = 'CYh6ON6zP0DPMLkJuzrV';
-
-    return hf.hash(
-        salt + '\n' +
-        user_login_profile['email'] + '\n' +
-        user_login_profile['password']
+    return hf_service.user_login_hash(
+        user_login_profile,
+        '8MghUWRllGKa2IHrARCFFtaSvUHbq6TUe4l8PtntqBYB4hDtwuv7npXcZJpvpN4t8O96QSDivtWbW2vO'
     );
 }
 
 hf_service.user_private_chunk_key = function(user_login_profile)
 {
-    assert(typeof user_login_profile['email'] == "string", "email is not string");
-    assert(typeof user_login_profile['password'] == "string", "password is not string");
-
-    var salt = '5ObbCwaiMi3PwMTVs67m';
-
-    return 'AES\n' + hf.hash(
-        salt + '\n' +
-        user_login_profile['email'] + '\n' +
-        user_login_profile['password']
+    return 'AES\n' + hf_service.user_login_hash(
+        user_login_profile,
+        '0XJ2keczYRagi99V9V128YxJexMrs7KU6oGbX1H37WYPQIWfSW7QHtTBODdDjIbzr5Xj4LWBQROXZxjd'
     );
 }
 
@@ -97,8 +128,9 @@ hf_service.create_user = function(user_profile, callback)
     assert(typeof user_profile['last_name'] == "string");
     assert(typeof user_profile['email'] == "string");
     assert(typeof user_profile['password'] == "string");
-    assert(user_profile['password'].length > 0);
     assert(hf.is_function(callback) || callback == undefined);
+
+    var password_hash = hf_service.user_password_hash(user_profile['password']);
 
     var chunks_owner = hf.generate_hash(
         '2lbfAs5v1yguvf2ETM7S\n' +
@@ -137,7 +169,8 @@ hf_service.create_user = function(user_profile, callback)
             'public_markdown': public_markdown
         },
         'system': {
-            'chunks_owner':  chunks_owner
+            'chunks_owner':  chunks_owner,
+            'password_hash': password_hash
         },
         'certifications' : {
         },
@@ -476,13 +509,48 @@ hf_service.save_user_chunks = function(callback)
 
     var transaction = new hf_com.Transaction();
 
-    // saves user's private chunk
-    transaction.write_data_chunk(
-        hf_service.user_private_chunk['__meta']['chunk_name'],
-        user_chunks_owner,
-        hf_service.user_private_chunk['__meta']['key'],
-        [JSON.stringify(hf_service.user_private_chunk)]
-    );
+    var old_private_chunk_name = hf_service.user_private_chunk['__meta']['chunk_name'];
+
+    var user_login_profile = {
+        'email':            hf_service.user_private_chunk['profile']['email'],
+        'password_hash':    hf_service.user_private_chunk['system']['password_hash']
+    };
+
+    var new_private_chunk_name = hf_service.user_private_chunk_name(user_login_profile);
+    var new_private_chunk_key = hf_service.user_private_chunk_key(user_login_profile);
+
+    hf_service.user_private_chunk['__meta']['chunk_name'] = new_private_chunk_name;
+    hf_service.user_private_chunk['__meta']['key'] = new_private_chunk_key;
+
+    if (new_private_chunk_name == old_private_chunk_name)
+    {
+        // saves user's private chunk
+        transaction.write_data_chunk(
+            new_private_chunk_name,
+            user_chunks_owner,
+            new_private_chunk_key,
+            [JSON.stringify(hf_service.user_private_chunk)]
+        );
+    }
+    else
+    {
+        /*
+         * the private chunk name has changed, so we delete the old one and
+         * create the new one
+         */
+        transaction.delete_data_chunk(
+            old_private_chunk_name,
+            user_chunks_owner
+        );
+
+        transaction.create_data_chunk(
+            new_private_chunk_name,
+            user_chunks_owner,
+            new_private_chunk_key,
+            [JSON.stringify(hf_service.user_private_chunk)],
+            true
+        );
+    }
 
     // saves user's public chunk
     transaction.write_data_chunk(
@@ -501,6 +569,26 @@ hf_service.save_user_chunks = function(callback)
                 callback(false);
         }
     })
+}
+
+/*
+ * Changes user's login profile
+ * @param <callback>: the function called once done
+ *      @param <success>: true or false
+ *      function my_callback(success)
+ */
+hf_service.change_user_login_profile = function(new_user_login_profile, callback)
+{
+    assert(hf_service.is_connected());
+    assert(typeof new_user_login_profile['email'] == 'string');
+    assert(new_user_login_profile['email'].length > 0);
+
+    hf_service.user_private_chunk['profile']['email'] = new_user_login_profile['email'];
+    hf_service.user_private_chunk['system']['password_hash'] = hf_service.user_password_hash(
+        new_user_login_profile['password']
+    );
+
+    hf_service.save_user_chunks(callback);
 }
 
 /*
