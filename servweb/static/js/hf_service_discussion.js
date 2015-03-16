@@ -25,24 +25,16 @@ hf_service.is_discussion_hash = function(discussion_hash)
 /*
  * Creates a private discussion thread
  *
- * @param <owner_hash>: the hash of the owner of the thread
  * @param <discussion_name>: the name chosen for the discussion
  * @param <callback>: the function called once the response has arrived with parameter
-            {
-                'status':,
-                'thread_chunk_name':,
-                'symetric_key':
-            };
+            true or false
  */
-hf_service.create_discussion = function(owner_hash, discussion_name, callback)
+hf_service.create_discussion = function(discussion_name, callback)
 {
     assert(hf_service.is_connected());
-    assert(hf.is_hash(owner_hash));
     assert(hf.is_function(callback) || callback == undefined);
 
-    var discussion_hash = null;
-
-    hf_service.create_thread(owner_hash, true, false, function(thread_info){
+    hf_service.create_thread(hf_service.user_chunks_owner(), true, false, function(thread_info){
         assert(thread_info['status'] == 'ok');
 
         var thread_chunk_name = thread_info['thread_chunk_name'];
@@ -61,14 +53,7 @@ hf_service.create_discussion = function(owner_hash, discussion_name, callback)
         hf_service.store_key(user_private_chunk, thread_chunk_name, thread_chunk_key);
 
         hf_service.save_user_chunks(callback);
-
-        discussion_hash = thread_chunk_name;
     });
-
-    /*
-     * For testing efficiency, we return the discussion's hash
-     */
-    return discussion_hash;
 }
 
 /*
