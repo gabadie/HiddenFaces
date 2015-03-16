@@ -297,21 +297,8 @@ hf_service.comment_post = function(post_chunk_name,post_chunk_key,comment,callba
     );
 }
 
-/*
- * Gets list of the resolved posts of a thread
- * @param <thread_name> : thread's name
- * @param <callback>: the function called once the response has arrived with parameter the list
-            of the resolved posts
- *
- */
-hf_service.list_posts = function(thread_name,callback)
+hf_service.list_thread_posts = function(thread_name,thread_key,callback)
 {
-    assert(hf_service.is_connected());
-    assert(hf.is_function(callback) || callback == undefined);
-    assert(hf.is_hash(thread_name));
-
-    var thread_key = hf_service.get_decryption_key(hf_service.user_private_chunk, thread_name);
-
     var list_posts = null;
 
     hf_com.get_data_chunk(thread_name,thread_key,function(thread_json_message){
@@ -379,6 +366,24 @@ hf_service.list_posts = function(thread_name,callback)
     /*
      * For testing conveniency, we return the thread name
      */
+    return list_posts;
+}
+/*
+ * Gets list of the resolved posts of a thread
+ * @param <thread_name> : thread's name
+ * @param <callback>: the function called once the response has arrived with parameter the list
+            of the resolved posts
+ *
+ */
+hf_service.list_posts = function(thread_name,callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf.is_function(callback) || callback == undefined);
+    assert(hf.is_hash(thread_name));
+
+    var thread_key = hf_service.get_decryption_key(hf_service.user_private_chunk, thread_name);
+    var list_posts = hf_service.list_thread_posts(thread_name,thread_key,callback);
+
     return list_posts;
 }
 
