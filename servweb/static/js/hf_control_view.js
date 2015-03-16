@@ -219,6 +219,74 @@ hf_control.signed_in.route('/global/groups', function(){
     });
 });
 
+hf_control.signed_in.route('/group', function(){
+    var current_url_arrs = hf_control.current_view_url().split("/");
+    var group_hash = current_url_arrs[2];
+    var domElem = document.getElementById("hf_page_main_content");
+    if (current_url_arrs[3] == 'contacts')
+    {
+        hf_control.group_contacts(group_hash);
+    } else
+    {
+        hf_control.group_thread(group_hash);
+    }
+});
+
+hf_control.group_contacts = function(group_hash)
+{
+    hf_service.get_group_public_chunk(group_hash, function(group)
+    {
+        var header_html = hf_ui.template(
+            'header/group_header.html',
+            group
+        );
+        hf_service.list_users(group_hash, function(users) {
+
+
+            var template_context = {
+                'contacts': users,
+                'title' : 'Group\'s contacts'
+            };
+
+            var html = hf_ui.template(
+                'list_users.html',
+                template_context
+            );
+            document.getElementById('hf_page_main_content').innerHTML = header_html + html;
+        });
+    });
+}
+
+hf_control.group_thread = function(group_hash)
+{
+    var domElem = document.getElementById('hf_page_main_content');
+    hf_service.get_group_public_chunk(group_hash, function(public_chunk){
+        var header_html = hf_ui.template('header/group_header.html', public_chunk);
+        domElem.innerHTML = header_html;
+
+        if(hf_service.already_subscribed(group_hash)) {
+            hf_control.view_new_group_post(group_hash, function(new_post_html){
+
+                domElem.innerHTML += new_post_html;
+                var chunks_names = [];
+                try
+                {
+                    chunks_names.push(public_chunk['thread']['name']);
+                }
+                catch(err){
+
+                }
+                finally
+                {
+                    hf_control.view_threads(chunks_names, function(posts_html){
+                        domElem.innerHTML += posts_html;
+                    });
+                }
+            });
+        }
+    });
+}
+
 // ------------------------------------------------------ MESSAGES' VIEWS
 hf_control.signed_in.route('/send_message', function(){
     var template_context = {
@@ -244,25 +312,67 @@ hf_control.signed_in.route('/send_message/', function(){
     );
 });
 
+// ------------------------------------------------------ EDIT PROFILE
+hf_control.signed_in.route('/edit_profile', function(){
+
+    var user_private_chunk = hf_service.user_private_chunk;
+    var first_name = user_private_chunk['profile']['first_name'];
+    var last_name = user_private_chunk['profile']['last_name'];
+
+    var template_context = {
+        'first_name': first_name,
+        'last_name' : last_name
+    };
+
+    hf_ui.apply_template(
+        'form/edit_profile.html',
+        template_context,
+        document.getElementById('hf_page_main_content')
+    );
+});
+
+// ------------------------------------------------------ EDIT LOGIN INFOS
+hf_control.signed_in.route('/edit_login_infos', function(){
+
+    var user_private_chunk = hf_service.user_private_chunk;
+    var email = user_private_chunk['profile']['email'];
+
+    var template_context = {
+        'email': email
+    };
+
+    hf_ui.apply_template(
+        'form/edit_login_infos.html',
+        template_context,
+        document.getElementById('hf_page_main_content')
+    );
+});
+
+
 // ------------------------------------------------------ CONSULT A CONTACT OR CIRCLE
 
 hf_control.signed_in.route('/profile', function (){
+    var domElem = document.getElementById('hf_page_main_content');
     var private_chunk = hf_service.user_private_chunk;
-    var html = hf_ui.template(
-        'header/user_profile.html',
-        private_chunk
+    var html = (
+        hf_ui.template(
+            'header/user_profile.html',
+            private_chunk
+        ) +
+        hf_ui.markdown_cell(private_chunk['profile']['public_markdown'])
     );
 
-    document.getElementById('hf_page_main_content').innerHTML = html;
+    domElem.innerHTML = html;
 
     hf_service.list_circles_names(function(circles_names){
         hf_control.view_threads(circles_names, function(posts_html){
-            document.getElementById('hf_page_main_content').innerHTML += posts_html;
+            domElem.innerHTML += posts_html;
         });
     });
 });
 
 hf_control.signed_in.route('/profile/', function (){
+    var domElem = document.getElementById('hf_page_main_content');
     var viewUrl = hf_control.current_view_url();
     var user_hash = viewUrl.split("/")[2];
 
@@ -281,60 +391,59 @@ hf_control.signed_in.route('/profile/', function (){
             return hf_control.view('/');
         }
 
-        var html = hf_ui.template(
+        domElem.innerHTML = hf_ui.template(
             'header/user_profile.html',
             public_chunk
         );
 
-        document.getElementById('hf_page_main_content').innerHTML = html;
+        var markdown_html = hf_ui.markdown_cell(private_chunk['profile']['public_markdown']);
 
         if (!hf_service.is_contact(user_hash))
         {
             var message_html = hf_ui.template('send_message.html',
                 {'user_hash': user_hash}
             );
+
             var add_contact = hf_ui.message_cell(
-                '{{{hf_user_link this}}} doesn'+'t exist in your contacts list.' +
+                '{{{hf_user_link this}}} is not in in your contacts list.' +
                 '<div class="hf_action_bar" align="right">'+
                     '{{{hf_user_add_contact this}}}'+
                 '</div>', public_chunk);
 
-            document.getElementById('hf_page_main_content').innerHTML = (html + add_contact + message_html);
+            domElem.innerHTML += add_contact + markdown_html + message_html;
 
             return;
         }
-        else if(hf_service.is_contact(user_hash))
-        {
-           var message_html = hf_ui.template('send_message.html',
-                {'user_hash': user_hash}
-            );
-            var no_post = hf_ui.message_cell('{{{hf_user_link this}}} hasn'+'t shared any post yet.', public_chunk)
-            ;
 
-            document.getElementById('hf_page_main_content').innerHTML = (html + no_post + message_html);
-
-            return;
-        }
+        domElem.innerHTML += markdown_html;
 
         hf_service.list_contact_threads_names(user_hash, function(contacts_threads_names){
-            if(contacts_threads_names.length == 0)
+            if (contacts_threads_names.length == 0)
             {
                 var message_html = hf_ui.template('send_message.html',
                     {'user_hash': user_hash}
                 );
-                var add_contact = hf_ui.message_cell(
-                    '{{{hf_user_link this}}} doesn'+'t exist in your contacts list.' +
-                    '<div class="hf_action_bar" align="right">'+
-                        '{{{hf_user_add_contact this}}}'+
-                    '</div>', public_chunk);
+                var no_post = hf_ui.message_cell(
+                    '{{{hf_user_link this}}} hasn\'t shared any post yet.',
+                    public_chunk
+                );
 
-                document.getElementById('hf_page_main_content').innerHTML = (html + add_contact + message_html);
-
+                domElem.innerHTML += no_post + message_html;
             }
             else
             {
                 hf_control.view_threads(contacts_threads_names, function(posts_html){
-                    document.getElementById('hf_page_main_content').innerHTML += posts_html;
+                    if (posts_html == '')
+                    {
+                        domElem.innerHTML += hf_ui.message_cell(
+                            '{{{hf_user_link this}}} hasn\'t posted yet.',
+                            public_chunk
+                        );
+
+                        return;
+                    }
+
+                    domElem.innerHTML += posts_html;
                 });
             }
         });
@@ -380,6 +489,14 @@ hf_control.view_new_post = function(current_circle_hash, callback)
     });
 }
 
+hf_control.view_new_group_post = function(group_hash, callback)
+{
+    hf_service.get_group_public_chunk(group_hash, function(public_chunk){
+        var html = hf_ui.template('form/new_group_post.html', null);
+        callback(html);
+    });
+}
+
 /*
  * @param <callback>: the callback once the html is fully computed
  *      @param <posts_html>: html of threads' posts
@@ -391,7 +508,7 @@ hf_control.view_threads = function(threads_names, callback)
 
     if(threads_names.length == 0){
         var template_context = {
-            'chunks': posts_list
+            'chunks': posts_lists
         };
 
         var posts_html = hf_ui.template('list_chunks.html', template_context);

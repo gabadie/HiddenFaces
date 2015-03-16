@@ -1,0 +1,26 @@
+{{#hf_cell}}
+    <div class="hf_padding">
+        <div class="hf_title">Edit profile.</div>
+
+        <form onsubmit="hf_control.edit_profile(this); return false;">
+            <div class="content">
+                <label> First name</label>
+                <input type="text" class="form-control" name="first_name" value="{{first_name}}"/>
+            </div>
+            <div class="content">
+                <label> Last name </label>
+                <input type="text" class="form-control" name="last_name" value="{{last_name}}" />
+            </div>
+            <div class="content">
+                <span class="btn btn-default btn-file">
+                    Profile picture
+                    <input type="file" name="picture" accept="image/*" />
+                </span>
+            </div>
+            <div class="content" align="right">
+                <input type="submit" class="btn btn-primary" name="save" value="Save"/>
+            </div>
+        </form>
+
+    </div>
+{{/hf_cell}}

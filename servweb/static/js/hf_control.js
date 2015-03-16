@@ -43,8 +43,11 @@ hf_control.view = function(viewUrl)
  */
 hf_control.refresh_view = function()
 {
-    hf_control.view(hf_control.current_view_url());
-    hf_control.refresh_left_column();
+    var viewRouter = hf_control.mainViewRouter;
+
+    hf_control.mainViewRouter = null;
+
+    viewRouter.view(hf_control.current_view_url());
 }
 
 hf_control.ViewRouter = function(build_up_callback)

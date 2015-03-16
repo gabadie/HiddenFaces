@@ -31,7 +31,10 @@ test_utils.run = function(testFunction, testName, doNotDropDataBase)
 
     testFunction();
 
-    test_utils.domSandboxElem.innerHTML = '';
+    if (!test_utils.is_lonely_run())
+    {
+        test_utils.domSandboxElem.innerHTML = '';
+    }
 }
 
 /*
@@ -147,6 +150,14 @@ test_utils.should_run = function(testName)
     assert(href.length == 2);
 
     return testName.slice(0, href[1].length) == href[1];
+}
+
+/*
+ * Tests if lonely run
+ */
+test_utils.is_lonely_run = function(testName)
+{
+    return window.location.href.split('#').length > 1;
 }
 
 /*
