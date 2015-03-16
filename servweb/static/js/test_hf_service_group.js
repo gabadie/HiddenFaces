@@ -21,7 +21,7 @@ test_hf_service.group_examples = function(id)
 
     return {
         'name':   group_names[id],
-        'description':    'Discusion group about ' + group_names[id]
+        'description':    'Discussion group about ' + group_names[id]
     }
 }
 //-------------------------------------------------------------------------------- TESTS GROUPS
