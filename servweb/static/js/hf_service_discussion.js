@@ -276,6 +276,7 @@ hf_service.leave_discussion = function(discussion_hash,callback)
     assert(hf_service.is_connected());
     assert(hf.is_function(callback) || callback == undefined);
     assert(hf_service.is_discussion_hash(discussion_hash));
+    assert(hf_service.is_discussion_peer(discussion_hash, hf_service.user_hash()));
 
     var discussion = hf_service.user_private_chunk['discussions'][discussion_hash];
     var peers = discussion['peers'];
@@ -290,7 +291,7 @@ hf_service.leave_discussion = function(discussion_hash,callback)
     };
 
     hf_service.store_key(hf_service.user_private_chunk, discussion_hash, '');
-    delete discussion;
+    delete hf_service.user_private_chunk['discussions'][discussion_hash];
 
     hf_service.save_user_chunks(function(success){
         if(success){
@@ -365,5 +366,12 @@ hf_service.define_notification('/notification/discussion_chunks_infos', {
 hf_service.send_discussions_infos_to_peers = function(peers_hashes, discussions_infos, callback)
 {
     assert(hf_service.is_connected());
+
+    //do not send the notification to himself
+    var index = peers_hashes.indexOf(hf_service.user_hash());
+    if(index >=0){
+        peers_hashes.splice(index,1);
+    }
+
     hf_service.send_chunks_infos_to_contacts(peers_hashes, discussions_infos, '/notification/discussion_chunks_infos', callback);
 }

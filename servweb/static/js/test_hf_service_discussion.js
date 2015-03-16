@@ -245,6 +245,9 @@ test_hf_service.leave_discussion = function() {
     hf_service.leave_discussion(discussion_hash,function(success){
         test_utils.assert(success == true, 'Cannot leave group');
     });
+    hf_service.list_discussions(function(discussion_map){
+        test_utils.assert(Object.keys(discussion_map).length == 0, 'the nb of discussions is ' + Object.keys(discussion_map).length + ' instead of 0');
+    });
 
     hf_service.disconnect();
 
@@ -255,5 +258,5 @@ test_hf_service.leave_discussion = function() {
     hf_service.list_peers(discussion_hash,function(peers_list){
         test_utils.assert(Object.keys(peers_list).length == 3, "Nb of peers is " + Object.keys(peers_list).length + " instead of 3");
     });
-    test_utils.assert_success(8);
+    test_utils.assert_success(9);
 }
