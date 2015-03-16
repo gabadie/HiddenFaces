@@ -2,12 +2,15 @@
     <div class="hf_padding">
         <div class="hf_title">
             Profile: {{profile.first_name}} {{profile.last_name}}
+            {{#if_eq __meta.type "/user/private_chunk"}}
+                <button
+                    class="btn btn-primary"
+                    style="float:right;"
+                    onclick="return hf_control.view('/edit_profile');"
+                >
+                    Edit profile
+                </button>
+            {{/if_eq}}
         </div>
-    </div>
-{{/hf_cell}}
-
-{{#hf_cell}}
-    <div class="hf_padding">
-        {{{hf_markdown profile.public_markdown}}}
     </div>
 {{/hf_cell}}
