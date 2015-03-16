@@ -127,11 +127,12 @@ hf_control.circle_contacts = function(circle_hash)
             var params = {
 
                 'circle_hash': circle_hash,
-                'contacts': list_contacts
-            }
+                'contacts': list_contacts,
+                'title' : 'Your contacts.'
+            };
 
             var circle_header_html = hf_ui.template('header/circle_header.html', circle);
-            var list_contacts = hf_ui.template('list_contacts_circle.html',params);
+            var list_contacts = hf_ui.template('list_users.html',params);
 
             document.getElementById('hf_page_main_content').innerHTML = (
                 circle_header_html + list_contacts
