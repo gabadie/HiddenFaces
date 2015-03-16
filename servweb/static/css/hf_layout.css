@@ -34,9 +34,9 @@
     width: 100%;
 }
 
-.hf_layout_cell form table td
+.hf_layout_cell table
 {
-    padding: 5px;
+    width: 100%;
 }
 
 .hf_layout_cell form table input
@@ -68,6 +68,32 @@
 .hf_layout_cell .hf_user_link
 {
     font-weight: bolder;
+}
+
+.hf_layout_cell .hf_user_link span
+{
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    margin-right: 20px;
+    vertical-align: middle;
+    text-align: middle;
+    overflow: hidden;
+}
+
+.hf_layout_cell .hf_img
+{
+    border: 1px solid #EEEEEE;
+    box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.3);
+}
+
+.hf_layout_cell .hf_user_link span img
+{
+    display: block;
+    margin: auto;
+    min-width: 100%;
+    min-height: 100%;
+    width: 100%;
 }
 
 .hf_layout_cell .hf_date
@@ -109,7 +135,7 @@
     padding: 0px 10px 10px 10px;
 }
 
-/* ------------------------------------ FORM */
+/* --------------------------------------------------------------------- FORM */
 
 .hf_layout_cell .hf_form_autocomplete
 {
@@ -148,6 +174,25 @@
 .hf_layout_cell .hf_form_autocomplete .hf_circle:hover .hf_delete_icon
 {
     color: red;
+}
+
+
+.hf_layout_cell .hf_input_image
+{
+    background-color: #FFFFFF;
+    border: 1px solid #EEEEEE;
+    border-radius: 3px;
+    padding: 5px;
+}
+
+.hf_layout_cell .hf_input_image img
+{
+    width: 100%;
+}
+
+.hf_layout_cell .hf_input_image .btn
+{
+    margin-top: 5px;
 }
 
 

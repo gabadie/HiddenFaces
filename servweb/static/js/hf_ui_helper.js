@@ -15,6 +15,19 @@ Handlebars.registerHelper('hf_user_link', function(user_public_chunk, options){
     out += ' class="hf_user_link"'
     out += ' onclick="return hf_control.view(\'/profile/' + user_public_chunk['__meta']['user_hash'] + '\');"';
     out += '>';
+
+    if (options.hash['picture'])
+    {
+        out += '<span class="hf_img">';
+
+        if (user_public_chunk['profile']['picture'])
+        {
+            out += '<img src="' + user_public_chunk['profile']['picture'] + '" />';
+        }
+
+        out += '</span>';
+    }
+
     out += user_public_chunk['profile']['first_name'];
     out += ' ';
     out += user_public_chunk['profile']['last_name'];

@@ -2,7 +2,11 @@
     <div class="hf_padding">
         <div class="hf_title">
             {{#if profile.picture}}
-                <img src="{{profile.picture}}" width="120px" />
+                <img
+                    class="hf_img"
+                    style="max-width: 120px; max-height: 120px; margin-right: 40px;"
+                    src="{{profile.picture}}"
+                />
             {{/if}}
             Profile: {{profile.first_name}} {{profile.last_name}}
             {{#if_eq __meta.type "/user/private_chunk"}}

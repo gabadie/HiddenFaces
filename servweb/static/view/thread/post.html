@@ -2,7 +2,7 @@
     <div class="hf_post">
         {{{hf_date this.date}}}
         <div class="hf_author">
-            {{{hf_user_link author}}}
+            {{{hf_user_link author picture=true}}}
         </div>
         <div class="hf_text">
             {{content}}
@@ -11,7 +11,7 @@
     <div class="hf_comments">
         {{#each comments}}
             <div class="hf_comment">
-                {{{hf_user_link author}}}
+                {{{hf_user_link author picture=true}}}
                 {{content}}
                 {{{hf_date this.date}}}
             </div>
