@@ -149,9 +149,9 @@ hf_service.create_user = function(user_profile, callback)
     assert(private_chunk_name != user_hash);
 
     var public_markdown = (
-        'Hello World.\n' +
-        '*You can modify this using markdown syntax\n' +
-        '*See more on http://en.wikipedia.org/wiki/Markdown'
+        '# About me.\n' +
+        '* You can modify this to write what ever you want using markdown syntax\n' +
+        '* See more on [the wikipedia\'s markdown page](http://en.wikipedia.org/wiki/Markdown)\n'
     );
 
     // Generates the user's private chunk's content
