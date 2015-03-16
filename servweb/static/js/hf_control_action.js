@@ -151,6 +151,23 @@ hf_control.signed_out.sign_up = function(domElem)
     hf_control.signed_out.view('/');
 }
 
+// --------------------------------------------------------------------- EDIT PROFILE
+
+hf_control.edit_profile = function(domElem)
+{
+    var user_profile = hf.inputs_to_json(domElem);
+
+    var user_private_chunk = hf_service.user_private_chunk;
+
+    user_private_chunk['profile']['first_name'] = user_profile['first_name'];
+    user_private_chunk['profile']['last_name'] = user_profile['last_name'];
+
+    hf_service.save_user_chunks(function(success){
+        assert(success);
+        hf_control.refresh_view();
+    });
+}
+
 // --------------------------------------------------------------------- Circles
 
 hf_control.create_circle = function(domElem)
