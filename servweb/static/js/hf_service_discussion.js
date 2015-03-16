@@ -61,54 +61,65 @@ hf_service.create_discussion = function(discussion_name, callback)
 }
 
 /*
- * Adds a peer to a discussion
+ * Adds many peers to a discussion
  * @param <discussion_hash>: the hash of the specified discussion
- * @param <peer_hash>: peer's user hash
+ * @param <peers_hashes>: peers' user hash
  * @param <callback>: the function called once the response has arrived
  *      @param <success>: true or false
  *      function my_callback(success)
  */
-hf_service.add_peer_to_discussion = function(discussion_hash, peer_hash, callback)
+hf_service.add_peers_to_discussion = function(discussion_hash, peers_hashes, callback)
 {
     assert(hf_service.is_connected());
     assert(hf_service.is_discussion_hash(discussion_hash));
+    assert(peers_hashes.length > 0);
     assert(hf.is_function(callback) || callback == undefined);
 
-    if (peer_hash == hf_service.user_hash())
-    {
-        assert(hf.is_function(callback));
-        callback(false);
-        return ;
-    }
+    var discussion = hf_service.user_private_chunk['discussions'][discussion_hash];
+    var iteration = peers_hashes.length;
 
-    hf_service.is_user_hash(peer_hash, function(is_user_hash)
-    {
-        if (!is_user_hash)
+    for(var i = 0; i < peers_hashes.length; i++){
+
+        var peer_hash = peers_hashes[i];
+
+        if (peer_hash == hf_service.user_hash())
         {
+            assert(hf.is_function(callback));
             callback(false);
-            return;
+            return ;
         }
-        var discussion = hf_service.user_private_chunk['discussions'][discussion_hash];
-        discussion['peers'].push(peer_hash);
 
-        hf_service.save_user_chunks(function(success)
-        {
-            if(success){
-
-                var discussion_info = {
-                    'type':             '/thread',
-                    'name':             discussion_hash,
-                    'symetric_key':     hf_service.get_decryption_key(hf_service.user_private_chunk, discussion_hash),
-                    'discussion_name':  discussion['name'],
-                    'peers':            discussion['peers']
-                };
-
-                hf_service.send_discussions_infos_to_peers(discussion['peers'],[discussion_info],callback);
-            }else{
+        hf_service.is_user_hash(peer_hash, function(is_user_hash){
+            if (!is_user_hash)
+            {
+                assert(hf.is_function(callback));
                 callback(false);
+                return;
+            }
+            iteration--;
+            discussion['peers'].push(peer_hash);
+
+            if(iteration == 0){
+                hf_service.save_user_chunks(function(success){
+                    if(success){
+
+                        var discussion_info = {
+                            'type':             '/thread',
+                            'name':             discussion_hash,
+                            'symetric_key':     hf_service.get_decryption_key(hf_service.user_private_chunk, discussion_hash),
+                            'discussion_name':  discussion['name'],
+                            'peers':            discussion['peers']
+                        };
+
+                        hf_service.send_discussions_infos_to_peers(discussion['peers'],[discussion_info],callback);
+                    }else{
+                        callback(false);
+                    }
+                });
             }
         });
-    });
+    }
+
 }
 
 /*
@@ -156,6 +167,7 @@ hf_service.list_peers = function(discussion_hash,callback)
 hf_service.define_notification('/notification/discussion_chunks_infos', {
     automation: function(notification_json)
     {
+        console.info('pulling discussion notification');
         assert(hf_service.is_connected());
 
         var peer_hash = notification_json['__meta']['author_user_hash'];
