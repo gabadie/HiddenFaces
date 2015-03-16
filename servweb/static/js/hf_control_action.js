@@ -157,6 +157,18 @@ hf_control.edit_profile = function(domElem)
 {
     var user_profile = hf.inputs_to_json(domElem);
 
+     if (user_profile['first_name'] == '')
+    {
+        alert('first name required');
+        return;
+    }
+
+    if (user_profile['last_name'] == '')
+    {
+        alert('last name required');
+        return;
+    }
+
     var user_private_chunk = hf_service.user_private_chunk;
 
     user_private_chunk['profile']['first_name'] = user_profile['first_name'];
@@ -167,6 +179,37 @@ hf_control.edit_profile = function(domElem)
         hf_control.refresh_view();
     });
 }
+
+// --------------------------------------------------------------------- EDIT LOGIN
+
+hf_control.edit_login_infos = function(domElem)
+{
+    var user_profile = hf.inputs_to_json(domElem);
+
+     if (user_profile['email'] == '')
+    {
+        alert('email required');
+        return;
+    }
+
+    if (user_profile['password'] == '')
+    {
+        alert('password required');
+        return;
+    }
+
+     if (user_profile['password'] != user_profile['confirm_password'])
+    {
+        alert('passwords are not matching');
+        return;
+    }
+
+    hf_service.change_user_login_profile(user_profile,function(success){
+        assert(success);
+        hf_control.refresh_view();
+    });
+}
+
 
 // --------------------------------------------------------------------- Circles
 
@@ -228,7 +271,7 @@ hf_control.create_post = function(postDom)
 
     if (circles_hash.length == 0)
     {
-        alert('you must select at least a circle');
+        alert('you must select a group');
         return;
     }
 

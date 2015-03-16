@@ -331,6 +331,24 @@ hf_control.signed_in.route('/edit_profile', function(){
     );
 });
 
+// ------------------------------------------------------ EDIT LOGIN INFOS
+hf_control.signed_in.route('/edit_login_infos', function(){
+
+    var user_private_chunk = hf_service.user_private_chunk;
+    var email = user_private_chunk['profile']['email'];
+
+    var template_context = {
+        'email': email
+    };
+
+    hf_ui.apply_template(
+        'form/edit_login_infos.html',
+        template_context,
+        document.getElementById('hf_page_main_content')
+    );
+});
+
+
 // ------------------------------------------------------ CONSULT A CONTACT OR CIRCLE
 
 hf_control.signed_in.route('/profile', function (){
