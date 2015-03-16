@@ -271,6 +271,36 @@ hf_service.list_discussions = function(callback)
     }
 }
 
+hf_service.leave_discussion = function(discussion_hash,callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf.is_function(callback) || callback == undefined);
+    assert(hf_service.is_discussion_hash(discussion_hash));
+
+    var peers = hf_service.user_private_chunk['discussions'][discussion_hash]['peers'];
+    peers.splice(peers.indexOf(hf_service.user_hash()),1);
+
+    var discussion_info = {
+        'type':             '/thread',
+        'name':             discussion_hash,
+        'symetric_key':     hf_service.get_decryption_key(hf_service.user_private_chunk, discussion_hash),
+        'discussion_name':  discussion['name'],
+        'peers':            peers
+    };
+
+    hf_service.store_key(hf_service.user_private_chunk, discussion_hash, '');
+    delete hf_service.user_private_chunk['discussions'][discussion_hash];
+
+    hf_service.save_user_chunks(function(success){
+        if(success){
+            hf_service.send_discussions_infos_to_peers(peers,[discussion_info], callback);
+        }else{
+            callback(false);
+        }
+    });
+
+}
+
 
 //------------------------------------------------------------------------- DISCUSSION'S NOTIFICATIONS
 /*
@@ -292,6 +322,10 @@ hf_service.define_notification('/notification/discussion_chunks_infos', {
 
             if (chunk_infos['type'] == '/thread')
             {
+                if(user_private_chunk['discussions'][chunk_infos['name']] == undefined){
+                    hf_service.store_key(user_private_chunk, chunk_infos['name'], chunk_infos['symetric_key']);
+                }
+
                 user_private_chunk['discussions'][chunk_infos['name']] = {
                     'name':                 chunk_infos['discussion_name'],
                     'peers':                chunk_infos['peers']
@@ -301,8 +335,6 @@ hf_service.define_notification('/notification/discussion_chunks_infos', {
             {
                 assert(false, 'unexpected type');
             }
-
-            hf_service.store_key(user_private_chunk, chunk_infos['name'], chunk_infos['symetric_key']);
         }
 
         return 'discard';
