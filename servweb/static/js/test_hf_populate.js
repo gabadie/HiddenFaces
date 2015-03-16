@@ -26,6 +26,13 @@ test_hf_populate.rand_user_id = function()
     return test_hf_populate.rand() % test_hf_populate.profile_count;
 }
 
+test_hf_populate.profile_picture_links = [
+    'http://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Rabbit_in_montana.jpg/270px-Rabbit_in_montana.jpg',
+    'http://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Kitten_in_Rizal_Park%2C_Manila.jpg/160px-Kitten_in_Rizal_Park%2C_Manila.jpg',
+    'http://upload.wikimedia.org/wikipedia/commons/thumb/9/94/My_dog.jpg/320px-My_dog.jpg',
+    'http://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Goldfish3.jpg/224px-Goldfish3.jpg'
+]
+
 test_hf_populate.create_users = function()
 {
     test_hf_populate.user_profile = [];
@@ -52,11 +59,16 @@ test_hf_populate.create_users = function()
 
     for (var i = 0; i < test_hf_populate.profile_count; i++)
     {
+        var picture_id = test_hf_populate.rand() % test_hf_populate.profile_picture_links.length;
+
         test_hf_populate.user_hash[i] = hf_service.create_user(test_hf_populate.user_profile[i], function(user_hash){
             test_utils.assert(user_hash != null, 'failed to create profile ' + i);
         });
 
         hf_service.login_user(test_hf_populate.user_profile[i]);
+
+        hf_service.user_private_chunk['profile']['picture'] = test_hf_populate.profile_picture_links[picture_id];
+
         hf_service.create_circle('Family', function(success){
             test_utils.assert(success == true, 'failed to create profile ' + i + '\'s family circle');
         });
@@ -69,6 +81,7 @@ test_hf_populate.create_users = function()
                 'failed to list prolfile ' + i + '\' circles'
             );
         });
+
         hf_service.disconnect();
 
         test_hf_populate.user_id[test_hf_populate.user_hash[i]] = i;
