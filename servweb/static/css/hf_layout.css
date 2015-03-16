@@ -34,9 +34,9 @@
     width: 100%;
 }
 
-.hf_layout_cell form table td
+.hf_layout_cell table
 {
-    padding: 5px;
+    width: 100%;
 }
 
 .hf_layout_cell form table input
@@ -109,7 +109,7 @@
     padding: 0px 10px 10px 10px;
 }
 
-/* ------------------------------------ FORM */
+/* --------------------------------------------------------------------- FORM */
 
 .hf_layout_cell .hf_form_autocomplete
 {
@@ -148,6 +148,25 @@
 .hf_layout_cell .hf_form_autocomplete .hf_circle:hover .hf_delete_icon
 {
     color: red;
+}
+
+
+.hf_layout_cell .hf_input_image
+{
+    background-color: #FFFFFF;
+    border: 1px solid #EEEEEE;
+    border-radius: 3px;
+    padding: 5px;
+}
+
+.hf_layout_cell .hf_input_image img
+{
+    width: 100%;
+}
+
+.hf_layout_cell .hf_input_image .btn
+{
+    margin-top: 5px;
 }
 
 

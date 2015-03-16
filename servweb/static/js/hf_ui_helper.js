@@ -110,6 +110,19 @@ Handlebars.registerHelper('hf_group_link', function(group){
     return out;
 });
 
+Handlebars.registerHelper('hf_input_image', function(name, value, opts) {
+    var out = '';
+    out += '<div class="hf_input_image">';
+    out += '<img src="' + value + '" />';
+    out += '<span class="btn btn-default btn-file">';
+    out += 'Change picture.';
+    out += '<input type="file" name="' + name + '" accept="image/*" />';
+    out += '</span>';
+    out += '</div>';
+
+    return out;
+});
+
 Handlebars.registerHelper('hf_group_header', function(group) {
     var out = '<div class="hf_title">Group: '+ group['group']['name'];
     var group_hash = group['__meta']['group_hash'];

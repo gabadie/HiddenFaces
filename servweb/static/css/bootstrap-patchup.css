@@ -21,3 +21,8 @@
     cursor: inherit;
     display: block;
 }
+
+.btn
+{
+    min-width: 100px;
+}
