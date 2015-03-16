@@ -271,6 +271,38 @@ hf_service.list_discussions = function(callback)
     }
 }
 
+hf_service.leave_discussion = function(discussion_hash,callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf.is_function(callback) || callback == undefined);
+    assert(hf_service.is_discussion_hash(discussion_hash));
+    assert(hf_service.is_discussion_peer(discussion_hash, hf_service.user_hash()));
+
+    var discussion = hf_service.user_private_chunk['discussions'][discussion_hash];
+    var peers = discussion['peers'];
+    peers.splice(peers.indexOf(hf_service.user_hash()),1);
+
+    var discussion_info = {
+        'type':             '/thread',
+        'name':             discussion_hash,
+        'symetric_key':     hf_service.get_decryption_key(hf_service.user_private_chunk, discussion_hash),
+        'discussion_name':  discussion['name'],
+        'peers':            peers
+    };
+
+    hf_service.store_key(hf_service.user_private_chunk, discussion_hash, '');
+    delete hf_service.user_private_chunk['discussions'][discussion_hash];
+
+    hf_service.save_user_chunks(function(success){
+        if(success){
+            hf_service.send_discussions_infos_to_peers(peers,[discussion_info], callback);
+        }else{
+            callback(false);
+        }
+    });
+
+}
+
 
 //------------------------------------------------------------------------- DISCUSSION'S NOTIFICATIONS
 /*
@@ -292,6 +324,10 @@ hf_service.define_notification('/notification/discussion_chunks_infos', {
 
             if (chunk_infos['type'] == '/thread')
             {
+                if(user_private_chunk['discussions'][chunk_infos['name']] == undefined){
+                    hf_service.store_key(user_private_chunk, chunk_infos['name'], chunk_infos['symetric_key']);
+                }
+
                 user_private_chunk['discussions'][chunk_infos['name']] = {
                     'name':                 chunk_infos['discussion_name'],
                     'peers':                chunk_infos['peers']
@@ -301,8 +337,6 @@ hf_service.define_notification('/notification/discussion_chunks_infos', {
             {
                 assert(false, 'unexpected type');
             }
-
-            hf_service.store_key(user_private_chunk, chunk_infos['name'], chunk_infos['symetric_key']);
         }
 
         return 'discard';
@@ -332,5 +366,12 @@ hf_service.define_notification('/notification/discussion_chunks_infos', {
 hf_service.send_discussions_infos_to_peers = function(peers_hashes, discussions_infos, callback)
 {
     assert(hf_service.is_connected());
+
+    //do not send the notification to himself
+    var index = peers_hashes.indexOf(hf_service.user_hash());
+    if(index >=0){
+        peers_hashes.splice(index,1);
+    }
+
     hf_service.send_chunks_infos_to_contacts(peers_hashes, discussions_infos, '/notification/discussion_chunks_infos', callback);
 }

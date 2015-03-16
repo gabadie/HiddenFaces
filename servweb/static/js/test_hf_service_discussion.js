@@ -103,7 +103,7 @@ test_hf_service.add_peers_to_discussion = function() {
         test_utils.assert(success == true, 'Cannot execute automatic notifications');
     });
     hf_service.list_peers(discussion_hash,function(peers_list){
-        test_utils.assert(Object.keys(peers_list).length == 4, "Nb of peers is " + peers_list.length + " instead of 4");
+        test_utils.assert(Object.keys(peers_list).length == 4, "Nb of peers is " + Object.keys(peers_list).length + " instead of 4");
     });
     test_utils.assert_success(10);
 }
@@ -206,4 +206,57 @@ test_hf_service.list_discussions = function() {
     hf_service.disconnect();
 
     test_utils.assert_success(13);
+}
+
+test_hf_service.leave_discussion = function() {
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+    var user_profile2 = test_hf_service.john_smith_profile(2);
+    var user_profile3 = test_hf_service.john_smith_profile(3);
+
+    var user_hash0 = hf_service.create_user(user_profile0);
+    var user_hash1 = hf_service.create_user(user_profile1);
+    var user_hash2 = hf_service.create_user(user_profile2);
+    var user_hash3 = hf_service.create_user(user_profile3);
+
+    hf_service.login_user(user_profile0);
+
+    //discussion creation
+    var discussion_hash = hf_service.create_discussion(test_hf_service.discussion_names[0], function(success){
+        test_utils.assert(success == true);
+    });
+    test_utils.assert(hf.is_hash(discussion_hash), 'Invalid discussion hash');
+
+    //adding peers
+    hf_service.add_peers_to_discussion(discussion_hash, [user_hash1,user_hash2,user_hash3], function(success){
+        test_utils.assert(success == true,'Cannot add peers to discussion');
+    });
+    //verify peer list
+    hf_service.list_peers(discussion_hash,function(peers_list){
+        test_utils.assert(Object.keys(peers_list).length == 4, "Nb of peers is " + Object.keys(peers_list).length + " instead of 4");
+    });
+
+    hf_service.disconnect();
+
+    hf_service.login_user(user_profile1);
+    hf_service.pull_fresh_user_notifications(function(success){
+        test_utils.assert(success == true, 'Cannot execute automatic notifications');
+    });
+    hf_service.leave_discussion(discussion_hash,function(success){
+        test_utils.assert(success == true, 'Cannot leave group');
+    });
+    hf_service.list_discussions(function(discussion_map){
+        test_utils.assert(Object.keys(discussion_map).length == 0, 'the nb of discussions is ' + Object.keys(discussion_map).length + ' instead of 0');
+    });
+
+    hf_service.disconnect();
+
+    hf_service.login_user(user_profile2);
+    hf_service.pull_fresh_user_notifications(function(success){
+        test_utils.assert(success == true, 'Cannot execute automatic notifications');
+    });
+    hf_service.list_peers(discussion_hash,function(peers_list){
+        test_utils.assert(Object.keys(peers_list).length == 3, "Nb of peers is " + Object.keys(peers_list).length + " instead of 3");
+    });
+    test_utils.assert_success(9);
 }

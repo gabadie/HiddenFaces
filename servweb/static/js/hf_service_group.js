@@ -656,6 +656,33 @@ hf_service.define_notification('/notification/subscription', {
 });
 
 /*
+ * Group notification resolver adding the ['author'] key fetched frorm the
+ * ['__meta']['author_user_hash']
+ */
+hf_service.resolve_gorup_notification_author = function(notification_json, callback)
+{
+    assert(hf.is_function(callback));
+
+    hf_service.get_group_public_chunk(
+        notification_json['__meta']['author_user_hash'],
+        function(group_public_chunk)
+        {
+            if (group_public_chunk == null)
+            {
+                callback(null);
+                return;
+            }
+
+            var notification = hf.clone(notification_json);
+
+            notification['author'] = group_public_chunk;
+
+            callback(notification);
+        }
+    );
+}
+
+/*
  * Sends a request of subscription for a group
  *
  * @params <group_hash>: group's hash
@@ -739,7 +766,7 @@ hf_service.define_notification('/notification/group_shared_chunk_infos', {
 
         return 'discard';
     },
-    resolve: hf_service.resolve_notification_author
+    resolve: hf_service.resolve_gorup_notification_author
 });
 
 /*
