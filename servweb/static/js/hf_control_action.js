@@ -162,9 +162,16 @@ hf_control.edit_profile = function(domElem)
     user_private_chunk['profile']['first_name'] = user_profile['first_name'];
     user_private_chunk['profile']['last_name'] = user_profile['last_name'];
 
-    hf_service.save_user_chunks(function(success){
-        assert(success);
-        hf_control.refresh_view();
+    hf.input_to_uri(hf.form_input(domElem, 'picture'), function(uri){
+        if (uri)
+        {
+            user_private_chunk['profile']['picture'] = uri;
+        }
+
+        hf_service.save_user_chunks(function(success){
+            assert(success);
+            hf_control.refresh_view();
+        });
     });
 }
 

@@ -1,6 +1,9 @@
 {{#hf_cell}}
     <div class="hf_padding">
         <div class="hf_title">
+            {{#if profile.picture}}
+                <img src="{{profile.picture}}" width="120px" />
+            {{/if}}
             Profile: {{profile.first_name}} {{profile.last_name}}
             {{#if_eq __meta.type "/user/private_chunk"}}
                 <button
