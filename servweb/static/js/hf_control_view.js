@@ -244,6 +244,25 @@ hf_control.signed_in.route('/send_message/', function(){
     );
 });
 
+// ------------------------------------------------------ EDIT PROFILE
+hf_control.signed_in.route('/edit_profile', function(){
+
+    var user_private_chunk = hf_service.user_private_chunk;
+    var first_name = user_private_chunk['profile']['first_name'];
+    var last_name = user_private_chunk['profile']['last_name'];
+
+    var template_context = {
+        'first_name': first_name,
+        'last_name' : last_name
+    };
+
+    hf_ui.apply_template(
+        'form/edit_profile.html',
+        template_context,
+        document.getElementById('hf_page_main_content')
+    );
+});
+
 // ------------------------------------------------------ CONSULT A CONTACT OR CIRCLE
 
 hf_control.signed_in.route('/profile', function (){
