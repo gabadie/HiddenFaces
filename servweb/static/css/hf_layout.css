@@ -79,6 +79,10 @@
     vertical-align: middle;
     text-align: middle;
     overflow: hidden;
+}
+
+.hf_layout_cell .hf_img
+{
     border: 1px solid #EEEEEE;
     box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.3);
 }

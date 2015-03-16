@@ -18,7 +18,7 @@ Handlebars.registerHelper('hf_user_link', function(user_public_chunk, options){
 
     if (options.hash['picture'])
     {
-        out += '<span>';
+        out += '<span class="hf_img">';
 
         if (user_public_chunk['profile']['picture'])
         {
