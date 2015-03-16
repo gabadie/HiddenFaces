@@ -166,7 +166,8 @@ hf_service.create_user = function(user_profile, callback)
             'first_name':   user_profile['first_name'],
             'last_name':    user_profile['last_name'],
             'email':        user_profile['email'],
-            'public_markdown': public_markdown
+            'public_markdown': public_markdown,
+            'picture':      null
         },
         'system': {
             'chunks_owner':  chunks_owner,
@@ -259,7 +260,8 @@ hf_service.export_user_public_chunk = function(user_private_chunk)
             'first_name':   user_private_chunk['profile']['first_name'],
             'last_name':    user_private_chunk['profile']['last_name'],
             'email':        '',
-            'public_markdown': user_private_chunk['profile']['public_markdown']
+            'public_markdown': user_private_chunk['profile']['public_markdown'],
+            'picture':      user_private_chunk['profile']['picture']
         },
         'system': {
         },
