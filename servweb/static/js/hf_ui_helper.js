@@ -88,7 +88,8 @@ Handlebars.registerHelper('if_eq', function(a, b, opts) {
         return opts.inverse(this);
 });
 
-Handlebars.registerHelper('hf_group_link', function(group){
+Handlebars.registerHelper('hf_group_link', function(group)
+{
     var group_hash = group['__meta']['group_hash'];
     var group_visibility = group['group']['public'];
 
@@ -125,12 +126,16 @@ Handlebars.registerHelper('hf_group_link', function(group){
     out += group['group']['name'];
     out += '</a>';
 
-    if(!hf_service.already_subscribed(group_hash))
+    var waiting_sub = hf_service.waiting_accept_subcribe(group);
+
+    if(waiting_sub == -1)
     {
         out+= hf_ui.send_message_dialog(group);
     }
-
-    hf_service.waiting_accept_subcribe(group_hash);
+    else if (waiting_sub == 0)
+    {
+        out += '<p class="btn-sm" style="float:right;color:white;">Waiting for reponse</p>';
+    }
 
     out += '</div><div class="hf_description">';
     out += group['group']['description'];
@@ -138,16 +143,20 @@ Handlebars.registerHelper('hf_group_link', function(group){
     return out;
 });
 
-Handlebars.registerHelper('hf_group_header', function(group) {
+Handlebars.registerHelper('hf_group_header', function(group)
+{
     var out = '<div class="hf_title">Group: '+ group['group']['name'];
     var group_hash = group['__meta']['group_hash'];
 
+    var waiting_sub = hf_service.waiting_accept_subcribe(group);
 
-
-    if(!hf_service.already_subscribed(group_hash))
+    if(waiting_sub == -1)
         out+= hf_ui.send_message_dialog(group);
 
-    if (hf_service.already_subscribed(group_hash) || group['group']['public'])
+    if (waiting_sub == 0)
+        out += '<p class="btn btn-sm" style="float:right;">Waiting for reponse</p>';
+
+    if (waiting_sub == 1 || group['group']['public'])
     {
         out += '<button class = "btn btn-default btn-sm" style="float:right; margin-right:5px;"';
         out += 'onclick="return hf_control.view(\'/group/'+group_hash+'/contacts'+ '\')";>';
@@ -157,6 +166,7 @@ Handlebars.registerHelper('hf_group_header', function(group) {
     out +=  '</div><div style="font-size:12px;">'
             + group['group']['description']
             +' </div>';
+
     return out;
 });
 
@@ -165,10 +175,11 @@ hf_ui.send_message_dialog = function(group)
     var group_hash = group['__meta']['group_hash'];
     var out = '';
     out += '<button style="float:right;"';
-    out += 'class="btn btn-primary btn-sm" data-toggle="modal" data-target="#hf_subcribe">';
+    out += 'class="btn btn-primary btn-sm" data-toggle="modal" data-target="#hf_subcribe_'+group_hash+'">';
     out += 'Subcribe</button>';
 
-    out += '<div class="modal fade" id="hf_subcribe" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">';
+    out += '<div class="modal fade" id="hf_subcribe_'+group_hash+'" tabindex="-1" '
+    out += 'role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">';
 
     out += '<div class="modal-dialog"><div class="modal-content"><div class="modal-header">';
     out += '<h4>Send a message to subcribe '+group['group']['name']+'</h4></div>';

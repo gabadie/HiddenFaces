@@ -261,13 +261,16 @@ hf_control.group_contacts = function(group_hash)
 hf_control.group_thread = function(group_hash)
 {
     var domElem = document.getElementById('hf_page_main_content');
-    hf_service.get_group_public_chunk(group_hash, function(public_chunk){
+
+    hf_service.get_group_public_chunk(group_hash, function(public_chunk)
+    {
         var header_html = hf_ui.template('header/group_header.html', public_chunk);
         domElem.innerHTML = header_html;
 
-        if(hf_service.already_subscribed(group_hash) || public_chunk['group']['public'])
-        {
+        var waiting_sub = hf_service.waiting_accept_subcribe(public_chunk);
 
+        if(waiting_sub == 1 || public_chunk['group']['public'])
+        {
             hf_control.view_new_group_post(group_hash, function(new_post_html)
             {
                 domElem.innerHTML += new_post_html;

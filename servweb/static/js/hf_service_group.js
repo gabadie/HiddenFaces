@@ -50,13 +50,36 @@ hf_service.already_subscribed = function(group_hash)
     return (group_hash in private_chunk['groups']['subscribed_to']);
 }
 
-hf_service.waiting_accept_subcribe = function(group_hash)
+/* Find state of user in this group (not subcribe, waiting to accept or subcribed)
+ *
+ * @param <user_hash>
+ *      function return :
+ *                1: subcribed
+ *                0: waiting
+ *               -1: not subcribe
+ */
+hf_service.waiting_accept_subcribe = function(group)
 {
-    assert(hf.is_hash(group_hash));
     assert(hf_service.is_connected());
+    var group_hash = group['__meta']['group_hash'];
 
     var private_chunk = hf_service.user_private_chunk;
-    console.log(private_chunk);
+
+    if(group['group']['public'] == false)
+    {
+        if (group_hash in private_chunk['groups']['subscribed_to'])
+        {
+            return private_chunk['groups']['subscribed_to'][group_hash] == null ? 0 : 1;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+    else
+    {
+        return (group_hash in private_chunk['groups']['subscribed_to'])?1 : -1;
+    }
 }
 
 /*
