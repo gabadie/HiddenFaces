@@ -1,6 +1,15 @@
 {{#hf_cell}}
     <div class="hf_padding">
-        <div class="hf_title">Edit profile.</div>
+        <div class="hf_title">
+            Edit profile.
+            <button
+                class="btn btn-default"
+                style="float:right;"
+                onclick="return hf_control.view('/profile');"
+            >
+                Back
+            </button>
+        </div>
 
         <form onsubmit="hf_control.edit_profile(this); return false;">
             <table width="100%">
