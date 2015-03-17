@@ -426,3 +426,27 @@ hf_control.subcribe = function(dom)
         hf_control.refresh_view();
     });
 }
+
+hf_control.create_group = function(dom)
+{
+    var arrs = hf.inputs_to_json(dom);
+
+    var group_name = arrs['name'].trim();
+    var description = arrs['description'].trim();
+
+    if(group_name == '')
+    {
+        alert('group must have a name');
+        return false;
+    }
+
+    var form_elements = document.getElementById('hf_create_new_group').elements;
+    var group_vis = form_elements['group-visilibity'].value == 'true'? true : false;
+    var thread_vis = form_elements['thread-visilibity'].value == 'true'? true : false;
+
+    hf_service.create_group(group_name, description, group_vis, thread_vis, function(success)
+    {
+        assert(success);
+        hf_control.refresh_view();
+    });
+}

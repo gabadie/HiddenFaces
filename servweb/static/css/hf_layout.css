@@ -280,12 +280,20 @@
 }
 
 /* ------------------------------------------------------------ GROUP */
-.hf_layout_cell .hf_group_public_private
+.hf_layout_cell .hf_group_public_private:after
 {
-    background-color: #5F9EA0;
+    content: 'protected';
 }
 
-.hf_layout_cell .hf_group_private
+.hf_layout_cell .hf_group_private:after
 {
-    background-color: #F08080;
+    content: 'private';
+}
+
+.hf_layout_cell .hf_group_radio
+{
+    display:inline-block;
+    width:100%;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
 }

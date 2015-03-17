@@ -1,0 +1,57 @@
+{{#hf_cell}}
+    <div class="hf_padding">
+        <div class="hf_title">Create new group.</div>
+        <form onsubmit="hf_control.create_group(this);return false;" class="form-group" id="hf_create_new_group">
+        <div>
+            <input
+                type="text"
+                class="form-control"
+                placeholder="group name..."
+                name="name"
+            />
+        </div>
+        <div style="margin-top:5px">
+            <textarea
+                class="form-control"
+                placeholder="group's description"
+                name="description"
+            ></textarea>
+        </div>
+        <div class="hf_group_radio" style="margin-top:5px">
+            <div style="float:left;">
+                Group's visibility:
+            </div>
+            <div class="radio" style="float:right">
+                <div >
+                    <label><input type="radio" name="group-visilibity" value="true">Public</label>
+                </div>
+                <div >
+                    <label><input type="radio" name="group-visilibity" value="false" checked>Private</label>
+                </div>
+            </div>
+        </div>
+        <div class="hf_group_radio">
+            <div style="float:left;">
+                Thread's visibility:
+            </div>
+            <div class="radio" style="float:right">
+                <div >
+                    <label><input type="radio" name="thread-visilibity" value="true" checked>Public</label>
+                </div>
+                <div >
+                    <label><input type="radio" name="thread-visilibity" value="false">Private</label>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align:right; margin-top:5px;">
+            <input
+                type="submit"
+                class="btn btn-default"
+                name="submit"
+                value="Create"
+            />
+        </div>
+        </form>
+    </div>
+{{/hf_cell}}

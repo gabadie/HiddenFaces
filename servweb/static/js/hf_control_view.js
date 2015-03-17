@@ -217,6 +217,28 @@ hf_control.signed_in.route('/global/users', function (ctx) {
 });
 
 // ------------------------------------------------------ GROUPS' USERS
+hf_control.signed_in.route('/groups', function(ctx)
+{
+    hf_service.list_groups(function(groups){
+        var template = {
+            'groups': groups
+        };
+
+        var header_html = hf_ui.template(
+            'form/create_new_group.html',
+            null
+        );
+
+        var list_group_html = hf_ui.template(
+            'list_groups.html',
+            template
+        );
+
+        document.getElementById('hf_page_main_content').innerHTML = header_html + list_group_html;
+        ctx.callback();
+    });
+});
+
 hf_control.signed_in.route('/global/groups', function(ctx){
     hf_service.global_list('/global/groups_list', function(groups_hashes){
         hf_service.get_group_public_chunks(groups_hashes, function(groups){
@@ -224,12 +246,12 @@ hf_control.signed_in.route('/global/groups', function(ctx){
                 'groups': groups
             };
 
-            hf_ui.apply_template(
+            var list_group_html = hf_ui.template(
                 'list_groups.html',
-                template,
-                document.getElementById('hf_page_main_content')
+                template
             );
 
+            document.getElementById('hf_page_main_content').innerHTML = list_group_html;
             ctx.callback();
         });
     });
@@ -637,7 +659,7 @@ hf_control.refresh_left_column = function()
     hf_service.list_groups(function(groups_list){
         var template_context = {
             'title': 'Groups',
-            //'title_view_path': '/circles',
+            'title_view_path': '/groups',
             'cells': []
         };
 
