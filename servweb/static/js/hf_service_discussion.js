@@ -37,6 +37,11 @@ hf_service.is_discussion_peer = function(discussion_hash, user_hash)
     return (hf_service.user_private_chunk['discussions'][discussion_hash]['peers'].indexOf(user_hash) >=0);
 }
 
+/*
+ * Generates discussion's name from its peers'public chunks list
+ * @param <peers_public_chunks_map> : peers'public chunks list
+ * @returns <discussion_name>
+ */
 hf_service.resolve_discussion_name = function(peers_public_chunks_map)
 {
     var discussion_name = null;
@@ -196,6 +201,7 @@ hf_service.add_peers_to_discussion = function(discussion_hash, peers_hashes, cal
                                 'discussion_name':  discussion['name'],
                                 'peers':            discussion['peers']
                             };
+
                             hf_service.send_discussions_infos_to_peers(discussion['peers'],[discussion_info], function(success){
                                 if(success){
                                     var message = hf_service.user_private_chunk['profile']['first_name'] + ' just added ';
@@ -247,8 +253,12 @@ hf_service.get_discussion = function(discussion_hash,callback)
 
     hf_service.get_users_public_chunks(discussion['peers'],function(public_chunks_map){
         if(public_chunks_map){
+            var discussion_name = discussion['name'];
+            if(discussion_name == null){
+                discussion_name = hf_service.resolve_discussion_name(public_chunks_map);
+            }
             var resolved_discussion = {
-                'name': hf_service.resolve_discussion_name(public_chunks_map),
+                'name': discussion_name,
                 'peers': hf.values(public_chunks_map)
             };
             callback(resolved_discussion);
