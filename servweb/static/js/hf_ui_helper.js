@@ -121,12 +121,11 @@ Handlebars.registerHelper('hf_group_link', function(group)
     var group_hash = group['__meta']['group_hash'];
     var group_visibility = group['group']['public'];
 
-    var class_visibility = '';
+    var group_visibility_prefix = '';
 
     if (group_visibility)
     {
-        class_visibility = 'hf_group_public';
-
+        group_visibility_prefix = '<em>public group, you can post and comment</em>';
     }
     else
     {
@@ -135,24 +134,24 @@ Handlebars.registerHelper('hf_group_link', function(group)
             var thread_visibility = group['thread']['public'];
             if(thread_visibility == true)
             {
-                class_visibility = 'hf_group_public_private';
+                group_visibility_prefix = '<em>protected group, you can post and comment</em>';
             }
             else
             {
-                class_visibility = 'hf_group_private';
+                group_visibility_prefix = '<em>private group, you just can view, subcribe to post and comment</em>';
             }
         }
         catch(err)
         {
-            class_visibility = 'hf_group_private';
+            group_visibility_prefix = '<em>private group, you must subcribe to view, post and comment</em>';
         }
     }
 
-    var out = '<div class="hf_list_item '+class_visibility+'">';
-    out += '<div> <a class="hf_user_link " ';
+    var out = '<div class="hf_list_item ">';
+    out += '<div> <a class="hf_user_link" ';
     out += 'onclick="return hf_control.view(\'/group/'+group_hash+'\');">';
     out += group['group']['name'];
-    out += '</a>';
+    out += '</a> ';
 
     var waiting_sub = hf_service.waiting_accept_subcribe(group);
 
@@ -162,12 +161,12 @@ Handlebars.registerHelper('hf_group_link', function(group)
     }
     else if (waiting_sub == 0)
     {
-        out += '<p class="btn-sm" style="float:right;color:white;">Waiting for reponse</p>';
+        out += '<p class="btn-sm" style="float:right;color:blue;">Waiting for reponse</p>';
     }
 
-    out += '</div><div class="hf_description">';
-    out += group['group']['description'];
-    out += '</div></div>' ;
+    out += '</div><div class="hf_description"><p>';
+    out += group_visibility_prefix + "</br>" + group['group']['description'];
+    out += '</p></div></div>' ;
     return out;
 });
 
