@@ -134,7 +134,7 @@ Handlebars.registerHelper('hf_group_header', function(group) {
     {
         out += '<button class = "btn btn-default" style="float:right;"';
         out += 'onclick="return hf_control.view(\'/group/'+group_hash+'/contacts'+ '\')";>';
-        out += 'Show contacts </button>';
+        out += 'Show members</button>';
     }
     else
     {
