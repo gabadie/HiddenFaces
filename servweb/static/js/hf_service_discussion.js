@@ -38,6 +38,27 @@ hf_service.is_discussion_peer = function(discussion_hash, user_hash)
 }
 
 /*
+ * Generates discussion's name from its peers'public chunks list
+ * @param <peers_public_chunks_map> : peers'public chunks list
+ * @returns <discussion_name>
+ */
+hf_service.resolve_discussion_name = function(peers_public_chunks_map)
+{
+    var discussion_name = null;
+    for(hash in peers_public_chunks_map){
+        if(hash != hf_service.user_hash()){
+            discussion_name = peers_public_chunks_map[hash]['profile']['first_name'] + ' ' + peers_public_chunks_map[hash]['profile']['last_name'];
+            break;
+        }
+    }
+    var nb_peers = hf.keys(peers_public_chunks_map).length;
+    if(nb_peers > 2){
+        discussion_name += ', (+' + (nb_peers - 2) + ')';
+    }
+    return discussion_name;
+}
+
+/*
  * Creates a private discussion thread
  *
  * @param <discussion_name>: the name chosen for the discussion.
@@ -180,6 +201,7 @@ hf_service.add_peers_to_discussion = function(discussion_hash, peers_hashes, cal
                                 'discussion_name':  discussion['name'],
                                 'peers':            discussion['peers']
                             };
+
                             hf_service.send_discussions_infos_to_peers(discussion['peers'],[discussion_info], function(success){
                                 if(success){
                                     var message = hf_service.user_private_chunk['profile']['first_name'] + ' just added ';
@@ -211,6 +233,39 @@ hf_service.add_peers_to_discussion = function(discussion_hash, peers_hashes, cal
         });
     }
 
+}
+
+/*
+ * Gets the specified discussion name and the list of its peers's public chunks
+ * @param <discussion_hash>: the hash of the discussion
+ * @param <callback>: the function called once the response has arrived
+ *          @param <resolved_discussion> : {
+ *              'name': <discussion_name>,
+ *              'peers': <peers_public_chunks_list>
+ *          } or null
+ */
+hf_service.get_discussion = function(discussion_hash,callback)
+{
+    assert(hf_service.is_discussion_hash(discussion_hash));
+    assert(hf.is_function(callback));
+
+    var discussion = hf_service.user_private_chunk['discussions'][discussion_hash];
+
+    hf_service.get_users_public_chunks(discussion['peers'],function(public_chunks_map){
+        if(public_chunks_map){
+            var discussion_name = discussion['name'];
+            if(discussion_name == null){
+                discussion_name = hf_service.resolve_discussion_name(public_chunks_map);
+            }
+            var resolved_discussion = {
+                'name': discussion_name,
+                'peers': hf.values(public_chunks_map)
+            };
+            callback(resolved_discussion);
+        }else{
+            callback(null);
+        }
+    });
 }
 
 /*
@@ -271,24 +326,17 @@ hf_service.list_discussions = function(callback)
     for(var discussion_hash in hf_service.user_private_chunk['discussions']){
 
         var discussion_name = hf_service.user_private_chunk['discussions'][discussion_hash]['name'];
-        iteration--;
+
         if(discussion_name == null){
             hf_service.list_peers(discussion_hash,function(public_chunks_map){
 
                 var peers_hashes = Object.keys(public_chunks_map);
 
-                for(hash in public_chunks_map){
-                    if(hash != hf_service.user_hash()){
-                        discussion_name = public_chunks_map[hash]['profile']['first_name'] + ' ' + public_chunks_map[hash]['profile']['last_name'];
-                        break;
-                    }
-                }
-                if(peers_hashes.length > 2){
-                    discussion_name += ', (+' + (peers_hashes.length - 2) + ')';
-                }
+                discussion_name = hf_service.resolve_discussion_name(public_chunks_map);
 
                 discussion_map[discussion_hash] = discussion_name;
 
+                iteration--;
                 if(iteration === 0){
                     callback(discussion_map);
                 }
@@ -297,6 +345,7 @@ hf_service.list_discussions = function(callback)
         }else{
             discussion_map[discussion_hash] = discussion_name;
 
+            iteration--;
             if(iteration === 0){
                 callback(discussion_map);
             }

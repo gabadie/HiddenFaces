@@ -631,6 +631,10 @@ hf_service.list_groups = function(callback)
                 if(group_private_chunk){
                     content.push(group_private_chunk);
                 }
+                iteration--;
+                if (iteration == 0) {
+                    callback(content);
+                }
             });
 
         }else{
@@ -646,15 +650,19 @@ hf_service.list_groups = function(callback)
                             }else{
                                 content.push(group_public_chunk);
                             }
+                            iteration--;
+                            if (iteration == 0) {
+                                callback(content);
+                            }
                         });
                     }
                 }
+                iteration--;
+                if (iteration == 0) {
+                    callback(content);
+                }
             });
 
-        }
-        iteration--;
-        if (iteration == 0) {
-            callback(content);
         }
     }
 }
