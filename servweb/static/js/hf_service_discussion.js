@@ -305,6 +305,13 @@ hf_service.list_discussions = function(callback)
     }
 }
 
+/*
+ * Deletes the current user from the specified discussion
+ * @param <discussion_hash>: the hash of the specified discussion
+ * @param <callback>: the function called once the response has arrived
+ *      @param <success>: true or false
+ *      function my_callback(success)
+ */
 hf_service.leave_discussion = function(discussion_hash,callback)
 {
     assert(hf_service.is_connected());
@@ -329,12 +336,13 @@ hf_service.leave_discussion = function(discussion_hash,callback)
 
     hf_service.save_user_chunks(function(success){
         if(success){
+            var message = hf_service.user_private_chunk['profile']['first_name'] + ' has left the discussion';
+            hf_service.append_post_to_discussion(message, discussion_hash);
             hf_service.send_discussions_infos_to_peers(peers,[discussion_info], callback);
         }else{
             callback(false);
         }
     });
-
 }
 
 
