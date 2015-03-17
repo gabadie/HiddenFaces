@@ -605,8 +605,8 @@ hf_control.refresh_left_column = function()
         for (var i = 0; i < groups_list.length; i++)
         {
             var group_cell = {
-                'name':         groups_list[i]['group']['name']
-                //'view_path':    '/circle/' + circles_list[i]['thread_chunk_name']
+                'name':         groups_list[i]['group']['name'],
+                'view_path':    '/group/' + groups_list[i]['__meta']['group_hash']
             };
 
             template_context['cells'].push(group_cell);
@@ -617,26 +617,4 @@ hf_control.refresh_left_column = function()
             template_context
         );
     });
-
-    /*hf_ui.apply_template(
-        "list_left_column.html",
-        {
-            'title': 'Groups',
-            'cells': [
-                {
-                    'name': 'INSA IF Promotion 2015',
-                    'view_path': '/group/1'
-                },
-                {
-                    'name': 'INSA IF',
-                    'view_path': '/group/2'
-                },
-                {
-                    'name': 'Codeurs Anonymes',
-                    'view_path': '/group/3'
-                }
-            ]
-        },
-        document.getElementById('hf_left_column_groups')
-    );*/
 }
