@@ -175,7 +175,7 @@ Handlebars.registerHelper('hf_group_header', function(group)
 
     if (waiting_sub == 1 || group['group']['public'])
     {
-        out += '<button class = "btn btn-default btn-sm" style="float:right; margin-right:5px;"';
+        out += '<button class = "btn btn-default" style="float:right; margin-right:5px;"';
         out += 'onclick="return hf_control.view(\'/group/'+group_hash+'/contacts'+ '\')";>';
         out += 'Show members</button>';
     }
