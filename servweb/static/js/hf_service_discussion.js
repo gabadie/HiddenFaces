@@ -368,10 +368,10 @@ hf_service.send_discussions_infos_to_peers = function(peers_hashes, discussions_
     assert(hf_service.is_connected());
 
     //do not send the notification to himself
-    var index = peers_hashes.indexOf(hf_service.user_hash());
-    if(index >=0){
-        peers_hashes.splice(index,1);
-    }
+    // var index = peers_hashes.indexOf(hf_service.user_hash());
+    // if(index >=0){
+    //     peers_hashes.splice(index,1);
+    // }
 
     hf_service.send_chunks_infos_to_contacts(peers_hashes, discussions_infos, '/notification/discussion_chunks_infos', callback);
 }
