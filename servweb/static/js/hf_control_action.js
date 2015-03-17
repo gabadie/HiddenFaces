@@ -173,6 +173,8 @@ hf_control.edit_profile = function(domElem)
 
     user_private_chunk['profile']['first_name'] = user_profile['first_name'];
     user_private_chunk['profile']['last_name'] = user_profile['last_name'];
+    user_private_chunk['profile']['public_markdown'] = user_profile['public_markdown'];
+
 
     hf.input_to_uri(hf.form_input(domElem, 'picture'), function(uri){
         if (uri)
@@ -183,6 +185,7 @@ hf_control.edit_profile = function(domElem)
         hf_service.save_user_chunks(function(success){
             assert(success);
             hf_control.refresh_view();
+            return hf_control.view('/profile');
         });
     });
 }

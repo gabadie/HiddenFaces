@@ -195,6 +195,11 @@
     margin-top: 5px;
 }
 
+.hf_layout_cell form .content
+{
+    margin: 10px 0 10px 0;
+}
+
 
 /* -------------------------------------------------------------------- POSTS */
 .hf_layout_cell .hf_post .hf_author
