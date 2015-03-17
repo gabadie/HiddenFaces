@@ -57,18 +57,18 @@
     box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.8);
 }
 
-#hf_page_top_bar li:hover .hf_sublist
-{
-    display: block;
-}
-
-#hf_page_top_bar li:hover .hf_sublist a
+#hf_page_top_bar li .hf_sublist a
 {
     font-weight: normal;
     padding: 2px 20px;
     width: 100%;
+    white-space: nowrap;
 }
 
+#hf_page_top_bar li:hover .hf_sublist
+{
+    display: block;
+}
 
 /* -------------------------------------------------------------- Page middle */
 
