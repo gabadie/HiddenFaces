@@ -11,6 +11,8 @@ test_hf_populate.comment_count = 300;
 test_hf_populate.group_count = 12;
 test_hf_populate.subscription_count = 10;
 test_hf_populate.users_group_count = 10;
+test_hf_populate.discussion_count = 40;
+test_hf_populate.discussion_peer_count = test_hf_populate.profile_count / 5;
 
 
 test_hf_populate.seed = 0;
@@ -544,6 +546,32 @@ test_hf_populate.pull_fresh_user_notifications = function()
     test_utils.assert_success(test_hf_populate.profile_count);
 }
 
+test_hf_populate.create_discussions = function()
+{
+    for (var i = 0; i < test_hf_populate.discussion_count; i++)
+    {
+        var user_id = test_hf_populate.rand_user_id();
+        hf_service.login_user(test_hf_populate.user_profile[user_id]);
+
+        var discussion_info = test_hf_service.discussion_examples(i);
+
+        var discussion_hash = hf_service.create_discussion(discussion_info['name'], function(disc_hash){
+            test_utils.assert(hf_service.is_discussion_hash(disc_hash), 'Cannot create discussion');
+        });
+
+        hf_service.append_post_to_discussion(discussion_info['first_post'], discussion_hash, function(success){
+            test_utils.assert(success == true, 'cannot post into discussion');
+        });
+
+        hf_service.list_posts(discussion_hash,function(posts_list){
+            test_utils.assert(posts_list.length == 1, 'Nb of posts is ' + posts_list.length + ' instead of 1');
+        });
+
+        hf_service.disconnect();
+    }
+    test_utils.assert_success(3 * test_hf_populate.discussion_count);
+}
+
 
 // ------------------------------------------------- SERVICE's TESTS ENTRY POINT
 
@@ -552,6 +580,7 @@ test_hf_populate.main = function()
     test_utils.drop_database();
 
     test_utils.run(test_hf_populate.create_users, 'test_hf_populate.create_users', true);
+    test_utils.run(test_hf_populate.create_discussions, 'test_hf_populate.create_discussions', true);
     test_utils.run(test_hf_populate.send_messages, 'test_hf_populate.send_messages', true);
     test_utils.run(test_hf_populate.add_symetric_users_contacts, 'test_hf_populate.add_symetric_users_contacts', true);
     test_utils.run(test_hf_populate.add_asymetric_users_contacts, 'test_hf_populate.add_asymetric_users_contacts', true);

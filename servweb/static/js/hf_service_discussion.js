@@ -42,7 +42,7 @@ hf_service.is_discussion_peer = function(discussion_hash, user_hash)
  *
  * @param <discussion_name>: the name chosen for the discussion.
  * @param <callback>: the function called once the response has arrived with parameter
-            true or false
+            the discussion hash or null
  */
 hf_service.create_discussion = function(discussion_name, callback)
 {
@@ -68,7 +68,13 @@ hf_service.create_discussion = function(discussion_name, callback)
 
         hf_service.store_key(user_private_chunk, thread_chunk_name, thread_chunk_key);
 
-        hf_service.save_user_chunks(callback);
+        hf_service.save_user_chunks(function(success){
+            if(success){
+                callback(thread_chunk_name);
+            }else{
+                callback(null);
+            }
+        });
 
         discussion_hash = thread_chunk_name;
     });
