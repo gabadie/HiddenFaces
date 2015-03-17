@@ -28,9 +28,13 @@ Handlebars.registerHelper('hf_user_link', function(user_public_chunk, options){
         out += '</span>';
     }
 
-    out += user_public_chunk['profile']['first_name'];
-    out += ' ';
-    out += user_public_chunk['profile']['last_name'];
+    if (options.hash['picture'] != "only")
+    {
+        out += user_public_chunk['profile']['first_name'];
+        out += ' ';
+        out += user_public_chunk['profile']['last_name'];
+    }
+
     out += '</a>';
 
     return out;

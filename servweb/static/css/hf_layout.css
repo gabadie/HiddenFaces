@@ -233,7 +233,12 @@
 
 .hf_layout_cell .hf_comment .hf_date
 {
-    text-align: right;
+    float: right;
+}
+
+.hf_layout_cell .hf_comment .hf_text
+{
+    padding: 5px 20px;
 }
 
 /* ------------------------------------------------------------ NOTIFICATIONS */
