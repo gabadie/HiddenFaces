@@ -8,6 +8,7 @@
             {{{hf_linkify content}}}
         </div>
     </div>
+
     <div class="hf_comments">
         {{#each comments}}
             <div class="hf_comment">
@@ -36,6 +37,7 @@
             </div>
         {{/each}}
     </div>
+    {{#if_eq is_comment_enable true}}
     <form onsubmit="hf_control.create_comment(this);return false;" name = "comment" style="padding: 3px;">
         <textarea class="form-control" name="content"></textarea>
         <input type="hidden" name="chunk_name" value="{{__meta.chunk_name}}" />
@@ -49,4 +51,5 @@
             value="Comment"
         />
     </form>
+    {{/if_eq}}
 </div>

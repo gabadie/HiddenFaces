@@ -256,6 +256,7 @@ hf_control.group_contacts = function(ctx, group_hash)
             'header/group_header.html',
             group
         );
+
         hf_service.list_users(group_hash, function(users) {
 
 
@@ -278,13 +279,18 @@ hf_control.group_contacts = function(ctx, group_hash)
 hf_control.group_thread = function(ctx, group_hash)
 {
     var domElem = document.getElementById('hf_page_main_content');
-    hf_service.get_group_public_chunk(group_hash, function(public_chunk){
+
+    hf_service.get_group_public_chunk(group_hash, function(public_chunk)
+    {
         var header_html = hf_ui.template('header/group_header.html', public_chunk);
         domElem.innerHTML = header_html;
 
-        if(hf_service.already_subscribed(group_hash)) {
-            hf_control.view_new_group_post(group_hash, function(new_post_html){
+        var waiting_sub = hf_service.waiting_accept_subcribe(public_chunk);
 
+        if(waiting_sub == 1 || public_chunk['group']['public'])
+        {
+            hf_control.view_new_group_post(group_hash, function(new_post_html)
+            {
                 domElem.innerHTML += new_post_html;
                 var chunks_names = [];
                 try
@@ -292,7 +298,6 @@ hf_control.group_thread = function(ctx, group_hash)
                     chunks_names.push(public_chunk['thread']['name']);
                 }
                 catch(err){
-
                 }
                 finally
                 {
@@ -303,6 +308,30 @@ hf_control.group_thread = function(ctx, group_hash)
                     ctx.callback();
                 }
             });
+        }
+        else
+        {
+            try
+            {
+                if(public_chunk['thread']['public'])
+                {
+                    var chunks_names = [];
+                    try
+                    {
+                        chunks_names.push(public_chunk['thread']['name']);
+                        hf_control.view_threads(chunks_names, function(posts_html)
+                        {
+                            domElem.innerHTML += posts_html;
+                        }, false);
+                    }
+                    catch(err)
+                    {
+                    }
+                }
+            }
+            catch(err)
+            {
+            }
         }
     });
 }
@@ -518,7 +547,7 @@ hf_control.view_new_group_post = function(group_hash, callback)
  *      @param <posts_html>: html of threads' posts
  *      function my_callback(posts_html)
  */
-hf_control.view_threads = function(threads_names, callback)
+hf_control.view_threads = function(threads_names, callback, is_comment_enable)
 {
     var posts_lists = [];
 
@@ -550,6 +579,16 @@ hf_control.view_threads = function(threads_names, callback)
                 var template_context = {
                     'chunks': posts_list
                 };
+
+                if(is_comment_enable == undefined )
+                {
+                    is_comment_enable = true;
+                }
+
+                for(var i = 0; i < posts_list.length; i++)
+                {
+                    posts_list[i]['is_comment_enable'] = is_comment_enable;
+                }
 
                 var posts_html = hf_ui.template('list_chunks.html', template_context);
 
@@ -617,4 +656,10 @@ hf_control.refresh_left_column = function()
             template_context
         );
     });
+}
+
+
+hf_control.subcribe = function(group_hash)
+{
+
 }

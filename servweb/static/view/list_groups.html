@@ -2,9 +2,7 @@
     <div class="hf_padding">
         <div class="hf_title">Your Groups.</div>
         {{#each groups}}
-            <div class="hf_list_item">
-                {{{hf_group_link this}}}
-            </div>
+            {{{hf_group_link this}}}
         {{else}}
             <div class="hf_empty">You don't have any group.</div>
         {{/each}}

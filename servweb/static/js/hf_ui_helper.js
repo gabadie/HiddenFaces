@@ -1,4 +1,3 @@
-
 Handlebars.registerHelper('hf_cell', function(options) {
     var out = (
         '<div class="hf_layout_cell"><div class="hf_layout_expand">' +
@@ -99,56 +98,129 @@ Handlebars.registerHelper('hf_markdown', function(markdown_code){
 });
 
 Handlebars.registerHelper('if_eq', function(a, b, opts) {
+
     if(a == b)
         return opts.fn(this);
     else
         return opts.inverse(this);
 });
 
-Handlebars.registerHelper('hf_group_link', function(group){
+Handlebars.registerHelper('hf_group_link', function(group)
+{
     var group_hash = group['__meta']['group_hash'];
-    var out = '';
-    out += '<div> <a class="hf_user_link" ';
+    var group_visibility = group['group']['public'];
+
+    var class_visibility = '';
+
+    if (group_visibility)
+    {
+        class_visibility = 'hf_group_public';
+
+    }
+    else
+    {
+        try
+        {
+            var thread_visibility = group['thread']['public'];
+            if(thread_visibility == true)
+            {
+                class_visibility = 'hf_group_public_private';
+            }
+            else
+            {
+                class_visibility = 'hf_group_private';
+            }
+        }
+        catch(err)
+        {
+            class_visibility = 'hf_group_private';
+        }
+    }
+
+    var out = '<div class="hf_list_item '+class_visibility+'">';
+    out += '<div> <a class="hf_user_link " ';
     out += 'onclick="return hf_control.view(\'/group/'+group_hash+'\');">';
     out += group['group']['name'];
     out += '</a>';
 
-    if(!hf_service.already_subscribed(group_hash))
+    var waiting_sub = hf_service.waiting_accept_subcribe(group);
+
+    if(waiting_sub == -1)
     {
-        out += '<div style="float:right"><button class="btn btn-default" style="text-align:right;"';
-        out += 'onclick=";"'
-        out += '>';
-        out +=  'Subcribe </button></div>';
+        out+= hf_ui.send_message_dialog(group);
+    }
+    else if (waiting_sub == 0)
+    {
+        out += '<p class="btn-sm" style="float:right;color:white;">Waiting for reponse</p>';
     }
 
     out += '</div><div class="hf_description">';
     out += group['group']['description'];
-    out += '</div>' ;
+    out += '</div></div>' ;
     return out;
 });
 
-Handlebars.registerHelper('hf_group_header', function(group) {
+Handlebars.registerHelper('hf_group_header', function(group)
+{
     var out = '<div class="hf_title">Group: '+ group['group']['name'];
     var group_hash = group['__meta']['group_hash'];
-    if (hf_service.already_subscribed(group_hash))
+
+    var waiting_sub = hf_service.waiting_accept_subcribe(group);
+
+    if(waiting_sub == -1)
+        out+= hf_ui.send_message_dialog(group);
+
+    if (waiting_sub == 0)
+        out += '<p class="btn btn-sm" style="float:right;">Waiting for reponse</p>';
+
+    if (waiting_sub == 1 || group['group']['public'])
     {
-        out += '<button class = "btn btn-default" style="float:right;"';
+        out += '<button class = "btn btn-default btn-sm" style="float:right; margin-right:5px;"';
         out += 'onclick="return hf_control.view(\'/group/'+group_hash+'/contacts'+ '\')";>';
         out += 'Show members</button>';
-    }
-    else
-    {
-        out += '<button class = "btn btn-default" style="float:right;"';
-        out += 'onclick="return hf_control.view(\'/group/'+group_hash+'/contacts'+ '\')";>';
-        out += 'Subcribe</button>';
     }
 
     out +=  '</div><div style="font-size:12px;">'
             + group['group']['description']
-            +' </div>'
+            +' </div>';
+
     return out;
 });
+
+
+hf_ui.send_message_dialog = function(group)
+{
+    var group_hash = group['__meta']['group_hash'];
+    var out = '';
+    out += '<button style="float:right;"';
+    out += 'class="btn btn-primary btn-sm" data-toggle="modal" data-target="#hf_subcribe_'+group_hash+'">';
+    out += 'Subcribe</button>';
+
+    out += '<div class="modal fade" id="hf_subcribe_'+group_hash+'" tabindex="-1" '
+    out += 'role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">';
+
+    out += '<div class="modal-dialog"><div class="modal-content"><div class="modal-header">';
+    out += '<h4>Send a message to subcribe '+group['group']['name']+'</h4></div>';
+
+    out += '<form onsubmit="hf_control.subcribe(this); return false;">';
+    out += '<div class="modal-body">';
+
+    out += '<textarea name="content" class="form-control" placeholder="Write something to send...">';
+    out += '</textarea>';
+
+    out += '<div class="modal-footer">';
+    out += '<input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">';
+    out += '<input type="submit" class="btn btn-primary" value="Send">';
+    out += '<input type="hidden" value="'+group_hash+'" name="group_hash">';
+    out += '</div>';
+
+    out += '</div></form>';
+    out += '</div></div></div>';
+
+    return out;
+}
 
 Handlebars.registerHelper('hf_linkify', function(text_to_linkify){
     return hf.linkify(text_to_linkify);
 });
+
