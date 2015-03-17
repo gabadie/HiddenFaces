@@ -57,6 +57,29 @@ test_hf_service.create_discussion = function()
     test_utils.assert_success(3);
 }
 
+test_hf_service.create_discussion_with_peers = function()
+{
+    var user_profile = test_hf_service.john_smith_profile();
+    hf_service.create_user(user_profile);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+    var user_hash1 = hf_service.create_user(user_profile1);
+    //user connexion
+    hf_service.login_user(user_profile, null);
+    test_utils.assert(hf_service.is_connected(), 'should be connected after');
+
+    //discussion creation
+    hf_service.create_discussion_with_peers(test_hf_service.discussion_names[0], [user_hash1], function(discussion_hash){
+        test_utils.assert(hf_service.is_discussion_hash(discussion_hash), 'Cannot create discussion');
+    });
+
+    //verify peer list
+    hf_service.list_peers(discussion_hash,function(peers_list){
+        test_utils.assert(Object.keys(peers_list).length == 2, "Nb of peers is " + Object.keys(peers_list).length + " instead of 2");
+    });
+
+    test_utils.assert_success(3);
+}
+
 test_hf_service.create_discussion_posts = function()
 {
     //user connexion

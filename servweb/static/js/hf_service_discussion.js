@@ -83,6 +83,34 @@ hf_service.create_discussion = function(discussion_name, callback)
 }
 
 /*
+ * Creates a private discussion thread and adds peers
+ *
+ * @param <discussion_name>: the name chosen for the discussion.
+ * @param <peers_hashes>: peers' user hash
+ * @param <callback>: the function called once the response has arrived with parameter
+            the discussion hash or null
+ */
+hf_service.create_discussion_with_peers = function(discussion_name, peers_hashes, callback)
+{
+    assert(peers_hashes.length > 0);
+
+    hf_service.create_discussion(discussion_name, function(discussion_hash){
+        assert(hf_service.is_discussion_hash(discussion_hash));
+
+        hf_service.add_peers_to_discussion(discussion_hash, peers_hashes, function(success){
+            if(success){
+                callback(discussion_hash);
+            }else{
+                hf_service.leave_discussion(discussion_hash,function(){
+                    callback(null);
+                });
+            }
+        });
+
+    });
+}
+
+/*
  * Creates a post in the discussion
  *
  * @param <discussion_hash>: the discussion's hash
@@ -280,7 +308,7 @@ hf_service.list_discussions = function(callback)
 hf_service.leave_discussion = function(discussion_hash,callback)
 {
     assert(hf_service.is_connected());
-    assert(hf.is_function(callback) || callback == undefined);
+    assert(hf.is_function(callback));
     assert(hf_service.is_discussion_hash(discussion_hash));
     assert(hf_service.is_discussion_peer(discussion_hash, hf_service.user_hash()));
 
