@@ -190,9 +190,12 @@ hf_control.discussion_thread = function(ctx, discussion_hash)
 {
     var domElem = document.getElementById("hf_page_main_content");
 
-    hf_control.view_threads([discussion_hash], function(posts_html){
-        domElem.innerHTML = posts_html;
-    }, false);
+    hf_service.list_posts(discussion_hash, function(posts_list){
+        domElem.innerHTML = hf_ui.template(
+            'list_discussion_posts.html',
+            {posts: posts_list}
+        );
+    });
 }
 
 

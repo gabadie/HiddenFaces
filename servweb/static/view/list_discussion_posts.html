@@ -1,0 +1,15 @@
+{{#hf_cell}}
+    <div class="hf_padding">
+        {{#each posts}}
+            <div class="hf_post">
+                {{{hf_date this.date}}}
+                <div class="hf_author">
+                    {{{hf_user_link author picture=true}}}
+                </div>
+                <div class="hf_text">
+                    {{{hf_linkify content}}}
+                </div>
+            </div>
+        {{/each}}
+    </div>
+{{/hf_cell}}
