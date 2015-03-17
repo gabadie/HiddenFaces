@@ -12,7 +12,7 @@ test_hf_populate.group_count = 12;
 test_hf_populate.subscription_count = 10;
 test_hf_populate.users_group_count = 10;
 test_hf_populate.discussion_count = 40;
-test_hf_populate.discussion_peer_count = test_hf_populate.profile_count / 5;
+test_hf_populate.discussion_peer_count = 6;
 
 
 test_hf_populate.seed = 0;
@@ -553,23 +553,34 @@ test_hf_populate.create_discussions = function()
         var user_id = test_hf_populate.rand_user_id();
         hf_service.login_user(test_hf_populate.user_profile[user_id]);
 
+        var peers_list = [];
+        for(var j = 0; j < test_hf_populate.discussion_peer_count; j++){
+            var peer_id;
+            do{
+                peer_id = test_hf_populate.rand_user_id();
+            }while(peer_id == user_id || (peers_list.indexOf(peer_id) >= 0));
+
+            peers_list.push(test_hf_populate.user_hash[peer_id]);
+        }
+        test_utils.assert(peers_list.length == test_hf_populate.discussion_peer_count, 'wrong number of new peers : ' + peers_list.length);
+
         var discussion_info = test_hf_service.discussion_examples(i);
 
-        var discussion_hash = hf_service.create_discussion(discussion_info['name'], function(disc_hash){
-            test_utils.assert(hf_service.is_discussion_hash(disc_hash), 'Cannot create discussion');
-        });
+        hf_service.create_discussion_with_peers(discussion_info['name'], peers_list, function(discussion_hash){
+            test_utils.assert(hf_service.is_discussion_hash(discussion_hash), 'Cannot create discussion');
 
-        hf_service.append_post_to_discussion(discussion_info['first_post'], discussion_hash, function(success){
-            test_utils.assert(success == true, 'cannot post into discussion');
-        });
+            hf_service.append_post_to_discussion(discussion_info['first_post'], discussion_hash, function(success){
+                test_utils.assert(success == true, 'cannot post into discussion');
+            });
 
-        hf_service.list_posts(discussion_hash,function(posts_list){
-            test_utils.assert(posts_list.length == 1, 'Nb of posts is ' + posts_list.length + ' instead of 1');
+            hf_service.list_posts(discussion_hash,function(posts_list){
+                test_utils.assert(posts_list.length == 2, 'Nb of posts is ' + posts_list.length + ' instead of 2');
+            });
         });
 
         hf_service.disconnect();
     }
-    test_utils.assert_success(3 * test_hf_populate.discussion_count);
+    test_utils.assert_success(4 * test_hf_populate.discussion_count);
 }
 
 
