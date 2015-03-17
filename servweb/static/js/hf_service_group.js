@@ -624,7 +624,6 @@ hf_service.list_groups = function(callback)
     var iteration = nb_groups;
 
     for(var group_hash in groups) {
-        iteration--;
 
         if(hf_service.is_group_admin(group_hash)){
 
@@ -632,6 +631,7 @@ hf_service.list_groups = function(callback)
                 if(group_private_chunk){
                     content.push(group_private_chunk);
                 }
+                iteration--;
                 if (iteration == 0) {
                     callback(content);
                 }
@@ -650,12 +650,14 @@ hf_service.list_groups = function(callback)
                             }else{
                                 content.push(group_public_chunk);
                             }
+                            iteration--;
                             if (iteration == 0) {
                                 callback(content);
                             }
                         });
                     }
                 }
+                iteration--;
                 if (iteration == 0) {
                     callback(content);
                 }
