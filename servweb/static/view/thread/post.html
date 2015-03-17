@@ -5,15 +5,31 @@
             {{{hf_user_link author picture=true}}}
         </div>
         <div class="hf_text">
-            {{content}}
+            {{{hf_linkify content}}}
         </div>
     </div>
+
     <div class="hf_comments">
         {{#each comments}}
             <div class="hf_comment">
-                {{{hf_user_link author picture=true}}}
-                {{content}}
-                {{{hf_date this.date}}}
+                <table>
+                    <tr>
+                        <td rowspan="2" width="60px" valign="top">
+                            {{{hf_user_link author picture="only"}}}
+                        </td>
+                        <td>
+                            {{{hf_user_link author}}}
+                        </td>
+                        <td>
+                            {{{hf_date this.date}}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" valign="top" class="hf_text">
+                            {{{hf_linkify content}}}
+                        </td>
+                    </tr>
+                </table>
             </div>
         {{else}}
             <div class="hf_empty">
@@ -21,6 +37,7 @@
             </div>
         {{/each}}
     </div>
+    {{#if_eq is_comment_enable true}}
     <form onsubmit="hf_control.create_comment(this);return false;" name = "comment" style="padding: 3px;">
         <textarea class="form-control" name="content"></textarea>
         <input type="hidden" name="chunk_name" value="{{__meta.chunk_name}}" />
@@ -34,4 +51,5 @@
             value="Comment"
         />
     </form>
+    {{/if_eq}}
 </div>

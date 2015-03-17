@@ -49,6 +49,39 @@ hf_service.already_subscribed = function(group_hash)
     var private_chunk = hf_service.user_private_chunk;
     return (group_hash in private_chunk['groups']['subscribed_to']);
 }
+
+/* Find state of user in this group (not subcribe, waiting to accept or subcribed)
+ *
+ * @param <user_hash>
+ *      function return :
+ *                1: subcribed
+ *                0: waiting
+ *               -1: not subcribe
+ */
+hf_service.waiting_accept_subcribe = function(group)
+{
+    assert(hf_service.is_connected());
+    var group_hash = group['__meta']['group_hash'];
+
+    var private_chunk = hf_service.user_private_chunk;
+
+    if(group['group']['public'] == false)
+    {
+        if (group_hash in private_chunk['groups']['subscribed_to'])
+        {
+            return private_chunk['groups']['subscribed_to'][group_hash] == null ? 0 : 1;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+    else
+    {
+        return (group_hash in private_chunk['groups']['subscribed_to'])?1 : -1;
+    }
+}
+
 /*
  * Creates a group
  *
@@ -419,7 +452,6 @@ hf_service.get_thread_infos = function(group_hash,callback)
     var thread_info = {};
 
     hf_service.get_group_public_chunk(group_hash, function(group_public_chunk){
-
         if(group_public_chunk){
 
             if(group_public_chunk['group']['public']){

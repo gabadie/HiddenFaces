@@ -125,7 +125,6 @@
 
 .hf_layout_cell .btn-default
 {
-    display: block;
     vertical-align: middle;
 }
 
@@ -195,6 +194,11 @@
     margin-top: 5px;
 }
 
+.hf_layout_cell form .content
+{
+    margin: 10px 0 10px 0;
+}
+
 
 /* -------------------------------------------------------------------- POSTS */
 .hf_layout_cell .hf_post .hf_author
@@ -233,7 +237,12 @@
 
 .hf_layout_cell .hf_comment .hf_date
 {
-    text-align: right;
+    float: right;
+}
+
+.hf_layout_cell .hf_comment .hf_text
+{
+    padding: 5px 20px;
 }
 
 /* ------------------------------------------------------------ NOTIFICATIONS */
@@ -268,4 +277,15 @@
 {
     display: block;
     font-size: 12px;
+}
+
+/* ------------------------------------------------------------ GROUP */
+.hf_layout_cell .hf_group_public_private
+{
+    background-color: #5F9EA0;
+}
+
+.hf_layout_cell .hf_group_private
+{
+    background-color: #F08080;
 }
