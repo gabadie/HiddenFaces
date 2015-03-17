@@ -314,7 +314,7 @@ hf_control.signed_in.route('/send_message', function(ctx){
     };
 
     hf_ui.apply_template(
-        'send_message.html',
+        'form/send_message.html',
         template_context,
         document.getElementById('hf_page_main_content')
     );
@@ -328,7 +328,7 @@ hf_control.signed_in.route('/send_message/', function(ctx){
     var user_hash = viewUrl.split("/")[2];
 
     hf_ui.apply_template(
-        'send_message.html',
+        'form/send_message.html',
         {'user_hash': user_hash},
         document.getElementById('hf_page_main_content')
     );
@@ -420,7 +420,7 @@ hf_control.signed_in.route('/profile/', function(ctx){
 
         if (!hf_service.is_contact(user_hash))
         {
-            var message_html = hf_ui.template('send_message.html',
+            var message_html = hf_ui.template('form/send_message.html',
                 {'user_hash': user_hash}
             );
 
@@ -442,7 +442,7 @@ hf_control.signed_in.route('/profile/', function(ctx){
         hf_service.list_contact_threads_names(user_hash, function(contacts_threads_names){
             if (contacts_threads_names.length == 0)
             {
-                var message_html = hf_ui.template('send_message.html',
+                var message_html = hf_ui.template('form/send_message.html',
                     {'user_hash': user_hash}
                 );
                 var no_post = hf_ui.message_cell(
