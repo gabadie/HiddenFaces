@@ -2,10 +2,10 @@
     <div class="hf_notification">
         {{{hf_date __meta.date}}}
         <div class="hf_author">
-            {{{hf_user_link author}}}
+            {{{hf_user_link author picture=true}}}
         </div>
         <div class="hf_text">
-            {{content}}
+            {{{hf_linkify content}}}
         </div>
         <div class="hf_action_bar" align="right">
             {{{hf_user_add_contact author}}}
@@ -14,7 +14,7 @@
             onclick="hf_control.view('/send_message/{{author.__meta.user_hash}}');">Reply</button>
 
             <button class="btn btn-default"
-                onclick="hf_control.delete_notification('{{__meta.hash}}');">Delete</button>
+                onclick="hf_control.delete_user_notification('{{__meta.hash}}');">Delete</button>
         </div>
     </div>
 </div>

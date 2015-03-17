@@ -1,0 +1,24 @@
+{{#hf_cell}}
+    <div class="hf_padding">
+        <div class="hf_title">Change login credentials.</div>
+
+        <form onsubmit="hf_control.edit_login_infos(this); return false;">
+            <div class="content">
+                <label> Email</label>
+                <input type="text" class="form-control" name="email" value="{{email}}"/>
+            </div>
+            <div class="content">
+                <label> Password </label>
+                <input type="password" placeholder="new password..." class="form-control" name="password"/>
+            </div>
+                <label> Confirm password </label>
+            <div class="content">
+                <input type="password" placeholder="confirm password..." class="form-control" name="confirm_password" />
+            </div>
+            <div class="content" align="right">
+                <input type="submit" class="btn btn-primary" name="save" value="Save"/>
+            </div>
+        </form>
+
+    </div>
+{{/hf_cell}}

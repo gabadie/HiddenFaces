@@ -667,6 +667,14 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.subscribe_to_group,'test_hf_service.subscribe_to_group');
     test_utils.run(test_hf_service.group_notifications, 'test_hf_service.group_notifications');
 
+    //DISCUSSIONS
+    test_utils.run(test_hf_service.create_discussion,'test_hf_service.create_discussion');
+    test_utils.run(test_hf_service.add_peers_to_discussion,'test_hf_service.add_peers_to_discussion');
+    test_utils.run(test_hf_service.create_discussion_posts,'test_hf_service.create_discussion_posts');
+    test_utils.run(test_hf_service.peers_conversation,'test_hf_service.peers_conversation');
+    test_utils.run(test_hf_service.list_discussions, 'test_hf_service.list_discussions');
+    test_utils.run(test_hf_service.leave_discussion,'test_hf_service.leave_discussion');
+
     // REGISTRY TESTES
     test_utils.run(test_hf_service.is_valide_chunk,"test_hf_service.is_valide_chunk");
     test_utils.run(test_hf_service.is_valide_profile,'test_hf_service.is_valide_profile');

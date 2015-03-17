@@ -195,6 +195,59 @@ hf.inputs_to_json = function(domElement)
 }
 
 /*
+ * Get an from's input from form DOM and the input name
+ *
+ * @param <domForm>: the form's DOM element
+ * @param <inputName>: the form's input name
+ */
+hf.form_input = function(domForm, inputName)
+{
+    assert(typeof inputName == 'string');
+
+    var inputs = domForm.getElementsByTagName('input');
+    var domImput = null;
+
+    for (var i = 0; i < inputs.length; i++)
+    {
+        if (inputs[i].name == inputName)
+        {
+            domImput = inputs[i];
+            break;
+        }
+    }
+
+    assert(domImput != null);
+
+    return domImput;
+}
+
+/*
+ * Get an uri from a input type=file
+ *
+ * @param <domElement>: the file input's DOM
+ * @param <callback>: the callback once done
+ *      @param <uri>: the file's uri
+ *      function my_callback(uri)
+ */
+hf.input_to_uri = function(domElement, callback)
+{
+    assert(hf.is_function(callback));
+
+    var file = domElement.files[0];
+
+    if (!file)
+    {
+        return callback(null);
+    }
+
+    var fileReader = new FileReader();
+    fileReader.onload = function(event) {
+        callback(event.target.result);
+    };
+    fileReader.readAsDataURL(file);
+}
+
+/*
  * Creates a cookie
  *
  * @param <name>: the cookie's name
@@ -328,4 +381,35 @@ hf.generate_full_date = function(date_format, timestamp_string)
     var date_timeStamp = date.getTime();
     var date_formatted = Date.create(date_timeStamp).format(date_format);
     return date_formatted;
+}
+
+/*
+ * Resolves links with <a> balises
+ *
+ * Code fetched from http://stackoverflow.com/questions/37684/how-to-replace-plain-urls-with-links
+ *
+ * @param <inputText>: text to parse
+ *
+ * @returns html code.
+ */
+hf.linkify = function(inputText)
+{
+    var replacedText, replacePattern1, replacePattern2, replacePattern3;
+
+    replacePattern1 = /\n/gim;
+    replacedText = inputText.replace(replacePattern1, '<br/>');
+
+    //URLs starting with http://, https://, or ftp://
+    replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+    replacedText = replacedText.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>');
+
+    //URLs starting with "www." (without // before it, or it'd re-link the ones done above).
+    replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
+    replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2" target="_blank">$2</a>');
+
+    //Change email addresses to mailto:: links.
+    replacePattern3 = /(([a-zA-Z0-9\-\_\.])+@[a-zA-Z\_]+?(\.[a-zA-Z]{2,6})+)/gim;
+    replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>');
+
+    return replacedText;
 }

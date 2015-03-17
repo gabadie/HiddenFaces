@@ -14,9 +14,26 @@ Handlebars.registerHelper('hf_user_link', function(user_public_chunk, options){
     out += ' class="hf_user_link"'
     out += ' onclick="return hf_control.view(\'/profile/' + user_public_chunk['__meta']['user_hash'] + '\');"';
     out += '>';
-    out += user_public_chunk['profile']['first_name'];
-    out += ' ';
-    out += user_public_chunk['profile']['last_name'];
+
+    if (options.hash['picture'])
+    {
+        out += '<span class="hf_img">';
+
+        if (user_public_chunk['profile']['picture'])
+        {
+            out += '<img src="' + user_public_chunk['profile']['picture'] + '" />';
+        }
+
+        out += '</span>';
+    }
+
+    if (options.hash['picture'] != "only")
+    {
+        out += user_public_chunk['profile']['first_name'];
+        out += ' ';
+        out += user_public_chunk['profile']['last_name'];
+    }
+
     out += '</a>';
 
     return out;
@@ -170,6 +187,7 @@ Handlebars.registerHelper('hf_group_header', function(group)
     return out;
 });
 
+
 hf_ui.send_message_dialog = function(group)
 {
     var group_hash = group['__meta']['group_hash'];
@@ -201,3 +219,8 @@ hf_ui.send_message_dialog = function(group)
 
     return out;
 }
+
+Handlebars.registerHelper('hf_linkify', function(text_to_linkify){
+    return hf.linkify(text_to_linkify);
+});
+

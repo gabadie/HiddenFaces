@@ -31,6 +31,22 @@ hf_ui.message_cell =function(message_src_code, message_context)
     var compiled_template = Handlebars.compile(template_src_code);
     return compiled_template(message_context);
 }
+
+/*
+ * @param <markdown_code>: markdown source code
+ *
+ * @return: html content
+ */
+hf_ui.markdown_cell =function(markdown_code)
+{
+    assert(typeof markdown_code == 'string');
+
+    return hf_ui.message_cell(
+        '{{{hf_markdown markdown_code}}}',
+        { markdown_code: markdown_code }
+    );
+}
+
 /*
  * @param <template_name>: name of the view template
  * @param <template_context>: parameters in this view, in sort of json

@@ -1,16 +1,34 @@
 {{#hf_cell}}
     <div class="hf_padding">
-        <div class="hf_title">Edit profile.</div>
+        <div class="hf_title">
+            Edit profile.
+            <button
+                class="btn btn-default"
+                style="float:right;"
+                onclick="return hf_control.view('/profile');"
+            >
+                Back
+            </button>
+        </div>
 
         <form onsubmit="hf_control.edit_profile(this); return false;">
-            <div class="content">
-                <label> First name</label>
-                <input type="text" class="form-control" name="first_name" value="{{first_name}}"/>
-            </div>
-            <div class="content">
-                <label> Last name </label>
-                <input type="text" class="form-control" name="last_name" value="{{last_name}}" />
-            </div>
+            <table width="100%">
+                <tr>
+                    <td width="120px" valign="top" style="padding-right: 20px;">
+                        {{{hf_input_image "picture" picture}}}
+                    </td>
+                    <td valign="top">
+                        <div class="content">
+                            <label> First name</label>
+                            <input type="text" class="form-control" name="first_name" value="{{first_name}}"/>
+                        </div>
+                        <div class="content">
+                            <label> Last name </label>
+                            <input type="text" class="form-control" name="last_name" value="{{last_name}}" />
+                        </div>
+                    </td>
+                </tr>
+            </table>
             <div class="content" align="right">
                 <input type="submit" class="btn btn-primary" name="save" value="Save"/>
             </div>
