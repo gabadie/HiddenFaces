@@ -1,0 +1,12 @@
+{{#hf_cell}}
+    <div class="hf_padding">
+        <div class="hf_title">Your discussions</div>
+        {{#each discussions}}
+            <div class="hf_list_item">
+                {{{hf_discussion_link this}}}
+            </div>
+        {{else}}
+            <div class="hf_empty">You don't have any discussion.</div>
+        {{/each}}
+    </div>
+{{/hf_cell}}

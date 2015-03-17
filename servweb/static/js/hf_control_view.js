@@ -149,6 +149,32 @@ hf_control.circle_contacts = function(ctx, circle_hash)
     });
 }
 
+// ---------------------------------------------------------- DISCUSSIONS' VIEWS
+
+hf_control.signed_in.route('/discussions', function(ctx){
+    var domElem = document.getElementById('hf_page_main_content');
+
+    hf_service.list_discussions(function(discussions_map){
+        var discussions_infos = [];
+
+        for (var discussion_hash in discussions_map)
+        {
+            discussions_infos.push({
+                'hash': discussion_hash,
+                'name': discussions_map[discussion_hash]
+            });
+        }
+
+        domElem.innerHTML = hf_ui.template(
+            "list_discussions.html",
+            {discussions: discussions_infos}
+        );
+
+        ctx.callback();
+    });
+});
+
+
 // -------------------------------------------------------- NOTIFICATIONS' VIEWS
 
 hf_control.signed_in.route('/notifications', function(ctx){
