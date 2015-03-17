@@ -74,9 +74,15 @@ test_hf_service.create_discussion_with_peers = function()
         hf_service.list_peers(discussion_hash,function(peers_list){
             test_utils.assert(Object.keys(peers_list).length == 2, "Nb of peers is " + Object.keys(peers_list).length + " instead of 2");
         });
+
+        //get discussion
+        hf_service.get_discussion(discussion_hash,function(resolved_discussion){
+            test_utils.assert(resolved_discussion !== null, 'cannot access discussion');
+            test_utils.assert(resolved_discussion["peers"].length == 2, "Nb of peers is " + resolved_discussion["peers"].length + " instead of 2");
+        });
     });
 
-    test_utils.assert_success(3);
+    test_utils.assert_success(5);
 }
 
 test_hf_service.create_discussion_posts = function()

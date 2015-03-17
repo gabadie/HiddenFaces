@@ -37,6 +37,22 @@ hf_service.is_discussion_peer = function(discussion_hash, user_hash)
     return (hf_service.user_private_chunk['discussions'][discussion_hash]['peers'].indexOf(user_hash) >=0);
 }
 
+hf_service.resolve_discussion_name = function(peers_public_chunks_map)
+{
+    var discussion_name = null;
+    for(hash in peers_public_chunks_map){
+        if(hash != hf_service.user_hash()){
+            discussion_name = peers_public_chunks_map[hash]['profile']['first_name'] + ' ' + peers_public_chunks_map[hash]['profile']['last_name'];
+            break;
+        }
+    }
+    var nb_peers = hf.keys(peers_public_chunks_map).length;
+    if(nb_peers > 2){
+        discussion_name += ', (+' + (nb_peers - 2) + ')';
+    }
+    return discussion_name;
+}
+
 /*
  * Creates a private discussion thread
  *
@@ -214,6 +230,35 @@ hf_service.add_peers_to_discussion = function(discussion_hash, peers_hashes, cal
 }
 
 /*
+ * Gets the specified discussion name and the list of its peers's public chunks
+ * @param <discussion_hash>: the hash of the discussion
+ * @param <callback>: the function called once the response has arrived
+ *          @param <resolved_discussion> : {
+ *              'name': <discussion_name>,
+ *              'peers': <peers_public_chunks_list>
+ *          } or null
+ */
+hf_service.get_discussion = function(discussion_hash,callback)
+{
+    assert(hf_service.is_discussion_hash(discussion_hash));
+    assert(hf.is_function(callback));
+
+    var discussion = hf_service.user_private_chunk['discussions'][discussion_hash];
+
+    hf_service.get_users_public_chunks(discussion['peers'],function(public_chunks_map){
+        if(public_chunks_map){
+            var resolved_discussion = {
+                'name': hf_service.resolve_discussion_name(public_chunks_map),
+                'peers': hf.values(public_chunks_map)
+            };
+            callback(resolved_discussion);
+        }else{
+            callback(null);
+        }
+    });
+}
+
+/*
  * Gets the map hash-public_chunk of discussion's peers
  * @param <callback>: the function called once the response has arrived
  *      @param <public_chunks>: the peers' hash-public chunk
@@ -277,15 +322,7 @@ hf_service.list_discussions = function(callback)
 
                 var peers_hashes = Object.keys(public_chunks_map);
 
-                for(hash in public_chunks_map){
-                    if(hash != hf_service.user_hash()){
-                        discussion_name = public_chunks_map[hash]['profile']['first_name'] + ' ' + public_chunks_map[hash]['profile']['last_name'];
-                        break;
-                    }
-                }
-                if(peers_hashes.length > 2){
-                    discussion_name += ', (+' + (peers_hashes.length - 2) + ')';
-                }
+                discussion_name = hf_service.resolve_discussion_name(public_chunks_map);
 
                 discussion_map[discussion_hash] = discussion_name;
 
