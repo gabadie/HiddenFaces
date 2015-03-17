@@ -47,7 +47,12 @@ hf_control.refresh_view = function()
 
     hf_control.mainViewRouter = null;
 
-    viewRouter.view(hf_control.current_view_url());
+    // snapshot the current scroll position
+    var top = window.pageYOffset;
+
+    viewRouter.view(hf_control.current_view_url(), function(){
+        window.scrollTo(0, top);
+    });
 }
 
 hf_control.ViewRouter = function(build_up_callback)
