@@ -624,12 +624,16 @@ hf_service.list_groups = function(callback)
     var iteration = nb_groups;
 
     for(var group_hash in groups) {
+        iteration--;
 
         if(hf_service.is_group_admin(group_hash)){
 
             hf_service.get_group_private_chunk(group_hash, function(group_private_chunk){
                 if(group_private_chunk){
                     content.push(group_private_chunk);
+                }
+                if (iteration == 0) {
+                    callback(content);
                 }
             });
 
@@ -646,15 +650,17 @@ hf_service.list_groups = function(callback)
                             }else{
                                 content.push(group_public_chunk);
                             }
+                            if (iteration == 0) {
+                                callback(content);
+                            }
                         });
                     }
                 }
+                if (iteration == 0) {
+                    callback(content);
+                }
             });
 
-        }
-        iteration--;
-        if (iteration == 0) {
-            callback(content);
         }
     }
 }
