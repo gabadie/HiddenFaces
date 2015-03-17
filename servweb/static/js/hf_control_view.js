@@ -174,6 +174,27 @@ hf_control.signed_in.route('/discussions', function(ctx){
     });
 });
 
+hf_control.signed_in.route('/discussion/', function(ctx){
+    var current_url_arrs = hf_control.current_view_url().split("/");
+    var discussion_hash = current_url_arrs[2];
+
+    if (!hf_service.is_discussion_hash(discussion_hash))
+    {
+        return hf_control.view('/');
+    }
+
+    hf_control.discussion_thread(ctx, discussion_hash);
+});
+
+hf_control.discussion_thread = function(ctx, discussion_hash)
+{
+    var domElem = document.getElementById("hf_page_main_content");
+
+    hf_control.view_threads([discussion_hash], function(posts_html){
+        domElem.innerHTML = posts_html;
+    }, false);
+}
+
 
 // -------------------------------------------------------- NOTIFICATIONS' VIEWS
 
