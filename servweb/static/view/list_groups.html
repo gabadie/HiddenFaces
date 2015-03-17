@@ -1,6 +1,11 @@
 {{#hf_cell}}
     <div class="hf_padding">
-        <div class="hf_title">All Groups</div>
+        <div class="hf_title" style="width:100%">
+            <span>{{title}}</span>
+            {{#if_eq title "All groups"}}
+                 <button class="btn btn-default" onclick="return hf_control.view('/groups');" style="float:right; margin-right:10px;">Create group</button>
+            {{/if_eq}}
+        </div>
         {{#each groups}}
             {{{hf_group_link this}}}
         {{else}}
