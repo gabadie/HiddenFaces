@@ -31,11 +31,11 @@ hf_control.current_view_url = function()
  *
  * @returns false to have the syntax: href="return hf_control.view(...)"
  */
-hf_control.view = function(viewUrl)
+hf_control.view = function(viewUrl, callback)
 {
     assert(hf_control.mainViewRouter != null);
 
-    return hf_control.mainViewRouter.view(viewUrl);
+    return hf_control.mainViewRouter.view(viewUrl, callback);
 }
 
 /*
@@ -93,8 +93,17 @@ hf_control.ViewRouter = function(build_up_callback)
      *
      * @returns false to have the syntax: href="return hf_control.view(...)"
      */
-    this.view = function(viewUrl)
+    this.view = function(viewUrl, callback)
     {
+        if (callback == undefined)
+        {
+            callback = function(){};
+        }
+        else
+        {
+            assert(hf.is_function(callback));
+        }
+
         assert(hf_control.domPageContainer != null);
 
         var viewRouter = this;
@@ -127,7 +136,10 @@ hf_control.ViewRouter = function(build_up_callback)
 
             window.location.assign('./#' + viewUrl);
 
-            match_callback();
+            match_callback({
+                view_url: viewUrl,
+                callback: callback
+            });
         });
 
         return false;
