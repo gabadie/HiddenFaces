@@ -2,10 +2,40 @@ test_hf_service.discussion_names = [
     'cinema',
     'homework',
     'beer',
-    'help! moving house',
+    'moving house',
     'present for John',
-    'my birthdate'
+    'my birthday',
+    null,
+    null,
+    null,
+    null
 ];
+
+test_hf_service.discussion_first_posts = [
+    'Cassie and I are going to the cinema next friday. Would you like to come?',
+    'Can we meet this we to have this huge homework done?',
+    'What are you doing on friday night? Why not going out for a beer?',
+    'help! I\'ve got so much stuff to move out. With your cars it would be so much easier!',
+    'Hi guys. Do you have any ideas for John\'s present?',
+    'You are all invited to my birthday party on friday night at my flat. Bring something to drink!',
+    'Hi! How are you doing?',
+    'You must watch the new season of House of Cards!',
+    'Hi! How are you doing?',
+    'Hi! How are you doing?'
+];
+
+test_hf_service.discussion_examples = function(id)
+{
+    assert(test_hf_service.discussion_names.length == test_hf_service.discussion_first_posts.length);
+
+    id = id || 0;
+    id %= test_hf_service.discussion_names.length;
+
+    return {
+        'name':   test_hf_service.discussion_names[id],
+        'first_post':    test_hf_service.discussion_first_posts[id]
+    }
+}
 //---------------------------------------------------------------------- TESTS DISCUSSIONS
 
 test_hf_service.create_discussion = function()
@@ -17,14 +47,42 @@ test_hf_service.create_discussion = function()
     test_utils.assert(hf_service.is_connected(), 'should be connected after');
 
     //discussion creation
-    hf_service.create_discussion(test_hf_service.discussion_names[0], function(success){
-        test_utils.assert(success == true);
+    hf_service.create_discussion(test_hf_service.discussion_names[0], function(discussion_hash){
+        test_utils.assert(hf_service.is_discussion_hash(discussion_hash), 'Cannot create discussion');
     });
 
     var discussions_list = hf_service.user_private_chunk['discussions'];
     test_utils.assert(Object.keys(discussions_list).length == 1, 'No discussion had been added to user private chunk');
 
     test_utils.assert_success(3);
+}
+
+test_hf_service.create_discussion_with_peers = function()
+{
+    var user_profile = test_hf_service.john_smith_profile();
+    hf_service.create_user(user_profile);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+    var user_hash1 = hf_service.create_user(user_profile1);
+    //user connexion
+    hf_service.login_user(user_profile, null);
+    test_utils.assert(hf_service.is_connected(), 'should be connected after');
+
+    //discussion creation
+    hf_service.create_discussion_with_peers(test_hf_service.discussion_names[0], [user_hash1], function(discussion_hash){
+        test_utils.assert(hf_service.is_discussion_hash(discussion_hash), 'Cannot create discussion');
+        //verify peer list
+        hf_service.list_peers(discussion_hash,function(peers_list){
+            test_utils.assert(Object.keys(peers_list).length == 2, "Nb of peers is " + Object.keys(peers_list).length + " instead of 2");
+        });
+
+        //get discussion
+        hf_service.get_discussion(discussion_hash,function(resolved_discussion){
+            test_utils.assert(resolved_discussion !== null, 'cannot access discussion');
+            test_utils.assert(resolved_discussion["peers"].length == 2, "Nb of peers is " + resolved_discussion["peers"].length + " instead of 2");
+        });
+    });
+
+    test_utils.assert_success(5);
 }
 
 test_hf_service.create_discussion_posts = function()
@@ -36,8 +94,8 @@ test_hf_service.create_discussion_posts = function()
     test_utils.assert(hf_service.is_connected(), 'should be connected after');
 
     //discussion creation
-    var discussion_hash = hf_service.create_discussion(test_hf_service.discussion_names[0], function(success){
-        test_utils.assert(success == true,'cannot create discussion');
+    var discussion_hash = hf_service.create_discussion(test_hf_service.discussion_names[0], function(discussion_hash0){
+        test_utils.assert(hf_service.is_discussion_hash(discussion_hash0), 'Cannot create discussion');
     });
 
     hf_service.append_post_to_discussion('first message', discussion_hash, function(success){
@@ -65,17 +123,14 @@ test_hf_service.add_peers_to_discussion = function() {
     hf_service.login_user(user_profile0);
 
     //discussion creation
-    var discussion_hash = hf_service.create_discussion(test_hf_service.discussion_names[0], function(success){
-        test_utils.assert(success == true);
+    var discussion_hash = hf_service.create_discussion(test_hf_service.discussion_names[0], function(discussion_hash0){
+        test_utils.assert(hf_service.is_discussion_hash(discussion_hash0), 'Cannot create discussion');
     });
     test_utils.assert(hf.is_hash(discussion_hash), 'Invalid discussion hash');
 
     //adding peers
-    hf_service.add_peers_to_discussion(discussion_hash, [user_hash1], function(success){
+    hf_service.add_peers_to_discussion(discussion_hash, [user_hash0,user_hash1], function(success){
         test_utils.assert(success == true,'Cannot add user_hash1 to discussion');
-    });
-    hf_service.add_peers_to_discussion(discussion_hash, [user_hash0], function(success){
-        test_utils.assert(success == false,'Could add user_hash0 to discussion');
     });
 
     hf_service.disconnect();
@@ -105,7 +160,7 @@ test_hf_service.add_peers_to_discussion = function() {
     hf_service.list_peers(discussion_hash,function(peers_list){
         test_utils.assert(Object.keys(peers_list).length == 4, "Nb of peers is " + Object.keys(peers_list).length + " instead of 4");
     });
-    test_utils.assert_success(10);
+    test_utils.assert_success(9);
 }
 
 test_hf_service.peers_conversation = function() {
@@ -118,8 +173,8 @@ test_hf_service.peers_conversation = function() {
     hf_service.login_user(user_profile0);
 
     //discussion creation
-    var discussion_hash = hf_service.create_discussion(test_hf_service.discussion_names[0], function(success){
-        test_utils.assert(success == true);
+    var discussion_hash = hf_service.create_discussion(test_hf_service.discussion_names[0], function(discussion_hash0){
+        test_utils.assert(hf_service.is_discussion_hash(discussion_hash0), 'Cannot create discussion');
     });
     test_utils.assert(hf.is_hash(discussion_hash), 'Invalid discussion hash');
 
@@ -168,11 +223,11 @@ test_hf_service.list_discussions = function() {
     });
 
     //discussion creation
-    var discussion_hash1 = hf_service.create_discussion(null, function(success){
-        test_utils.assert(success == true);
+    var discussion_hash1 = hf_service.create_discussion(null, function(disc_hash){
+        test_utils.assert(hf_service.is_discussion_hash(disc_hash), 'Cannot create discussion');
     });
-    var discussion_hash0 = hf_service.create_discussion(test_hf_service.discussion_names[0], function(success){
-        test_utils.assert(success == true);
+    var discussion_hash0 = hf_service.create_discussion(test_hf_service.discussion_names[0], function(disc_hash){
+        test_utils.assert(hf_service.is_discussion_hash(disc_hash), 'Cannot create discussion');
     });
 
     //adding peers
@@ -222,8 +277,8 @@ test_hf_service.leave_discussion = function() {
     hf_service.login_user(user_profile0);
 
     //discussion creation
-    var discussion_hash = hf_service.create_discussion(test_hf_service.discussion_names[0], function(success){
-        test_utils.assert(success == true);
+    var discussion_hash = hf_service.create_discussion(test_hf_service.discussion_names[0], function(disc_hash){
+        test_utils.assert(hf_service.is_discussion_hash(disc_hash), 'Cannot create discussion');
     });
     test_utils.assert(hf.is_hash(discussion_hash), 'Invalid discussion hash');
 

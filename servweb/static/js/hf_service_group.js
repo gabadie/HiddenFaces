@@ -602,7 +602,7 @@ hf_service.add_user_to_group = function(user_hash, group_hash, callback)
 }
 
 /*
- * Lists groups' public chunks the user has subscribes to
+ * Lists groups' public or shared or private chunk the user has subscribes to
  * @param <callback>: the function called once the response has arrived
  *      @param <public_chunks>: the contacts' public chunk
  *      function my_callback(public_chunks)
@@ -624,16 +624,46 @@ hf_service.list_groups = function(callback)
     var iteration = nb_groups;
 
     for(var group_hash in groups) {
-        hf_service.get_group_public_chunk(group_hash, function(group_public_chunk){
-        if(group_public_chunk){
-                content.push(group_public_chunk);
-            }
 
-            iteration--;
-            if (iteration == 0) {
-                callback(content);
-            }
-        });
+        if(hf_service.is_group_admin(group_hash)){
+
+            hf_service.get_group_private_chunk(group_hash, function(group_private_chunk){
+                if(group_private_chunk){
+                    content.push(group_private_chunk);
+                }
+                iteration--;
+                if (iteration == 0) {
+                    callback(content);
+                }
+            });
+
+        }else{
+
+            hf_service.get_group_public_chunk(group_hash, function(group_public_chunk){
+                if(group_public_chunk){
+                    if(group_public_chunk['group']['public']){
+                        content.push(group_public_chunk);
+                    }else{
+                        hf_service.get_group_shared_chunk(group_hash, function(group_shared_chunk){
+                            if(group_shared_chunk){
+                                content.push(group_shared_chunk);
+                            }else{
+                                content.push(group_public_chunk);
+                            }
+                            iteration--;
+                            if (iteration == 0) {
+                                callback(content);
+                            }
+                        });
+                    }
+                }
+                iteration--;
+                if (iteration == 0) {
+                    callback(content);
+                }
+            });
+
+        }
     }
 }
 
@@ -691,7 +721,7 @@ hf_service.define_notification('/notification/subscription', {
  * Group notification resolver adding the ['author'] key fetched frorm the
  * ['__meta']['author_user_hash']
  */
-hf_service.resolve_gorup_notification_author = function(notification_json, callback)
+hf_service.resolve_group_notification_author = function(notification_json, callback)
 {
     assert(hf.is_function(callback));
 
@@ -798,7 +828,7 @@ hf_service.define_notification('/notification/group_shared_chunk_infos', {
 
         return 'discard';
     },
-    resolve: hf_service.resolve_gorup_notification_author
+    resolve: hf_service.resolve_group_notification_author
 });
 
 /*

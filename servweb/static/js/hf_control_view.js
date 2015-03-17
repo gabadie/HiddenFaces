@@ -149,6 +149,56 @@ hf_control.circle_contacts = function(ctx, circle_hash)
     });
 }
 
+// ---------------------------------------------------------- DISCUSSIONS' VIEWS
+
+hf_control.signed_in.route('/discussions', function(ctx){
+    var domElem = document.getElementById('hf_page_main_content');
+
+    hf_service.list_discussions(function(discussions_map){
+        var discussions_infos = [];
+
+        for (var discussion_hash in discussions_map)
+        {
+            discussions_infos.push({
+                'hash': discussion_hash,
+                'name': discussions_map[discussion_hash]
+            });
+        }
+
+        domElem.innerHTML = hf_ui.template(
+            "list_discussions.html",
+            {discussions: discussions_infos}
+        );
+
+        ctx.callback();
+    });
+});
+
+hf_control.signed_in.route('/discussion/', function(ctx){
+    var current_url_arrs = hf_control.current_view_url().split("/");
+    var discussion_hash = current_url_arrs[2];
+
+    if (!hf_service.is_discussion_hash(discussion_hash))
+    {
+        return hf_control.view('/');
+    }
+
+    hf_control.discussion_thread(ctx, discussion_hash);
+});
+
+hf_control.discussion_thread = function(ctx, discussion_hash)
+{
+    var domElem = document.getElementById("hf_page_main_content");
+
+    hf_service.list_posts(discussion_hash, function(posts_list){
+        domElem.innerHTML = hf_ui.template(
+            'list_discussion_posts.html',
+            {posts: posts_list}
+        );
+    });
+}
+
+
 // -------------------------------------------------------- NOTIFICATIONS' VIEWS
 
 hf_control.signed_in.route('/notifications', function(ctx){
@@ -657,6 +707,7 @@ hf_control.refresh_left_column = function()
     });
 
     hf_service.list_groups(function(groups_list){
+        console.info(groups_list.length);
         var template_context = {
             'title': 'Groups',
             'title_view_path': '/groups',

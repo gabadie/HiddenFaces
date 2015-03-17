@@ -89,9 +89,13 @@ test_hf_service.add_user_to_group = function() {
             hf_service.list_users(group_hash,function(users_chunks){
                 test_utils.assert(Object.keys(users_chunks).length == 3, 'The number of group\'s users is not 3 but '+Object.keys(users_chunks).length);
             });
+
+            hf_service.list_groups(function(groups_list){
+                test_utils.assert(groups_list.length == 1);
+            });
         }
     );
-    test_utils.assert_success(8);
+    test_utils.assert_success(9);
 }
 
 test_hf_service.subscribe_to_group = function(){

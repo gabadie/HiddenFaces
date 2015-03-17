@@ -669,6 +669,7 @@ test_hf_service.main = function()
 
     //DISCUSSIONS
     test_utils.run(test_hf_service.create_discussion,'test_hf_service.create_discussion');
+    test_utils.run(test_hf_service.create_discussion_with_peers, 'test_hf_service.create_discussion_with_peers');
     test_utils.run(test_hf_service.add_peers_to_discussion,'test_hf_service.add_peers_to_discussion');
     test_utils.run(test_hf_service.create_discussion_posts,'test_hf_service.create_discussion_posts');
     test_utils.run(test_hf_service.peers_conversation,'test_hf_service.peers_conversation');
