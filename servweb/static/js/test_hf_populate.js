@@ -105,7 +105,8 @@ test_hf_populate.send_messages = function()
 
         var message = (
             'Hi ' + test_hf_populate.user_profile[to]['first_name'] +
-            '! This is your dude ' + test_hf_populate.user_profile[from]['first_name'] + '.'
+            '! This is your dude ' + test_hf_populate.user_profile[from]['first_name'] + '.\n' +
+            'Check this out http://en.wikipedia.org/wiki/Banana !!!'
         );
 
         hf_service.login_user(test_hf_populate.user_profile[from]);

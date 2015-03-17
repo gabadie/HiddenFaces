@@ -148,3 +148,7 @@ Handlebars.registerHelper('hf_group_header', function(group) {
             +' </div>'
     return out;
 });
+
+Handlebars.registerHelper('hf_linkify', function(text_to_linkify){
+    return hf.linkify(text_to_linkify);
+});
