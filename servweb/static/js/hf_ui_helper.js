@@ -39,6 +39,17 @@ Handlebars.registerHelper('hf_user_link', function(user_public_chunk, options){
     return out;
 });
 
+Handlebars.registerHelper('hf_discussion_link', function(discussion_infos, options){
+    var out = '<a'
+
+    out += ' class="hf_user_link"'
+    out += ' onclick="return hf_control.view(\'/discussion/' + discussion_infos['hash'] + '\');"';
+    out += '>';
+    out += discussion_infos['name'];
+    out += '</a>';
+
+    return out;
+});
 
 Handlebars.registerHelper('hf_user_add_contact', function(user_public_chunk, options){
     var user_hash = user_public_chunk['__meta']['user_hash'];
@@ -174,7 +185,7 @@ Handlebars.registerHelper('hf_group_header', function(group)
 
     if (waiting_sub == 1 || group['group']['public'])
     {
-        out += '<button class = "btn btn-default btn-sm" style="float:right; margin-right:5px;"';
+        out += '<button class = "btn btn-default" style="float:right; margin-right:5px;"';
         out += 'onclick="return hf_control.view(\'/group/'+group_hash+'/contacts'+ '\')";>';
         out += 'Show members</button>';
     }

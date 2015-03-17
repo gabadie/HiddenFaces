@@ -51,7 +51,7 @@ hf_service.publish_into_global_list = function(transaction, global_chunk_name, p
 }
 
 /*
- * @param <global_chunk_name>: the global chunk name where to list is
+ * @param <global_chunk_name>: the global chunk name where the list is
  * @param <callback>: the function called once done
  *      @param <global_list>: the list once successed
  *      function my_callback(global_list)
