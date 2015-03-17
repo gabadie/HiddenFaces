@@ -139,6 +139,8 @@ hf_control.onload = function()
     // set up the page content's DOM element
     hf_control.domPageContainer = document.body;
 
+    window.addEventListener("hashchange", hf_control.refresh_view, false);
+
     hf_ui.init(function(){
         var user_cookie = hf.get_cookie(hf_control.userCookieName);
 
