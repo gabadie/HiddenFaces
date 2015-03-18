@@ -563,6 +563,7 @@ hf_service.add_user_to_group = function(user_hash, group_hash, callback)
     {
         if (!is_user_hash)
         {
+            alert('user_hash is not good');
             callback(false);
             return;
         }
@@ -572,6 +573,7 @@ hf_service.add_user_to_group = function(user_hash, group_hash, callback)
             function(group_json){
                 if(group_json){
                     if(hf_service.already_user(user_hash,group_json)){
+                        alert('already user');
                         callback(false);
                         return;
                     }
@@ -591,6 +593,7 @@ hf_service.add_user_to_group = function(user_hash, group_hash, callback)
                             if(success){
                                 hf_service.send_group_infos_to_user(user_hash, group_hash, shared_chunk_infos,callback);
                             }else{
+                                alert('cannot save group chunks');
                                 callback(false);
                             }
                         });
@@ -598,6 +601,7 @@ hf_service.add_user_to_group = function(user_hash, group_hash, callback)
                         hf_service.save_group_chunks(group_json,callback);
                     }
                 }else{
+                    alert('group json is not good');
                     callback(false);
                 }
             }
@@ -934,6 +938,33 @@ hf_service.list_group_notifications = function(group_hash, callback)
 }
 
 /*
+ * change group's profile
+ *
+ * @params <group_hash>: group's hash
+ * @params <json_modification>: information stock as a map that must contain
+                                'group_name'
+                                'group_description'
+                                'group_group_public'
+                                'group_thread_public'
+ *
+ */
+hf_service.change_group_profile = function(group_hash, json_modification, callback)
+{
+    hf_service.get_group_private_chunk(group_hash, function(private_chunk){
+        console.log(private_chunk);
+        private_chunk['group']['name'] = json_modification['group_name'];
+        private_chunk['group']['description'] = json_modification['group_description'];
+        private_chunk['group']['public'] = json_modification['group_group_public'];
+        private_chunk['thread']['public'] = json_modification['group_thread_public'];
+
+        console.log(private_chunk);
+        hf_service.save_group_chunks(private_chunk, function(success){
+            callback(success);
+        });
+    });
+}
+
+/*
  * Deletes a group notification with its hash
  *
  * @param <group_hash>: the hash of the group
@@ -971,3 +1002,4 @@ hf_service.delete_group_notification = function(group_hash, notification_hash, c
 
     });
 }
+

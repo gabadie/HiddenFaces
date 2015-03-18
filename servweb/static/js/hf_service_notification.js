@@ -585,6 +585,53 @@ hf_service.list_user_notifications = function(callback)
     });
 }
 
+hf_service.list_group_notifications = function(group_hash, callback)
+{
+    assert(hf.is_function(callback));
+    assert(hf_service.is_group_admin(group_hash));
+
+    hf_service.get_group_private_chunk(group_hash, function(private_chunk_group){
+        hf_service.list_notifications(private_chunk_group, function(notifications_list, modified_repository){
+        if (notifications_list == null)
+        {
+            callback(null);
+            return;
+        }
+
+        var todo = function(success){
+            if (!success)
+            {
+                callback(null);
+                return;
+            }
+
+            notifications_list.sort(function(notification_a, notification_b){
+                if (notification_a['__meta']['date'] > notification_b['__meta']['date'])
+                {
+                    return -1;
+                }
+                else if (notification_a['__meta']['date'] < notification_b['__meta']['date'])
+                {
+                    return 1;
+                }
+
+                return 0;
+            });
+
+            callback(notifications_list);
+        }
+
+        if (!modified_repository)
+        {
+            todo(true);
+            return;
+        }
+
+        hf_service.save_user_chunks(todo);
+    });
+    });
+}
+
 
 // ------------------------------------------------ NOTIFICATION IMPLEMENTATIONS
 
