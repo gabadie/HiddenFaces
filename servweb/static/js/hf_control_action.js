@@ -510,10 +510,22 @@ hf_control.create_group = function(dom)
 hf_control.approuve_group_user = function(user_hash)
 {
     var group_hash = hf_control.current_view_url().split("/")[2];
-    console.log(group_hash);
+    assert(hf_service.is_group_admin(group_hash));
+
     hf_service.add_user_to_group(user_hash, group_hash, function(success){
-        // assert(success);
-        // hf_control.refresh_view();
+        assert(success);
+        hf_control.refresh_view();
+    });
+}
+
+hf_control.ignore_group_user = function(notification_hash)
+{
+    var group_hash = hf_control.current_view_url().split("/")[2];
+    assert(hf_service.is_group_admin(group_hash));
+
+    hf_service.delete_group_notification(group_hash, notification_hash, function(success){
+        assert(success);
+        hf_control.refresh_view();
     });
 }
 

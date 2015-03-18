@@ -494,7 +494,6 @@ hf_service.get_thread_infos = function(group_hash,callback)
 hf_service.save_group_chunks = function(group_private_chunk,callback)
 {
     assert(hf.is_function(callback) || callback == undefined);
-
     var group_chunks_owner = group_private_chunk['system']['chunks_owner'];
     var group_hash = group_private_chunk['__meta']['group_hash'];
 
@@ -951,13 +950,11 @@ hf_service.list_group_notifications = function(group_hash, callback)
 hf_service.change_group_profile = function(group_hash, json_modification, callback)
 {
     hf_service.get_group_private_chunk(group_hash, function(private_chunk){
-        console.log(private_chunk);
         private_chunk['group']['name'] = json_modification['group_name'];
         private_chunk['group']['description'] = json_modification['group_description'];
         private_chunk['group']['public'] = json_modification['group_group_public'];
         private_chunk['thread']['public'] = json_modification['group_thread_public'];
 
-        console.log(private_chunk);
         hf_service.save_group_chunks(private_chunk, function(success){
             callback(success);
         });
@@ -979,7 +976,6 @@ hf_service.delete_group_notification = function(group_hash, notification_hash, c
     assert(hf_service.is_group_admin(group_hash));
 
     hf_service.get_group_private_chunk(group_hash, function(group_private_chunk){
-
         if(group_private_chunk){
             hf_service.delete_notification(
                 group_private_chunk,
@@ -988,7 +984,7 @@ hf_service.delete_group_notification = function(group_hash, notification_hash, c
                 {
                     if (success)
                     {
-                        hf_service.save_group_chunks(callback);
+                        hf_service.save_group_chunks(group_private_chunk);
                     }
                     else
                     {
