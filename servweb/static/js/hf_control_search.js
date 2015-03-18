@@ -2,11 +2,15 @@
 hf_control.search_focus = function()
 {
     document.getElementById('hf_search_submit').style.display = "block";
+    document.getElementById('hf_search_submit').style.opacity = 1.0;
 }
 
 hf_control.search_blur = function()
 {
-    document.getElementById('hf_search_submit').style.display = "none";
+    document.getElementById('hf_search_submit').style.opacity = 0.0;
+    setTimeout(function(){
+        document.getElementById('hf_search_submit').style.display = "none";
+    }, 500);
 }
 
 hf_control.search_result = function(domElem)
