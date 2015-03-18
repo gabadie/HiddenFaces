@@ -241,7 +241,17 @@ hf_control.discussion_peers = function(ctx, discussion_hash)
             )
         );
 
-        ctx.callback();
+        hf_service.list_contacts(function(contacts_list){
+            domElem.innerHTML += hf_ui.template(
+                'form/add_discussion_peers.html',
+                {
+                    'contacts': contacts_list,
+                    'discussion': discussion
+                }
+            );
+
+            ctx.callback();
+        });
     });
 }
 
