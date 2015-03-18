@@ -47,14 +47,20 @@ test_hf_service.create_discussion = function()
     test_utils.assert(hf_service.is_connected(), 'should be connected after');
 
     //discussion creation
-    hf_service.create_discussion(test_hf_service.discussion_names[0], function(discussion_hash){
+    var discussion_hash = hf_service.create_discussion(null, function(discussion_hash){
         test_utils.assert(hf_service.is_discussion_hash(discussion_hash), 'Cannot create discussion');
+    });
+
+    //resolve discussion
+    hf_service.get_discussion(discussion_hash,function(resolved_discussion){
+        test_utils.assert(resolved_discussion !== null, 'cannot access discussion');
+        test_utils.assert(resolved_discussion["name"] == "Unnamed discussion", "wrong discussion name");
     });
 
     var discussions_list = hf_service.user_private_chunk['discussions'];
     test_utils.assert(Object.keys(discussions_list).length == 1, 'No discussion had been added to user private chunk');
 
-    test_utils.assert_success(3);
+    test_utils.assert_success(5);
 }
 
 test_hf_service.create_discussion_with_peers = function()
@@ -148,6 +154,12 @@ test_hf_service.add_peers_to_discussion = function() {
     hf_service.add_peers_to_discussion(discussion_hash, [user_hash2,user_hash3], function(success){
         test_utils.assert(success == true,'Cannot add user_hash2 and user_hash3 to discussion');
     });
+    hf_service.add_peers_to_discussion(discussion_hash, [user_hash2,user_hash3], function(success){
+        test_utils.assert(success == true,'Adding old peers to discussion failed');
+    });
+    hf_service.add_peers_to_discussion(discussion_hash, [], function(success){
+        test_utils.assert(success == true,'Cannot add no peers to discussion');
+    });
     hf_service.list_posts(discussion_hash,function(posts_list){
         test_utils.assert(posts_list.length == 2, 'Nb of posts is ' + posts_list.length + ' instead of 2');
     });
@@ -166,7 +178,7 @@ test_hf_service.add_peers_to_discussion = function() {
     hf_service.list_peers(discussion_hash,function(peers_list){
         test_utils.assert(Object.keys(peers_list).length == 4, "Nb of peers is " + Object.keys(peers_list).length + " instead of 4");
     });
-    test_utils.assert_success(11);
+    test_utils.assert_success(13);
 }
 
 test_hf_service.peers_conversation = function() {
