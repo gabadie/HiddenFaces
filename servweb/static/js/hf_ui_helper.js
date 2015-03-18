@@ -164,8 +164,7 @@ Handlebars.registerHelper('hf_group_link', function(group)
         }
     }
 
-    var out = '<div class="hf_list_item ">';
-    out += '<div> <a class="hf_user_link" ';
+    var out = '<div> <a class="hf_user_link" ';
     out += 'onclick="return hf_control.view(\'/group/'+group_hash+'\');">';
     out += group['group']['name'];
     out += '</a> ';
@@ -186,7 +185,7 @@ Handlebars.registerHelper('hf_group_link', function(group)
 
     out += '</div><div class="hf_description"><p>';
     out += group_visibility_prefix + "</br>" + group['group']['description'];
-    out += '</p></div></div>' ;
+    out += '</p></div>' ;
     return out;
 });
 

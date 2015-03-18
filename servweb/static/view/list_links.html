@@ -37,15 +37,21 @@
             {{/if_eq}}
 
             {{#if_eq __meta.type "/group/public_chunk"}}
-                {{{hf_group_link this}}}
+                <div class="hf_list_item">
+                    {{{hf_group_link this}}}
+                </div>
             {{/if_eq}}
 
             {{#if_eq __meta.type "/group/shared_chunk"}}
-                {{{hf_group_link this}}}
+                <div class="hf_list_item">
+                    {{{hf_group_link this}}}
+                </div>
             {{/if_eq}}
 
             {{#if_eq __meta.type "/group/private_chunk"}}
-                {{{hf_group_link this}}}
+                <div class="hf_list_item">
+                    {{{hf_group_link this}}}
+                </div>
             {{/if_eq}}
 
         {{else}}
