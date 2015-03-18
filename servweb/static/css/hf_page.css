@@ -70,6 +70,43 @@
     display: block;
 }
 
+/* -------------------------------------------------------------- Page search */
+
+#hf_page_top_bar .hf_layout_page_width
+{
+    position: relative;
+}
+
+#hf_page_top_bar #hf_search
+{
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 300px;
+    margin-top: 3px;
+    padding: 0;
+}
+
+#hf_page_top_bar #hf_search input
+{
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+#hf_page_top_bar #hf_search input[type=text]
+{
+    height: 28px;
+}
+
+#hf_page_top_bar #hf_search input[type=submit]
+{
+    width: 100px;
+    top: 0px;
+    right: 0px;
+    position: absolute;
+}
+
+
 /* -------------------------------------------------------------- Page middle */
 
 #hf_page_middle

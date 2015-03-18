@@ -1,51 +1,46 @@
 <div id="hf_page_top_bar">
-    <ul class="hf_layout_page_width">
-        <li>
-            <a onclick="return hf_control.view('/');">HiddenFaces</a>
-            <div class="hf_sublist">
-                <a onclick="return hf_control.log_out();">Log Out</a>
-                <a onclick="return hf_control.view('/global/users');">All users</a>
-                <a onclick="return hf_control.view('/global/groups');">All groups</a>
-            </div>
-        </li>
-        <li>
-            <a onclick="return hf_control.view('/profile');">
-                {{private_chunk.profile.first_name}} {{private_chunk.profile.last_name}}
-            </a>
-            <div class="hf_sublist">
-                <a onclick="return hf_control.view('/edit_profile');"> Edit profile</a>
-                <a onclick="return hf_control.view('/edit_login_infos');"> Change login credentials</a>
-                <a onclick="return hf_control.view('/notifications');">Notifications</a>
-                <a onclick="return hf_control.view('/contacts');">Contacts</a>
-                <a onclick="return hf_control.view('/discussions');">Discussions</a>
-                <a onclick="return hf_control.view('/send_message');">Send message</a>
-            </div>
-        </li>
-        <li>
-            <table >
-                <tr>
-                    <td style="padding-right: 0px; padding-left: 150px;" >
-                        <input
-                            type="text"
-                            class="form-control"
-                            placeholder="Search..."
-                            name="search"
-                            style="margin-top: 10px; height:30px;width: 300px;"
-                        />
-                    </td>
-                    <td style="padding-right: 0px; padding-left: 0px; ">
-                        <input
-                            type="submit"
-                            class="btn btn-primary"
-                            name="search"
-                            value="Search"
-                            style="margin-top: 10px; height:30px;"
-                        />
-                    </td>
-                </tr>
-            </table>
-        </li>
-    </ul>
+    <div class="hf_layout_page_width">
+        <ul>
+            <li>
+                <a onclick="return hf_control.view('/');">HiddenFaces</a>
+                <div class="hf_sublist">
+                    <a onclick="return hf_control.log_out();">Log Out</a>
+                    <a onclick="return hf_control.view('/global/users');">All users</a>
+                    <a onclick="return hf_control.view('/global/groups');">All groups</a>
+                </div>
+            </li>
+            <li>
+                <a onclick="return hf_control.view('/profile');">
+                    {{private_chunk.profile.first_name}} {{private_chunk.profile.last_name}}
+                </a>
+                <div class="hf_sublist">
+                    <a onclick="return hf_control.view('/edit_profile');"> Edit profile</a>
+                    <a onclick="return hf_control.view('/edit_login_infos');"> Change login credentials</a>
+                    <a onclick="return hf_control.view('/notifications');">Notifications</a>
+                    <a onclick="return hf_control.view('/contacts');">Contacts</a>
+                    <a onclick="return hf_control.view('/discussions');">Discussions</a>
+                    <a onclick="return hf_control.view('/send_message');">Send message</a>
+                </div>
+            </li>
+        </ul>
+        <form
+            id="hf_search"
+            onsubmit="return false;"
+        >
+            <input
+                type="text"
+                class="form-control"
+                placeholder="Search..."
+                name="search"
+            />
+            <input
+                type="submit"
+                class="btn btn-primary"
+                name="search"
+                value="Search"
+            />
+        </form>
+    </div>
 </div>
 
 <div id="hf_page_middle">
