@@ -97,6 +97,17 @@ hf_control.create_new_discussion = function(domElem)
     });
 }
 
+hf_control.start_discussion_with_peer = function(user_hash)
+{
+    hf_service.start_discussion_with_peer(user_hash, function(resolved_discussion){
+        if(resolved_discussion['hash'] !== undefined){
+            hf_control.view('/discussion/' + resolved_discussion["hash"]);
+        }else{
+            alert('Cannot start discussion');
+        }
+    });
+}
+
 
 // --------------------------------------------------------------------- LOG IN/OUT
 
@@ -491,7 +502,7 @@ hf_control.create_group = function(dom)
 
     hf_service.create_group(info['group_name'], info['group_description'], info['group_group_public'], info['group_thread_public'], function(success)
     {
-        assert(success != null);
+        assert(success);
         hf_control.refresh_view();
     });
 }
