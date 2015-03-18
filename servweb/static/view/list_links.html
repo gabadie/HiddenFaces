@@ -12,8 +12,14 @@
                     {{/if_eq}}
                 {{/if}}
 
-                {{#if_eq title "All groups"}}
-                     <button class="btn btn-default btn-sm" onclick="return hf_control.view('/groups');" style="float:right; margin-right:10px;">Create group</button>
+                {{#if_eq view "groups"}}
+                    <button
+                        class="btn btn-default"
+                        onclick="return hf_control.view('/group/create');"
+                        style="float:right; margin-right:10px;"
+                    >
+                        Create group
+                    </button>
                 {{/if_eq}}
             </div>
         {{/if}}

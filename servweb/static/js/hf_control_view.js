@@ -361,20 +361,15 @@ hf_control.signed_in.route('/groups', function(ctx)
         var template = {
             'chunks': groups,
             'title': "My groups",
-            'empty': 'You have not subcribed to any groups.'
+            'empty': 'You have not subcribed to any groups.',
+            'view': 'groups'
         };
 
-        var header_html = hf_ui.template(
-            'form/create_new_group.html',
-            null
-        );
-
-        var list_group_html = hf_ui.template(
+        document.getElementById('hf_page_main_content').innerHTML = hf_ui.template(
             'list_links.html',
             template
         );
 
-        document.getElementById('hf_page_main_content').innerHTML = header_html + list_group_html;
         ctx.callback();
     });
 });
@@ -385,7 +380,8 @@ hf_control.signed_in.route('/global/groups', function(ctx){
             var template = {
                 'chunks': groups,
                 'title': 'All groups',
-                'empty': 'There is no groups on this server.'
+                'empty': 'There is no groups on this server.',
+                'view': 'groups'
             };
 
             var list_group_html = hf_ui.template(
@@ -403,19 +399,33 @@ hf_control.signed_in.route('/group', function(ctx){
     var current_url_arrs = hf_control.current_view_url().split("/");
     var group_hash = current_url_arrs[2];
 
-    if (current_url_arrs.length > 3){
-        if (current_url_arrs[3] === 'contacts'){
-            hf_control.group_contacts(ctx, group_hash);
-        } else if (current_url_arrs[3] == 'notifications'){
-            hf_control.group_notifications(ctx, group_hash);
-        } else {
-            hf_control.group_settings(ctx, group_hash);
-        }
-    }
-    else
+    if (!hf.is_hash(group_hash))
     {
-        hf_control.group_thread(ctx, group_hash);
+        if (group_hash == 'create')
+        {
+            return hf_control.group_create(ctx);
+        }
+
+        return hf_control.view('/groups');
     }
+    else if (current_url_arrs.length == 2)
+    {
+        return hf_control.group_thread(ctx, group_hash);
+    }
+    else if (current_url_arrs[3] === 'contacts')
+    {
+        return hf_control.group_contacts(ctx, group_hash);
+    }
+    else if (current_url_arrs[3] == 'notifications')
+    {
+        return hf_control.group_notifications(ctx, group_hash);
+    }
+    else if (current_url_arrs[3] == 'settings')
+    {
+        return hf_control.group_settings(ctx, group_hash);
+    }
+
+    return hf_control.view('/group/' + group_hash);
 });
 
 hf_control.group_settings = function(ctx, group_hash)
@@ -559,6 +569,14 @@ hf_control.group_thread = function(ctx, group_hash)
         }
     });
 }
+
+hf_control.group_create = function(ctx)
+{
+    var domElem = document.getElementById('hf_page_main_content');
+
+    domElem.innerHTML = hf_ui.template('form/create_new_group.html');
+}
+
 
 // ------------------------------------------------------ MESSAGES' VIEWS
 hf_control.signed_in.route('/send_message', function(ctx){
