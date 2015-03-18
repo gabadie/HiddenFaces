@@ -131,14 +131,14 @@ hf_control.circle_contacts = function(ctx, circle_hash)
         hf_service.list_contacts(function(list_contacts)
         {
             var params = {
-
                 'circle_hash': circle_hash,
-                'contacts': list_contacts,
-                'title' : 'Your contacts.'
+                'chunks': list_contacts,
+                'title': 'Your contacts.',
+                'empty': 'You don\'t have any contacts yet'
             };
 
             var circle_header_html = hf_ui.template('header/circle_header.html', circle);
-            var list_contacts = hf_ui.template('list_users.html',params);
+            var list_contacts = hf_ui.template('list_links.html',params);
 
             document.getElementById('hf_page_main_content').innerHTML = (
                 circle_header_html + list_contacts
@@ -241,8 +241,9 @@ hf_control.discussion_peers = function(ctx, discussion_hash)
     hf_service.get_discussion(discussion_hash, function(discussion){
         var template_context = {
             'discussion_view': true,
-            'contacts': discussion['peers'],
-            'title': 'Discussion\'s peers'
+            'chunks': discussion['peers'],
+            'title': 'Discussion\'s peers',
+            'empty': 'YOU SHOULD NOT SEE THIS MESSAGE.'
         };
 
         domElem.innerHTML = (
@@ -251,7 +252,7 @@ hf_control.discussion_peers = function(ctx, discussion_hash)
                 discussion
             ) +
             hf_ui.template(
-                'list_users.html',
+                'list_links.html',
                 template_context
             )
         );
@@ -317,12 +318,13 @@ hf_control.signed_in.route('/notifications', function(ctx){
 hf_control.signed_in.route('/contacts', function(ctx) {
     hf_service.list_contacts(function(list_contacts) {
         var params = {
-            'contacts': list_contacts,
-            'title': 'Your contacts'
+            'chunks': list_contacts,
+            'title': 'Your contacts',
+            'empty': 'You don\'t have any contacts yet'
         };
 
         hf_ui.apply_template(
-            'list_users.html',
+            'list_links.html',
             params,
             document.getElementById('hf_page_main_content')
         );
@@ -336,17 +338,13 @@ hf_control.signed_in.route('/global/users', function (ctx) {
     hf_service.global_list('/global/users_list', function(users_hashes){
         hf_service.get_users_public_chunks(users_hashes, function(users_public_chunks) {
             var template_context = {
-                'contacts': hf.values(users_public_chunks),
-                'title' : 'All users'
+                'chunks': hf.values(users_public_chunks),
+                'title' : 'All users',
+                'empty': 'YOU SHOULD NOT SEE THIS MESSAGE.'
             };
 
-            for (var i = 0; i < template_context['contacts'].length; i++)
-            {
-                assert(template_context['contacts'][i] != null);
-            }
-
             hf_ui.apply_template(
-                'list_users.html',
+                'list_links.html',
                 template_context,
                 document.getElementById('hf_page_main_content')
             );
@@ -361,8 +359,9 @@ hf_control.signed_in.route('/groups', function(ctx)
 {
     hf_service.list_groups(function(groups){
         var template = {
-            'groups': groups,
-            'title': "My groups"
+            'chunks': groups,
+            'title': "My groups",
+            'empty': 'You have not subcribed to any groups.'
         };
 
         var header_html = hf_ui.template(
@@ -371,7 +370,7 @@ hf_control.signed_in.route('/groups', function(ctx)
         );
 
         var list_group_html = hf_ui.template(
-            'list_groups.html',
+            'list_links.html',
             template
         );
 
@@ -384,12 +383,13 @@ hf_control.signed_in.route('/global/groups', function(ctx){
     hf_service.global_list('/global/groups_list', function(groups_hashes){
         hf_service.get_group_public_chunks(groups_hashes, function(groups){
             var template = {
-                'groups': groups,
-                'title': 'All groups'
+                'chunks': groups,
+                'title': 'All groups',
+                'empty': 'There is no groups on this server.'
             };
 
             var list_group_html = hf_ui.template(
-                'list_groups.html',
+                'list_links.html',
                 template
             );
 
@@ -476,14 +476,15 @@ hf_control.group_contacts = function(ctx, group_hash)
 
             var is_admin = hf_service.is_group_admin(group_hash);
             var template_context = {
-                'contacts': users,
+                'chunks': users,
                 'title' : 'Group\'s members',
-                'is_admin': is_admin
+                'is_admin': is_admin,
+                'empty': 'YOU SHOULD NOT SEE THIS MESSAGE.'
             };
 
 
             var html = hf_ui.template(
-                'list_users.html',
+                'list_links.html',
                 template_context
             );
             document.getElementById('hf_page_main_content').innerHTML = header_html + html;
