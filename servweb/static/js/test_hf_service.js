@@ -665,6 +665,7 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.create_group,'test_hf_service.create_group');
     test_utils.run(test_hf_service.add_user_to_group,'test_hf_service.add_user_to_group');
     test_utils.run(test_hf_service.subscribe_to_group,'test_hf_service.subscribe_to_group');
+    test_utils.run(test_hf_service.list_group_notifications, 'test_hf_service.list_group_notifications');
     test_utils.run(test_hf_service.group_notifications, 'test_hf_service.group_notifications');
 
     //DISCUSSIONS
