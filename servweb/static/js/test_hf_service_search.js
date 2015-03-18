@@ -61,5 +61,8 @@ test_hf_service.search_string_pattern = function()
         test_utils.assert(matching_chunks_list.length == 1, 'Search \'aliens\' pattern unexpected result ' + matching_chunks_list.length);
     });
 
-    test_utils.assert_success(3);
+    hf_service.search_string_pattern("aliensFFFFF",function(matching_chunks_list){
+        test_utils.assert(matching_chunks_list.length == 0, 'Search \'aliensFFFFF\' pattern unexpected result ' + matching_chunks_list.length);
+    });
+    test_utils.assert_success(4);
 }

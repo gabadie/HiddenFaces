@@ -1,4 +1,10 @@
-
+/*
+ * Searchs for a string pattern in users and groups chunks
+ * @param <pattern>: the string to find
+ * @param <callback>: the function called once the response has arrived
+ *      @param <matching_chunks>: the list of matching groups and users public chunks
+ *      function my_callback(matching_chunks)
+ */
 hf_service.search_string_pattern = function(pattern, callback)
 {
     assert(typeof pattern == 'string');
@@ -27,6 +33,14 @@ hf_service.search_string_pattern = function(pattern, callback)
 
 }
 
+/*
+ * Searchs for a string pattern in users chunks (fields profile.first_name and profile.last_name)
+ * @param <pattern>: the string to find
+ * @param <callback>: the function called once the response has arrived
+ *      @param <matching_chunks>: the list of matching users public chunks.
+ *              = null if cannot access global users list chunk
+ *      function my_callback(matching_chunks)
+ */
 hf_service.search_string_pattern_users = function(pattern, callback)
 {
     var users_matching_chunks = [];
@@ -57,6 +71,14 @@ hf_service.search_string_pattern_users = function(pattern, callback)
     });
 }
 
+/*
+ * Searchs for a string pattern in groups chunks (fields group.name and group.description)
+ * @param <pattern>: the string to find
+ * @param <callback>: the function called once the response has arrived
+ *      @param <matching_chunks>: the list of matching groups public chunks.
+ *              = null if cannot access global groups list chunk
+ *      function my_callback(matching_chunks)
+ */
 hf_service.search_string_pattern_groups = function(pattern, callback)
 {
     var groups_matching_chunks = [];
