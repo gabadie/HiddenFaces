@@ -183,7 +183,14 @@ hf_control.signed_in.route('/discussion/', function(ctx){
         return hf_control.view('/');
     }
 
-    hf_control.discussion_thread(ctx, discussion_hash);
+    if (current_url_arrs[3] == 'peers')
+    {
+        hf_control.discussion_peers(ctx, discussion_hash);
+    }
+    else
+    {
+        hf_control.discussion_thread(ctx, discussion_hash);
+    }
 });
 
 hf_control.discussion_thread = function(ctx, discussion_hash)
@@ -202,6 +209,25 @@ hf_control.discussion_thread = function(ctx, discussion_hash)
                 template_context
             );
         });
+    });
+}
+
+hf_control.discussion_peers = function(ctx, discussion_hash)
+{
+    var domElem = document.getElementById("hf_page_main_content");
+
+    hf_service.get_discussion(discussion_hash, function(discussion){
+        var params = {
+            'contacts': discussion['peers'],
+            'title': 'Discussion\'s peers'
+        };
+
+        domElem.innerHTML = hf_ui.template(
+            'list_users.html',
+            params
+        );
+
+        ctx.callback();
     });
 }
 
