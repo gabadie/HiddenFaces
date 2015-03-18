@@ -408,7 +408,7 @@ hf_control.signed_in.route('/group', function(ctx){
 
         return hf_control.view('/groups');
     }
-    else if (current_url_arrs.length == 2)
+    else if (current_url_arrs.length == 3)
     {
         return hf_control.group_thread(ctx, group_hash);
     }
@@ -523,25 +523,23 @@ hf_control.group_thread = function(ctx, group_hash)
 
         if(waiting_sub == 1 || public_chunk['group']['public'])
         {
-            hf_control.view_new_group_post(group_hash, function(new_post_html)
-            {
-                domElem.innerHTML += new_post_html;
-                var chunks_names = [];
-                try
-                {
-                    chunks_names.push(public_chunk['thread']['name']);
-                }
-                catch(err){
-                }
-                finally
-                {
-                    hf_control.view_threads(chunks_names, function(posts_html){
-                        domElem.innerHTML += posts_html;
-                    });
+            domElem.innerHTML += hf_ui.template('form/new_post.html', {});
 
-                    ctx.callback();
-                }
-            });
+            var chunks_names = [];
+            try
+            {
+                chunks_names.push(public_chunk['thread']['name']);
+            }
+            catch(err){
+            }
+            finally
+            {
+                hf_control.view_threads(chunks_names, function(posts_html){
+                    domElem.innerHTML += posts_html;
+                });
+
+                ctx.callback();
+            }
         }
         else
         {
@@ -773,14 +771,6 @@ hf_control.view_new_post = function(current_circle_hash, callback)
             callback(html);
         }
 
-    });
-}
-
-hf_control.view_new_group_post = function(group_hash, callback)
-{
-    hf_service.get_group_public_chunk(group_hash, function(public_chunk){
-        var html = hf_ui.template('form/new_group_post.html', null);
-        callback(html);
     });
 }
 
