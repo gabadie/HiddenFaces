@@ -210,6 +210,10 @@ hf_control.discussion_thread = function(ctx, discussion_hash)
                     discussion
                 ) +
                 hf_ui.template(
+                    'form/append_post_to_discussion.html',
+                    discussion
+                ) +
+                hf_ui.template(
                     'list_discussion_posts.html',
                     template_context
                 )

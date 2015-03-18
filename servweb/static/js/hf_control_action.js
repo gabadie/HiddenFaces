@@ -63,6 +63,23 @@ hf_control.add_discussion_peers = function(domElem)
     });
 }
 
+hf_control.append_post_to_discussion = function(domElem)
+{
+    var form_json = hf.inputs_to_json(domElem);
+
+    if (form_json['content'] == '')
+    {
+        return;
+    }
+
+    hf_service.append_post_to_discussion(form_json['content'], form_json['discussion_hash'], function(success){
+        assert(success);
+
+        hf_control.refresh_view();
+    });
+}
+
+
 // --------------------------------------------------------------------- LOG IN/OUT
 
 hf_control.signed_out.login = function(domElem)
