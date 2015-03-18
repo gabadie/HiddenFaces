@@ -164,7 +164,7 @@ Handlebars.registerHelper('hf_group_link', function(group)
         out += '<p class="btn-sm" style="float:right;color:blue;">Waiting for reponse</p>';
     } else if (hf_service.is_group_admin(group_hash))
     {
-        out += '<button class="btn btn-sm btn-success" style="float:right;"">Settings</button>';
+        out += '<button class="btn btn-sm btn-success" style="float:right;"  onclick="return hf_control.view(\'/group/'+group_hash+'/settings'+ '\')">Settings</button>';
     }
 
     out += '</div><div class="hf_description"><p>';
@@ -175,36 +175,52 @@ Handlebars.registerHelper('hf_group_link', function(group)
 
 Handlebars.registerHelper('hf_group_header', function(group)
 {
+    // Span for title
     var out = '<div class="hf_title">Group: '+ group['group']['name'];
     var group_hash = group['__meta']['group_hash'];
 
     var waiting_sub = hf_service.waiting_accept_subcribe(group);
 
-    if(waiting_sub == -1)
-        out+= hf_ui.send_message_dialog(group);
-
     if (waiting_sub == 0)
         out += '<p class="btn btn-sm" style="float:right;">Waiting for reponse</p>';
 
-    if (waiting_sub == 1 || group['group']['public'])
-    {
-        out += '<button class = "btn btn-default btn-sm" style="float:right; margin-right:5px; margin-left:5px;"';
-        out += 'onclick="return hf_control.view(\'/group/'+group_hash+'/contacts'+ '\')";>';
-        out += 'Show members</button>';
-
-        if(hf_service.is_group_admin(group_hash))
-        {
-            out += '<button class="btn btn-sm btn-success" style="float:right;"">Settings</button>';
-        }
-    }
+    if(waiting_sub == -1)
+        out+= hf_ui.send_message_dialog(group);
 
     out +=  '</div><div style="font-size:12px;">'
             + group['group']['description']
             +' </div>';
 
+    // menu group for public member
+    if (waiting_sub == 1 || group['group']['public'])
+    {
+        out += hf_ui.menu_group(group_hash);
+    }
+
     return out;
 });
 
+hf_ui.menu_group = function(group_hash)
+{
+    var is_admin = hf_service.is_group_admin(group_hash);
+    var out = '';
+    out += '<div class="hf_group_menu">';
+
+    if (is_admin)
+        out += '<button class="btn btn-sm btn-default" onclick="return hf_control.view(\'/group/'+group_hash+'/notifications'+ '\')">Notifications</button>';
+
+    out += '<button class = "btn btn-default btn-sm"';
+    out += 'onclick="return hf_control.view(\'/group/'+group_hash+'/contacts'+ '\')";>';
+    out += 'Show members</button>';
+
+    if(is_admin)
+    {
+        out += '<button class="btn btn-sm btn-default" onclick="return hf_control.view(\'/group/'+group_hash+'/settings'+ '\')">Settings</button>';
+    }
+
+    out += '</div>';
+    return out;
+}
 
 hf_ui.send_message_dialog = function(group)
 {
@@ -242,3 +258,6 @@ Handlebars.registerHelper('hf_linkify', function(text_to_linkify){
     return hf.linkify(text_to_linkify);
 });
 
+Handlebars.registerHelper('hf_checked', function(isChecked){
+    return isChecked?"checked":"";
+});

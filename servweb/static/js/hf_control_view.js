@@ -213,7 +213,9 @@ hf_control.signed_in.route('/notifications', function(ctx){
 
     domElem.innerHTML = hf_ui.template(
         "header/notification_header.html",
-        {}
+        {
+            'title': 'Your notifications'
+        }
     );
 
     hf_service.list_user_notifications(function(notifications_list){
@@ -319,15 +321,67 @@ hf_control.signed_in.route('/global/groups', function(ctx){
 hf_control.signed_in.route('/group', function(ctx){
     var current_url_arrs = hf_control.current_view_url().split("/");
     var group_hash = current_url_arrs[2];
-    var domElem = document.getElementById("hf_page_main_content");
-    if (current_url_arrs[3] == 'contacts')
-    {
-        hf_control.group_contacts(ctx, group_hash);
-    } else
+
+    if (current_url_arrs.length > 3){
+        if (current_url_arrs[3] === 'contacts'){
+            hf_control.group_contacts(ctx, group_hash);
+        } else if (current_url_arrs[3] == 'notifications'){
+            hf_control.group_notifications(ctx, group_hash);
+        } else {
+            hf_control.group_settings(ctx, group_hash);
+        }
+    }
+    else
     {
         hf_control.group_thread(ctx, group_hash);
     }
 });
+
+hf_control.group_settings = function(ctx, group_hash)
+{
+    hf_service.get_group_public_chunk(group_hash, function(group){
+        console.log(group);
+        hf_ui.apply_template(
+            'form/edit_group.html',
+            {
+                'group':group
+            },
+            document.getElementById('hf_page_main_content')
+        );
+    });
+}
+
+hf_control.group_notifications = function(ctx, group_hash)
+{
+    hf_service.get_group_public_chunk(group_hash, function(public_chunk)
+    {
+        var domElem = document.getElementById('hf_page_main_content');
+        var header_html = hf_ui.template(
+                            'header/group_header.html',
+                            public_chunk
+                        );
+
+        hf_service.list_group_notifications(group_hash, function(notifications_list){
+
+            var notfi_header = hf_ui.template(
+                "header/notification_header.html",
+                {
+                    'title': 'Your group\'s notifications'
+                }
+            );
+            var template_context = {
+                'chunks': notifications_list
+            };
+
+            domElem.innerHTML = header_html + notfi_header + hf_ui.template(
+                "list_chunks.html",
+                template_context
+            );
+
+            ctx.callback();
+        });
+    });
+}
 
 hf_control.group_contacts = function(ctx, group_hash)
 {
@@ -340,11 +394,13 @@ hf_control.group_contacts = function(ctx, group_hash)
 
         hf_service.list_users(group_hash, function(users) {
 
-
+            var is_admin = hf_service.is_group_admin(group_hash);
             var template_context = {
                 'contacts': users,
-                'title' : 'Group\'s members'
+                'title' : 'Group\'s members',
+                'is_admin': is_admin
             };
+
 
             var html = hf_ui.template(
                 'list_users.html',
