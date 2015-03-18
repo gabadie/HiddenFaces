@@ -2,6 +2,14 @@
     <div class="hf_padding">
         <div class="hf_title">
             Discussion: {{name}}
+
+            <button
+                class="btn btn-default"
+                style="float:right;"
+                onclick="return hf_control.view('/discussion/{{hash}}/peers');"
+            >
+                Show peers
+            </button>
         </div>
     </div>
 {{/hf_cell}}
