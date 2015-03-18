@@ -44,7 +44,7 @@ hf_service.is_discussion_peer = function(discussion_hash, user_hash)
  */
 hf_service.resolve_discussion_name = function(peers_public_chunks_map)
 {
-    var discussion_name = null;
+    var discussion_name = 'Unnamed discussion';
     for(hash in peers_public_chunks_map){
         if(hash != hf_service.user_hash()){
             discussion_name = peers_public_chunks_map[hash]['profile']['first_name'] + ' ' + peers_public_chunks_map[hash]['profile']['last_name'];
@@ -55,6 +55,7 @@ hf_service.resolve_discussion_name = function(peers_public_chunks_map)
     if(nb_peers > 2){
         discussion_name += ', (+' + (nb_peers - 2) + ')';
     }
+
     return discussion_name;
 }
 

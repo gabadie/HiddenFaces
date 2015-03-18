@@ -47,14 +47,20 @@ test_hf_service.create_discussion = function()
     test_utils.assert(hf_service.is_connected(), 'should be connected after');
 
     //discussion creation
-    hf_service.create_discussion(test_hf_service.discussion_names[0], function(discussion_hash){
+    var discussion_hash = hf_service.create_discussion(null, function(discussion_hash){
         test_utils.assert(hf_service.is_discussion_hash(discussion_hash), 'Cannot create discussion');
+    });
+
+    //resolve discussion
+    hf_service.get_discussion(discussion_hash,function(resolved_discussion){
+        test_utils.assert(resolved_discussion !== null, 'cannot access discussion');
+        test_utils.assert(resolved_discussion["name"] == "Unnamed discussion", "wrong discussion name");
     });
 
     var discussions_list = hf_service.user_private_chunk['discussions'];
     test_utils.assert(Object.keys(discussions_list).length == 1, 'No discussion had been added to user private chunk');
 
-    test_utils.assert_success(3);
+    test_utils.assert_success(5);
 }
 
 test_hf_service.create_discussion_with_peers = function()
