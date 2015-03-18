@@ -241,6 +241,7 @@ hf_service.add_peers_to_discussion = function(discussion_hash, peers_hashes, cal
  * @param <callback>: the function called once the response has arrived
  *          @param <resolved_discussion> : {
  *              'name': <discussion_name>,
+                'hash': <discussion_hash>,
  *              'peers': <peers_public_chunks_list>
  *          } or null
  */
@@ -259,6 +260,7 @@ hf_service.get_discussion = function(discussion_hash,callback)
             }
             var resolved_discussion = {
                 'name': discussion_name,
+                'hash': discussion_hash,
                 'peers': hf.values(public_chunks_map)
             };
             callback(resolved_discussion);

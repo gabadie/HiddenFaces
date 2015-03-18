@@ -183,7 +183,14 @@ hf_control.signed_in.route('/discussion/', function(ctx){
         return hf_control.view('/');
     }
 
-    hf_control.discussion_thread(ctx, discussion_hash);
+    if (current_url_arrs[3] == 'peers')
+    {
+        hf_control.discussion_peers(ctx, discussion_hash);
+    }
+    else
+    {
+        hf_control.discussion_thread(ctx, discussion_hash);
+    }
 });
 
 hf_control.discussion_thread = function(ctx, discussion_hash)
@@ -193,15 +200,48 @@ hf_control.discussion_thread = function(ctx, discussion_hash)
     hf_service.get_discussion(discussion_hash, function(discussion){
         hf_service.list_posts(discussion_hash, function(posts_list){
             var template_context = {
-                discussion: discussion,
-                posts: posts_list
+                'discussion': discussion,
+                'posts': posts_list
             };
 
-            domElem.innerHTML = hf_ui.template(
-                'list_discussion_posts.html',
-                template_context
+            domElem.innerHTML = (
+                hf_ui.template(
+                    'header/discussion_header.html',
+                    discussion
+                ) +
+                hf_ui.template(
+                    'list_discussion_posts.html',
+                    template_context
+                )
             );
+
+            ctx.callback();
         });
+    });
+}
+
+hf_control.discussion_peers = function(ctx, discussion_hash)
+{
+    var domElem = document.getElementById("hf_page_main_content");
+
+    hf_service.get_discussion(discussion_hash, function(discussion){
+        var template_context = {
+            'contacts': discussion['peers'],
+            'title': 'Discussion\'s peers'
+        };
+
+        domElem.innerHTML = (
+            hf_ui.template(
+                'header/discussion_header.html',
+                discussion
+            ) +
+            hf_ui.template(
+                'list_users.html',
+                template_context
+            )
+        );
+
+        ctx.callback();
     });
 }
 
@@ -278,7 +318,8 @@ hf_control.signed_in.route('/groups', function(ctx)
 {
     hf_service.list_groups(function(groups){
         var template = {
-            'groups': groups
+            'groups': groups,
+            'title': "My groups"
         };
 
         var header_html = hf_ui.template(
@@ -300,7 +341,8 @@ hf_control.signed_in.route('/global/groups', function(ctx){
     hf_service.global_list('/global/groups_list', function(groups_hashes){
         hf_service.get_group_public_chunks(groups_hashes, function(groups){
             var template = {
-                'groups': groups
+                'groups': groups,
+                'title': 'All groups'
             };
 
             var list_group_html = hf_ui.template(
@@ -341,7 +383,7 @@ hf_control.group_contacts = function(ctx, group_hash)
 
             var template_context = {
                 'contacts': users,
-                'title' : 'Group\'s contacts'
+                'title' : 'Group\'s members'
             };
 
             var html = hf_ui.template(
