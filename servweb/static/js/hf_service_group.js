@@ -344,6 +344,10 @@ hf_service.get_group_public_chunks = function(group_hashes, callback)
 {
     var nb_public_chunks = 0;
     var group_chunks = [];
+
+    if(group_hashes.length === 0){
+        callback(group_chunks);
+    }
     for(var i = 0; i < group_hashes.length; i++)
     {
         hf_service.get_group_public_chunk(group_hashes[i], function(public_group_chunk){
@@ -622,7 +626,6 @@ hf_service.list_groups = function(callback)
     }
 
     var iteration = nb_groups;
-    console.log(iteration);
 
     for(var group_hash in groups) {
 
