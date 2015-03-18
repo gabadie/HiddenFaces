@@ -420,13 +420,19 @@ hf_control.signed_in.route('/group', function(ctx){
 hf_control.group_settings = function(ctx, group_hash)
 {
     hf_service.get_group_public_chunk(group_hash, function(group){
-        hf_ui.apply_template(
+        var header_html = hf_ui.template(
+                'header/group_header.html',
+                group
+            );
+
+        var edit_view = hf_ui.template(
             'form/edit_group.html',
             {
                 'group':group
-            },
-            document.getElementById('hf_page_main_content')
+            }
         );
+
+        document.getElementById('hf_page_main_content').innerHTML = header_html + edit_view;
     });
 }
 
@@ -873,10 +879,4 @@ hf_control.refresh_left_column = function()
             template_context
         );
     });
-}
-
-
-hf_control.subcribe = function(group_hash)
-{
-
 }
