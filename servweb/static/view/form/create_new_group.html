@@ -1,51 +1,58 @@
 {{#hf_cell}}
     <div class="hf_padding">
         <div class="hf_title">Create new group.</div>
-        <form onsubmit="hf_control.create_group(this);return false;" class="form-group" id="hf_create_new_group">
         <div>
-            <input
-                type="text"
-                class="form-control"
-                placeholder="group name..."
-                name="name"
-            />
-        </div>
-        <div style="margin-top:5px">
-            <textarea
-                class="form-control"
-                placeholder="group's description"
-                name="description"
-            ></textarea>
-        </div>
-        <div class="hf_group_radio" style="margin-top:5px">
-            <div style="float:left;">
-                Group's visibility:
-            </div>
-            <div class="checkbox" style="float:right">
-                <div >
-                    <label><input type="checkbox" name="group-visilibity" value="true" checked>Public</label>
+            <form onsubmit="hf_control.create_group(this);return false;" class="form-group" id="hf_create_new_group" style="display:inline-block;">
+                <div style="width: 140px; display:inline-block; float:left;">
+                    {{{hf_input_image "picture" "hello"}}}
                 </div>
-            </div>
-        </div>
-        <div class="hf_group_radio">
-            <div style="float:left;">
-                Thread's visibility:
-            </div>
-            <div class="checkbox" style="float:right">
-                <div >
-                    <label><input type="checkbox" name="thread-visilibity" value="true">Public</label>
-                </div>
-            </div>
-        </div>
+                <div style="float:left; margin-left:20px; width: 71%;">
+                    <div>
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder="group name..."
+                            name="name"
+                        />
+                    </div>
+                    <div style="margin-top:5px">
+                        <textarea
+                            class="form-control"
+                            placeholder="group's description"
+                            name="description"
+                        ></textarea>
+                    </div>
+                    <div class="hf_group_radio" style="margin-top:5px">
+                        <div style="float:left;">
+                            Group's visibility:
+                        </div>
+                        <div class="checkbox" style="float:right">
+                            <div >
+                                <label><input type="checkbox" name="group-visilibity" value="true" checked>Public</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hf_group_radio">
+                        <div style="float:left;">
+                            Thread's visibility:
+                        </div>
+                        <div class="checkbox" style="float:right">
+                            <div >
+                                <label><input type="checkbox" name="thread-visilibity" value="true">Public</label>
+                            </div>
+                        </div>
+                    </div>
 
-        <div style="text-align:right; margin-top:5px;">
-            <input
-                type="submit"
-                class="btn btn-default btn-sm"
-                name="submit"
-                value="Create"
-            />
+                    <div style="text-align:right; margin-top:5px;">
+                        <input
+                            type="submit"
+                            class="btn btn-default btn-sm"
+                            name="submit"
+                            value="Create"
+                        />
+                    </div>
+                </div>
+            </form>
         </div>
-        </form>
     </div>
 {{/hf_cell}}
