@@ -1,6 +1,14 @@
 {{#hf_cell}}
     <div class="hf_padding">
-        <div class="hf_title">Create a new discussion.</div>
+        <div class="hf_title">Create a new discussion.
+            <button
+                class="btn btn-default"
+                style="float:right;"
+                onclick="return hf_control.view('/discussions');"
+            >
+                Back
+            </button>
+        </div>
         <form
             onsubmit="hf_control.create_new_discussion(this); return false;"
             onkeypress="return event.keyCode != 13;"
