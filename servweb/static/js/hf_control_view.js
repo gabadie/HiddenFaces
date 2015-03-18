@@ -852,7 +852,6 @@ hf_control.refresh_left_column = function()
     });
 
     hf_service.list_groups(function(groups_list){
-        console.info(groups_list.length);
         var template_context = {
             'title': 'Groups',
             'title_view_path': '/groups',
