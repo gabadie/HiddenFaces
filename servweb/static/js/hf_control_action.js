@@ -63,6 +63,41 @@ hf_control.add_discussion_peers = function(domElem)
     });
 }
 
+hf_control.append_post_to_discussion = function(domElem)
+{
+    var form_json = hf.inputs_to_json(domElem);
+
+    if (form_json['content'] == '')
+    {
+        return;
+    }
+
+    hf_service.append_post_to_discussion(form_json['content'], form_json['discussion_hash'], function(success){
+        assert(success);
+
+        hf_control.refresh_view();
+    });
+}
+
+hf_control.create_new_discussion = function(domElem)
+{
+    var form_json = hf.inputs_to_json(domElem);
+
+    form_json['peers'] = form_json['peers'].split('\n');
+
+    if (form_json['name'] == '')
+    {
+        form_json['name'] = null;
+    }
+
+    hf_service.create_discussion_with_peers(form_json['name'], form_json['peers'], function(discussion_hash){
+        assert(discussion_hash != null);
+
+        hf_control.view('/discussion/' + discussion_hash);
+    });
+}
+
+
 // --------------------------------------------------------------------- LOG IN/OUT
 
 hf_control.signed_out.login = function(domElem)

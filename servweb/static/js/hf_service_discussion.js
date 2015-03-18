@@ -44,7 +44,7 @@ hf_service.is_discussion_peer = function(discussion_hash, user_hash)
  */
 hf_service.resolve_discussion_name = function(peers_public_chunks_map)
 {
-    var discussion_name = null;
+    var discussion_name = 'Unnamed discussion';
     for(hash in peers_public_chunks_map){
         if(hash != hf_service.user_hash()){
             discussion_name = peers_public_chunks_map[hash]['profile']['first_name'] + ' ' + peers_public_chunks_map[hash]['profile']['last_name'];
@@ -55,6 +55,7 @@ hf_service.resolve_discussion_name = function(peers_public_chunks_map)
     if(nb_peers > 2){
         discussion_name += ', (+' + (nb_peers - 2) + ')';
     }
+
     return discussion_name;
 }
 
@@ -136,7 +137,6 @@ hf_service.create_discussion = function(discussion_name, callback)
  */
 hf_service.create_discussion_with_peers = function(discussion_name, peers_hashes, callback)
 {
-    assert(peers_hashes.length > 0);
 
     hf_service.create_discussion(discussion_name, function(discussion_hash){
         assert(hf_service.is_discussion_hash(discussion_hash));
@@ -146,8 +146,6 @@ hf_service.create_discussion_with_peers = function(discussion_name, peers_hashes
                 if(success){
                     callback(discussion_hash);
                 }else{
-                    console.info('cannot add peers to discussion');
-                    alert(peers_hashes);
                     hf_service.leave_discussion(discussion_hash,function(){
                         callback(null);
                     });
@@ -193,12 +191,17 @@ hf_service.add_peers_to_discussion = function(discussion_hash, peers_hashes, cal
 {
     assert(hf_service.is_connected());
     assert(hf_service.is_discussion_hash(discussion_hash));
-    assert(peers_hashes.length > 0);
+    assert(peers_hashes instanceof Array);
     assert(hf.is_function(callback));
 
     var discussion = hf_service.user_private_chunk['discussions'][discussion_hash];
     var iteration = peers_hashes.length;
     var new_peers = [];
+
+    if(iteration === 0){
+        callback(true);
+        return;
+    }
 
     for(var i = 0; i < peers_hashes.length; i++){
 
@@ -250,7 +253,7 @@ hf_service.add_peers_to_discussion = function(discussion_hash, peers_hashes, cal
                     });
                 }else{
                     console.info('no peers to add');
-                    callback(false);
+                    callback(true);
                 }
             }
         });

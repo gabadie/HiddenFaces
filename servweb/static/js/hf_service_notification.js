@@ -214,13 +214,14 @@ hf_service.delete_notification = function(repository_chunk, notification_hash, c
 /*
  * Processes notifications automations on given notification json.
  *
+ * @param <repository_chunk> : the repository containing the notifications
  * @param <notifications_json>: the notifications to process
  * @param <callback>: the function called once done
  *      @param <continued_notifications_json>: the notifications that made it
  *          throught
  *      function my_callback(continued_notifications_json)
  */
-hf_service.process_notifications = function(notifications_json, callback)
+hf_service.process_notifications = function(repository_chunk,notifications_json, callback)
 {
     assert(hf.is_function(callback));
 
@@ -239,7 +240,7 @@ hf_service.process_notifications = function(notifications_json, callback)
         {
             assert(hf.is_function(notificationAutomation));
 
-            status = notificationAutomation(notification_json);
+            status = notificationAutomation(notification_json,repository_chunk);
 
             assert(typeof status == 'string');
 
@@ -431,7 +432,7 @@ hf_service.refresh_notifications = function(repository_chunk, callback)
 
     var notifications_json = repository_chunk['notifications'];
 
-    hf_service.process_notifications(notifications_json, function(survived_notifications_json){
+    hf_service.process_notifications(repository_chunk,notifications_json, function(survived_notifications_json){
         assert(survived_notifications_json.length <= notifications_json.length);
 
         repository_chunk['notifications'] = survived_notifications_json;
