@@ -690,4 +690,7 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.verify_append_posts_certification,'test_hf_service.verify_append_posts_certification');
     test_utils.run(test_hf_service.verify_comment_certification,'test_hf_service.verify_comment_certification');
     test_utils.run(test_hf_service.list_certified_posts_comments, 'test_hf_service.list_certified_posts_comments ');
+
+    //SEARCH ENGINE
+    test_utils.run(test_hf_service.search_string_pattern,'test_hf_service.search_string_pattern');
 }
