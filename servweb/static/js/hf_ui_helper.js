@@ -100,7 +100,6 @@ Handlebars.registerHelper('hf_add_contact_to_circle', function(contact, circle_h
 
 Handlebars.registerHelper('hf_chunk', function(chunk, options){
     var template_name = chunk['__meta']['type'].substring(1) + '.html';
-    console.log(chunk);
 
     if (hf_ui.templatesCaches.has(template_name))
     {
