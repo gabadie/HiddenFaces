@@ -874,9 +874,3 @@ hf_control.refresh_left_column = function()
         );
     });
 }
-
-
-hf_control.subcribe = function(group_hash)
-{
-
-}

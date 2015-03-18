@@ -517,6 +517,14 @@ hf_control.approuve_group_user = function(user_hash)
     });
 }
 
+hf_control.answer_group_request = function(group_hash)
+{
+    hf_service.subscribe_to_group(group_hash, '', function(success){
+        assert(success);
+        hf_control.refresh_view();
+    });
+}
+
 hf_control.save_edit_group_profile = function(dom)
 {
     var info = hf_control.get_group_infos(dom);
