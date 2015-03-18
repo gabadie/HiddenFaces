@@ -358,7 +358,7 @@ hf_service.pull_fresh_notifications = function(repository_chunk, callback)
  *      notification repository
  * @param <callback>: the function called once done
  *      @param <notifications_list>: the resolved notifications list or null
- *      function my_callback(notifications_list)
+ *      function my_callback(notifications_list, modified_repository)
  */
 hf_service.list_notifications = function(repository_chunk, callback)
 {
@@ -372,7 +372,7 @@ hf_service.list_notifications = function(repository_chunk, callback)
              * hf_service.pull_fresh_notifications() failed so we fail
              * hf_service.list_notifications().
              */
-            callback(null);
+            callback(null, false);
             return;
         }
 
@@ -400,7 +400,7 @@ hf_service.list_notifications = function(repository_chunk, callback)
 
                     if (callbacks_remaining == 0)
                     {
-                        callback(notifications);
+                        callback(notifications, notifications_count > 0);
                     }
                 }
             );
@@ -408,7 +408,7 @@ hf_service.list_notifications = function(repository_chunk, callback)
 
         if (notifications_json.length == 0)
         {
-            callback(notifications);
+            callback(notifications, notifications_count > 0);
         }
     });
 }
@@ -544,69 +544,46 @@ hf_service.list_user_notifications = function(callback)
 {
     assert(hf.is_function(callback));
 
-    hf_service.list_notifications(hf_service.user_private_chunk, function(notifications_list){
+    hf_service.list_notifications(hf_service.user_private_chunk, function(notifications_list, modified_repository){
         if (notifications_list == null)
         {
-            alert('hf_service.list_user_notifications() failed');
+            callback(null);
             return;
         }
 
-        notifications_list = hf_service.sort_notifications(notifications_list);
-        callback(notifications_list);
-    });
-}
-
-/*
- * sort a list notifications by date
- *
- * @param <notifications>: list notifications input
- * @return: list notifications sorted by date
- */
-hf_service.sort_notifications = function(notifications)
-{
-    notifications.sort(function(notification_a, notification_b){
-        if (notification_a['__meta']['date'] > notification_b['__meta']['date'])
-        {
-            return -1;
-        }
-        else if (notification_a['__meta']['date'] < notification_b['__meta']['date'])
-        {
-            return 1;
-        }
-
-        return 0;
-    });
-
-    return notifications;
-}
-
-/*
- * Lists group's notifications
- *
- * @param <group_hash>: group's hash
- * @param <callback>: the function called once done
- *      @param <notifications_list>: the list of notifications or null
- *      function my_callback(notifications_list)
- */
-hf_service.list_group_notifications = function(group_hash, callback)
-{
-    assert(hf.is_function(callback));
-    assert(hf_service.is_group_admin(group_hash));
-
-    hf_service.get_group_private_chunk(group_hash, function(private_group_chunk){
-        console.log(private_group_chunk);
-        hf_service.list_notifications(private_group_chunk, function(notifications_list){
-            if (notifications_list == null)
+        var todo = function(success){
+            if (!success)
             {
-                alert('hf_service.list_user_notifications() failed');
+                callback(null);
                 return;
             }
-            console.log(notifications_list);
-            //notifications_list = hf_service.sort_notifications(notifications_list);
+
+            notifications_list.sort(function(notification_a, notification_b){
+                if (notification_a['__meta']['date'] > notification_b['__meta']['date'])
+                {
+                    return -1;
+                }
+                else if (notification_a['__meta']['date'] < notification_b['__meta']['date'])
+                {
+                    return 1;
+                }
+
+                return 0;
+            });
+
             callback(notifications_list);
-        });
+        }
+
+        if (!modified_repository)
+        {
+            todo(true);
+            return;
+        }
+
+        hf_service.save_user_chunks(todo);
     });
 }
+
 
 // ------------------------------------------------ NOTIFICATION IMPLEMENTATIONS
 

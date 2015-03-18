@@ -167,7 +167,14 @@ test_hf_service.list_user_notifications = function()
         );
     });
 
-    test_utils.assert_success(6);
+    hf_service.disconnect(user_profile0);
+    hf_service.login_user(user_profile0);
+
+    hf_service.list_user_notifications(function(notifications_list){
+        test_utils.assert(notifications_list.length == 2, 'should still have two notifications');
+    });
+
+    test_utils.assert_success(7);
 }
 
 test_hf_service.delete_user_notification = function()

@@ -344,6 +344,10 @@ hf_service.get_group_public_chunks = function(group_hashes, callback)
 {
     var nb_public_chunks = 0;
     var group_chunks = [];
+
+    if(group_hashes.length === 0){
+        callback(group_chunks);
+    }
     for(var i = 0; i < group_hashes.length; i++)
     {
         hf_service.get_group_public_chunk(group_hashes[i], function(public_group_chunk){
@@ -874,6 +878,43 @@ hf_service.send_group_infos_to_user = function(user_hash, group_hash, shared_chu
 
         hf_service.get_user_public_chunk(user_hash, function(user_public_chunk){
             hf_service.push_notification(user_public_chunk, notification_json, callback);
+        });
+    });
+}
+
+/*
+ * Lists group's notifications
+ *
+ * @params <group_hash>: group's hash
+ * @param <callback>: the function called once done
+ *      @param <notifications_list>: the list of notifications or null
+ *      function my_callback(notifications_list)
+ */
+hf_service.list_group_notifications = function(group_hash, callback)
+{
+    hf_service.get_group_private_chunk(group_hash, function(group_private_chunk){
+        if (group_private_chunk == null)
+        {
+            return callback(null);
+        }
+
+        hf_service.list_notifications(group_private_chunk, function(notifications_list, modified_repository){
+            var todo = function(success)
+            {
+                if (!success)
+                {
+                    return callback(null);
+                }
+
+                callback(notifications_list);
+            }
+
+            if (!modified_repository)
+            {
+                return todo(true);
+            }
+
+            hf_service.save_group_chunks(group_private_chunk, todo);
         });
     });
 }

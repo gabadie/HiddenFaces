@@ -665,6 +665,7 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.create_group,'test_hf_service.create_group');
     test_utils.run(test_hf_service.add_user_to_group,'test_hf_service.add_user_to_group');
     test_utils.run(test_hf_service.subscribe_to_group,'test_hf_service.subscribe_to_group');
+    test_utils.run(test_hf_service.list_group_notifications, 'test_hf_service.list_group_notifications');
     test_utils.run(test_hf_service.group_notifications, 'test_hf_service.group_notifications');
 
     //DISCUSSIONS
@@ -690,4 +691,8 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.verify_append_posts_certification,'test_hf_service.verify_append_posts_certification');
     test_utils.run(test_hf_service.verify_comment_certification,'test_hf_service.verify_comment_certification');
     test_utils.run(test_hf_service.list_certified_posts_comments, 'test_hf_service.list_certified_posts_comments ');
+
+    //SEARCH ENGINE
+    test_utils.run(test_hf_service.search_string_pattern_users,'test_hf_service.search_string_pattern_users');
+    test_utils.run(test_hf_service.search_string_pattern, 'test_hf_service.search_string_pattern');
 }

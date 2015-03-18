@@ -170,6 +170,49 @@ test_hf_service.subscribe_to_group = function(){
     test_utils.assert_success(10);
 }
 
+test_hf_service.list_group_notifications = function(){
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+
+    var user_hash0 = hf_service.create_user(user_profile0);
+    var user_hash1 = hf_service.create_user(user_profile1);
+
+    hf_service.login_user(user_profile0);
+
+    //group creation
+    var group_info = test_hf_service.group_examples();
+    var subscription_message = 'I would like to subscribe to this group';
+    hf_service.create_group(
+        group_info['name'],
+        group_info['description'],
+        false, false,
+        function(group_hash){
+            test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
+
+            hf_service.list_group_notifications(group_hash, function(notifications_list){
+                test_utils.assert(notifications_list.length == 0, 'should not have notification');
+            });
+
+            hf_service.disconnect();
+
+            //users subscriptions
+            hf_service.login_user(user_profile1);
+            hf_service.subscribe_to_group(group_hash, subscription_message, test_utils.callbackSuccess);
+            hf_service.disconnect();
+
+            hf_service.login_user(user_profile0);
+            hf_service.list_group_notifications(group_hash, function(notifications_list){
+                test_utils.assert(notifications_list.length == 1, 'should have one notification');
+            });
+            hf_service.list_group_notifications(group_hash, function(notifications_list){
+                test_utils.assert(notifications_list.length == 1, 'should still have one notification');
+            });
+        }
+    );
+
+    test_utils.assert_success(5);
+}
+
 test_hf_service.group_notifications = function(){
     var user_profile0 = test_hf_service.john_smith_profile(0);
     var user_profile1 = test_hf_service.john_smith_profile(1);
