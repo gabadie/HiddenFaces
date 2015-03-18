@@ -200,14 +200,22 @@ hf_control.discussion_thread = function(ctx, discussion_hash)
     hf_service.get_discussion(discussion_hash, function(discussion){
         hf_service.list_posts(discussion_hash, function(posts_list){
             var template_context = {
-                discussion: discussion,
-                posts: posts_list
+                'discussion': discussion,
+                'posts': posts_list
             };
 
-            domElem.innerHTML = hf_ui.template(
-                'list_discussion_posts.html',
-                template_context
+            domElem.innerHTML = (
+                hf_ui.template(
+                    'header/discussion_header.html',
+                    discussion
+                ) +
+                hf_ui.template(
+                    'list_discussion_posts.html',
+                    template_context
+                )
             );
+
+            ctx.callback();
         });
     });
 }
@@ -217,14 +225,20 @@ hf_control.discussion_peers = function(ctx, discussion_hash)
     var domElem = document.getElementById("hf_page_main_content");
 
     hf_service.get_discussion(discussion_hash, function(discussion){
-        var params = {
+        var template_context = {
             'contacts': discussion['peers'],
             'title': 'Discussion\'s peers'
         };
 
-        domElem.innerHTML = hf_ui.template(
-            'list_users.html',
-            params
+        domElem.innerHTML = (
+            hf_ui.template(
+                'header/discussion_header.html',
+                discussion
+            ) +
+            hf_ui.template(
+                'list_users.html',
+                template_context
+            )
         );
 
         ctx.callback();
