@@ -25,18 +25,20 @@
         </ul>
         <form
             id="hf_search"
-            onsubmit="return false;"
+            onsubmit="hf_control.search_result(this); return false;"
         >
             <input
                 type="text"
                 class="form-control"
                 placeholder="Search..."
-                name="search"
+                name="search_query"
+                onfocus="hf_control.search_focus();"
+                onblur="hf_control.search_blur();"
             />
             <input
+                id="hf_search_submit"
                 type="submit"
                 class="btn btn-primary"
-                name="search"
                 value="Search"
             />
         </form>
