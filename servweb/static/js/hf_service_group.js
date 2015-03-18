@@ -655,7 +655,7 @@ hf_service.list_groups = function(callback)
                             callback(content);
                         }
                     }else{
-                        hf_service.get_group_shared_chunk(group_hash, function(group_shared_chunk){
+                        hf_service.get_group_shared_chunk(group_public_chunk['__meta']['group_hash'], function(group_shared_chunk){
                             if(group_shared_chunk){
                                 content.push(group_shared_chunk);
                             }else{
