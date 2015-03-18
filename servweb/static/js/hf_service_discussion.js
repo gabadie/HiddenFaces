@@ -193,12 +193,17 @@ hf_service.add_peers_to_discussion = function(discussion_hash, peers_hashes, cal
 {
     assert(hf_service.is_connected());
     assert(hf_service.is_discussion_hash(discussion_hash));
-    assert(peers_hashes.length > 0);
+    assert(peers_hashes instanceof Array);
     assert(hf.is_function(callback));
 
     var discussion = hf_service.user_private_chunk['discussions'][discussion_hash];
     var iteration = peers_hashes.length;
     var new_peers = [];
+
+    if(iteration === 0){
+        callback(true);
+        return;
+    }
 
     for(var i = 0; i < peers_hashes.length; i++){
 
@@ -250,7 +255,7 @@ hf_service.add_peers_to_discussion = function(discussion_hash, peers_hashes, cal
                     });
                 }else{
                     console.info('no peers to add');
-                    callback(false);
+                    callback(true);
                 }
             }
         });

@@ -148,6 +148,12 @@ test_hf_service.add_peers_to_discussion = function() {
     hf_service.add_peers_to_discussion(discussion_hash, [user_hash2,user_hash3], function(success){
         test_utils.assert(success == true,'Cannot add user_hash2 and user_hash3 to discussion');
     });
+    hf_service.add_peers_to_discussion(discussion_hash, [user_hash2,user_hash3], function(success){
+        test_utils.assert(success == true,'Adding old peers to discussion failed');
+    });
+    hf_service.add_peers_to_discussion(discussion_hash, [], function(success){
+        test_utils.assert(success == true,'Cannot add no peers to discussion');
+    });
     hf_service.list_posts(discussion_hash,function(posts_list){
         test_utils.assert(posts_list.length == 2, 'Nb of posts is ' + posts_list.length + ' instead of 2');
     });
@@ -166,7 +172,7 @@ test_hf_service.add_peers_to_discussion = function() {
     hf_service.list_peers(discussion_hash,function(peers_list){
         test_utils.assert(Object.keys(peers_list).length == 4, "Nb of peers is " + Object.keys(peers_list).length + " instead of 4");
     });
-    test_utils.assert_success(11);
+    test_utils.assert_success(13);
 }
 
 test_hf_service.peers_conversation = function() {
