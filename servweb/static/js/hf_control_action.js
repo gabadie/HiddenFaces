@@ -502,7 +502,7 @@ hf_control.create_group = function(dom)
 
     hf_service.create_group(info['group_name'], info['group_description'], info['group_group_public'], info['group_thread_public'], function(success)
     {
-        assert(success != null);
+        assert(success);
         hf_control.refresh_view();
     });
 }
