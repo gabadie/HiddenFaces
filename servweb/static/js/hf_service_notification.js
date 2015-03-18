@@ -158,7 +158,7 @@ hf_service.push_notification = function(public_repository_chunk, notification_js
             if (json_message['status'] != 'ok')
             {
                 allert(
-                    'hf_service.push_user_notification(' +
+                    'hf_service.push_notification(' +
                     user_hash + ', ' +
                     JSON.stringify(notification_json) +
                     ') failed'
