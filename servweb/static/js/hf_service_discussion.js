@@ -249,6 +249,7 @@ hf_service.get_discussion = function(discussion_hash,callback)
 {
     assert(hf_service.is_discussion_hash(discussion_hash));
     assert(hf.is_function(callback));
+    assert(hf_service.is_connected());
 
     var discussion = hf_service.user_private_chunk['discussions'][discussion_hash];
 
@@ -268,6 +269,58 @@ hf_service.get_discussion = function(discussion_hash,callback)
             callback(null);
         }
     });
+}
+
+/*
+ * Gets the discussion with the specified peer or starts a new one
+ * @param <peer_hash>: the hash of the peer
+ * @param <callback>: the function called once the response has arrived
+ *          @param <resolved_discussion> : {
+ *              'name': <discussion_name>,
+                'hash': <discussion_hash>,
+ *              'peers': <peers_public_chunks_list>
+ *          } or null
+ */
+hf_service.start_discussion_with_peer = function(peer_hash,callback)
+{
+    assert(hf.is_function(callback));
+
+    var discussion_hash = get_discussion_with_peer(peer_hash);
+
+    if(discussion_hash == null){
+        hf_service.create_discussion_with_peers(null, [peer_hash], function(discussion_hash){
+            if(discussion_hash != null){
+                hf_service.get_discussion(discussion_hash,callback);
+            }else{
+                callback(null);
+            }
+        });
+    }else{
+        hf_service.get_discussion(discussion_hash,callback);
+    }
+}
+
+/*
+ * Returns the discussion hash with the specified peer if it exists
+ * @param <peer_hash>: the hash of the peer
+ * @returns <discussion_hash> = null if not found
+ */
+hf_service.get_discussion_with_peer = function(peer_hash)
+{
+    assert(hf.is_hash(peer_hash));
+    assert(hf_service.user_hash() != peer_hash);
+    assert(hf_service.is_connected());
+
+    for(var discussion_hash in hf_service.user_private_chunk['discussions']){
+
+        var peers_list = hf_service.user_private_chunk['discussions'][discussion_hash]['peers'];
+
+        if(peers_list.length == 2 && peers_list.indexOf(peer_hash) >= 0){
+            return discussion_hash;
+        }
+    }
+
+    return null;
 }
 
 /*

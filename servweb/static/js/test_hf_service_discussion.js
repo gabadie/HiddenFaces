@@ -133,6 +133,12 @@ test_hf_service.add_peers_to_discussion = function() {
         test_utils.assert(success == true,'Cannot add user_hash1 to discussion');
     });
 
+    var found_hash = hf_service.get_discussion_with_peer(user_hash1);
+    test_utils.assert(found_hash == discussion_hash,'Discussion hash not matching');
+
+    var found_hash = hf_service.get_discussion_with_peer(user_hash3);
+    test_utils.assert(found_hash == null,'Discussion hash found unexpectly');
+
     hf_service.disconnect();
 
     hf_service.login_user(user_profile1);
@@ -160,7 +166,7 @@ test_hf_service.add_peers_to_discussion = function() {
     hf_service.list_peers(discussion_hash,function(peers_list){
         test_utils.assert(Object.keys(peers_list).length == 4, "Nb of peers is " + Object.keys(peers_list).length + " instead of 4");
     });
-    test_utils.assert_success(9);
+    test_utils.assert_success(11);
 }
 
 test_hf_service.peers_conversation = function() {
