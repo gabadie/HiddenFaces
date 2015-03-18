@@ -622,6 +622,7 @@ hf_service.list_groups = function(callback)
     }
 
     var iteration = nb_groups;
+    console.log(iteration);
 
     for(var group_hash in groups) {
 
@@ -636,13 +637,17 @@ hf_service.list_groups = function(callback)
                     callback(content);
                 }
             });
-
         }else{
 
             hf_service.get_group_public_chunk(group_hash, function(group_public_chunk){
                 if(group_public_chunk){
                     if(group_public_chunk['group']['public']){
                         content.push(group_public_chunk);
+
+                        iteration--;
+                        if (iteration == 0) {
+                            callback(content);
+                        }
                     }else{
                         hf_service.get_group_shared_chunk(group_hash, function(group_shared_chunk){
                             if(group_shared_chunk){
@@ -656,10 +661,6 @@ hf_service.list_groups = function(callback)
                             }
                         });
                     }
-                }
-                iteration--;
-                if (iteration == 0) {
-                    callback(content);
                 }
             });
 

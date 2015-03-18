@@ -441,12 +441,14 @@ hf_control.create_group = function(dom)
     }
 
     var form_elements = document.getElementById('hf_create_new_group').elements;
-    var group_vis = form_elements['group-visilibity'].value == 'true'? true : false;
-    var thread_vis = form_elements['thread-visilibity'].value == 'true'? true : false;
+    var group_vis = form_elements['group-visilibity'].checked;
+    var thread_vis = form_elements['thread-visilibity'].checked;
+    if(group_vis)
+        thread_vis = true;
 
     hf_service.create_group(group_name, description, group_vis, thread_vis, function(success)
     {
-        assert(success);
+        assert(success != null);
         hf_control.refresh_view();
     });
 }

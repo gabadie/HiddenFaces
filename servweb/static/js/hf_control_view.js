@@ -318,7 +318,8 @@ hf_control.signed_in.route('/groups', function(ctx)
 {
     hf_service.list_groups(function(groups){
         var template = {
-            'groups': groups
+            'groups': groups,
+            'title': "My groups"
         };
 
         var header_html = hf_ui.template(
@@ -340,7 +341,8 @@ hf_control.signed_in.route('/global/groups', function(ctx){
     hf_service.global_list('/global/groups_list', function(groups_hashes){
         hf_service.get_group_public_chunks(groups_hashes, function(groups){
             var template = {
-                'groups': groups
+                'groups': groups,
+                'title': 'All groups'
             };
 
             var list_group_html = hf_ui.template(
@@ -381,7 +383,7 @@ hf_control.group_contacts = function(ctx, group_hash)
 
             var template_context = {
                 'contacts': users,
-                'title' : 'Group\'s contacts'
+                'title' : 'Group\'s members'
             };
 
             var html = hf_ui.template(

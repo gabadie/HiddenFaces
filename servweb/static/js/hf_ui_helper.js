@@ -162,6 +162,9 @@ Handlebars.registerHelper('hf_group_link', function(group)
     else if (waiting_sub == 0)
     {
         out += '<p class="btn-sm" style="float:right;color:blue;">Waiting for reponse</p>';
+    } else if (hf_service.is_group_admin(group_hash))
+    {
+        out += '<button class="btn btn-sm btn-success" style="float:right;"">Settings</button>';
     }
 
     out += '</div><div class="hf_description"><p>';
@@ -185,9 +188,14 @@ Handlebars.registerHelper('hf_group_header', function(group)
 
     if (waiting_sub == 1 || group['group']['public'])
     {
-        out += '<button class = "btn btn-default" style="float:right; margin-right:5px;"';
+        out += '<button class = "btn btn-default btn-sm" style="float:right; margin-right:5px; margin-left:5px;"';
         out += 'onclick="return hf_control.view(\'/group/'+group_hash+'/contacts'+ '\')";>';
         out += 'Show members</button>';
+
+        if(hf_service.is_group_admin(group_hash))
+        {
+            out += '<button class="btn btn-sm btn-success" style="float:right;"">Settings</button>';
+        }
     }
 
     out +=  '</div><div style="font-size:12px;">'
