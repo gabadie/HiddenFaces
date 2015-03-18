@@ -1,6 +1,14 @@
 {{#hf_cell}}
     <div class="hf_padding">
-        <div class="hf_title">Your discussions</div>
+        <div class="hf_title">Your discussions
+            <button
+                class="btn btn-default"
+                style="float:right;"
+                onclick="return hf_control.view('/discussion/create');"
+            >
+                Create discussion
+            </button>
+        </div>
         {{#each discussions}}
             <div class="hf_list_item">
                 {{{hf_discussion_link this}}}

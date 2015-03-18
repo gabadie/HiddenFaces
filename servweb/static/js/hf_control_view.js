@@ -185,12 +185,12 @@ hf_control.signed_in.route('/discussion/', function(ctx){
             return hf_control.discussion_create(ctx);
         }
 
-        return hf_control.view('/discussion/');
+        return hf_control.view('/discussions');
     }
 
     if (!hf_service.is_discussion_hash(discussion_hash))
     {
-        return hf_control.view('/discussion/');
+        return hf_control.view('/discussions');
     }
 
     if (current_url_arrs[3] == 'peers')
