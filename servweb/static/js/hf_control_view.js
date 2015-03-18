@@ -240,6 +240,7 @@ hf_control.discussion_peers = function(ctx, discussion_hash)
 
     hf_service.get_discussion(discussion_hash, function(discussion){
         var template_context = {
+            'discussion_view': true,
             'contacts': discussion['peers'],
             'title': 'Discussion\'s peers'
         };
