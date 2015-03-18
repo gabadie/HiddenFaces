@@ -223,16 +223,14 @@ hf_ui.menu_group = function(group_hash)
     var out = '';
     out += '<div class="hf_group_menu">';
 
-    if (is_admin)
-        out += '<button class="btn btn-sm btn-default" onclick="return hf_control.view(\'/group/'+group_hash+'/notifications'+ '\')">Notifications</button>';
-
     out += '<button class = "btn btn-default btn-sm"';
     out += 'onclick="return hf_control.view(\'/group/'+group_hash+'/contacts'+ '\')";>';
     out += 'Show members</button>';
 
     if(is_admin)
     {
-        out += '<button class="btn btn-sm btn-default" onclick="return hf_control.view(\'/group/'+group_hash+'/settings'+ '\')">Settings</button>';
+        out += '<button class="btn btn-sm btn-default" onclick="return hf_control.view(\'/group/'+group_hash+'/notifications'+ '\')">Notifications</button>';
+        out += '<button class="btn btn-sm btn-success" onclick="return hf_control.view(\'/group/'+group_hash+'/settings'+ '\')">Settings</button>';
     }
 
     out += '</div>';
