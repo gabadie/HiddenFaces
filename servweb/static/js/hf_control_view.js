@@ -242,7 +242,7 @@ hf_control.discussion_peers = function(ctx, discussion_hash)
         var template_context = {
             'discussion_view': true,
             'chunks': discussion['peers'],
-            'title': 'Discussion\'s peers',
+            'title': 'Discussion\'s peers.',
             'empty': 'YOU SHOULD NOT SEE THIS MESSAGE.'
         };
 
@@ -296,7 +296,7 @@ hf_control.signed_in.route('/notifications', function(ctx){
     domElem.innerHTML = hf_ui.template(
         "header/notification_header.html",
         {
-            'title': 'Your notifications'
+            'title': 'Your notifications.'
         }
     );
 
@@ -319,7 +319,7 @@ hf_control.signed_in.route('/contacts', function(ctx) {
     hf_service.list_contacts(function(list_contacts) {
         var params = {
             'chunks': list_contacts,
-            'title': 'Your contacts',
+            'title': 'Your contacts.',
             'empty': 'You don\'t have any contacts yet'
         };
 
@@ -339,7 +339,7 @@ hf_control.signed_in.route('/global/users', function (ctx) {
         hf_service.get_users_public_chunks(users_hashes, function(users_public_chunks) {
             var template_context = {
                 'chunks': hf.values(users_public_chunks),
-                'title' : 'All users',
+                'title' : 'All users.',
                 'empty': 'YOU SHOULD NOT SEE THIS MESSAGE.'
             };
 
@@ -360,7 +360,7 @@ hf_control.signed_in.route('/groups', function(ctx)
     hf_service.list_groups(function(groups){
         var template = {
             'chunks': groups,
-            'title': "My groups",
+            'title': "Your groups.",
             'empty': 'You have not subcribed to any groups.',
             'view': 'groups'
         };
@@ -379,7 +379,7 @@ hf_control.signed_in.route('/global/groups', function(ctx){
         hf_service.get_group_public_chunks(groups_hashes, function(groups){
             var template = {
                 'chunks': groups,
-                'title': 'All groups',
+                'title': 'All groups.',
                 'empty': 'There is no groups on this server.',
                 'view': 'groups'
             };
@@ -462,7 +462,7 @@ hf_control.group_notifications = function(ctx, group_hash)
             var notfi_header = hf_ui.template(
                 "header/notification_header.html",
                 {
-                    'title': 'Your group\'s notifications'
+                    'title': 'Your group\'s notifications.'
                 }
             );
             var template_context = {
@@ -493,7 +493,7 @@ hf_control.group_contacts = function(ctx, group_hash)
             var is_admin = hf_service.is_group_admin(group_hash);
             var template_context = {
                 'chunks': users,
-                'title' : 'Group\'s members',
+                'title' : 'Group\'s members.',
                 'is_admin': is_admin,
                 'empty': 'YOU SHOULD NOT SEE THIS MESSAGE.'
             };
