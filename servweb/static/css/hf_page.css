@@ -20,6 +20,8 @@
 #hf_page_top_bar ul
 {
     cursor: pointer;
+    margin: 0;
+    padding: 0;
 }
 
 #hf_page_top_bar li
@@ -27,6 +29,8 @@
     position: relative;
     display: inline-block;
     list-style-type: none;
+    margin: 0;
+    padding: 0;
 }
 
 #hf_page_top_bar a
