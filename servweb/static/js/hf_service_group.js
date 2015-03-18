@@ -626,7 +626,6 @@ hf_service.list_groups = function(callback)
     }
 
     var iteration = nb_groups;
-    console.log(iteration);
 
     for(var group_hash in groups) {
 
