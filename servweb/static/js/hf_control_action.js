@@ -97,6 +97,17 @@ hf_control.create_new_discussion = function(domElem)
     });
 }
 
+hf_control.start_discussion_with_peer = function(user_hash)
+{
+    hf_service.start_discussion_with_peer(user_hash, function(resolved_discussion){
+        if(resolved_discussion['hash'] !== undefined){
+            hf_control.view('/discussion/' + resolved_discussion["hash"]);
+        }else{
+            alert('Cannot start discussion');
+        }
+    });
+}
+
 
 // --------------------------------------------------------------------- LOG IN/OUT
 
