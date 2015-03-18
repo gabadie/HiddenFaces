@@ -59,6 +59,29 @@ hf_service.resolve_discussion_name = function(peers_public_chunks_map)
 }
 
 /*
+ * Returns the discussion hash with the specified peer if it exists
+ * @param <peer_hash>: the hash of the peer
+ * @returns <discussion_hash> = null if not found
+ */
+hf_service.get_discussion_with_peer = function(peer_hash)
+{
+    assert(hf.is_hash(peer_hash));
+    assert(hf_service.user_hash() != peer_hash);
+    assert(hf_service.is_connected());
+
+    for(var discussion_hash in hf_service.user_private_chunk['discussions']){
+
+        var peers_list = hf_service.user_private_chunk['discussions'][discussion_hash]['peers'];
+
+        if(peers_list.length == 2 && peers_list.indexOf(peer_hash) >= 0){
+            return discussion_hash;
+        }
+    }
+
+    return null;
+}
+
+/*
  * Creates a private discussion thread
  *
  * @param <discussion_name>: the name chosen for the discussion.
@@ -285,7 +308,7 @@ hf_service.start_discussion_with_peer = function(peer_hash,callback)
 {
     assert(hf.is_function(callback));
 
-    var discussion_hash = get_discussion_with_peer(peer_hash);
+    var discussion_hash = hf_service.get_discussion_with_peer(peer_hash);
 
     if(discussion_hash == null){
         hf_service.create_discussion_with_peers(null, [peer_hash], function(discussion_hash){
@@ -298,29 +321,6 @@ hf_service.start_discussion_with_peer = function(peer_hash,callback)
     }else{
         hf_service.get_discussion(discussion_hash,callback);
     }
-}
-
-/*
- * Returns the discussion hash with the specified peer if it exists
- * @param <peer_hash>: the hash of the peer
- * @returns <discussion_hash> = null if not found
- */
-hf_service.get_discussion_with_peer = function(peer_hash)
-{
-    assert(hf.is_hash(peer_hash));
-    assert(hf_service.user_hash() != peer_hash);
-    assert(hf_service.is_connected());
-
-    for(var discussion_hash in hf_service.user_private_chunk['discussions']){
-
-        var peers_list = hf_service.user_private_chunk['discussions'][discussion_hash]['peers'];
-
-        if(peers_list.length == 2 && peers_list.indexOf(peer_hash) >= 0){
-            return discussion_hash;
-        }
-    }
-
-    return null;
 }
 
 /*

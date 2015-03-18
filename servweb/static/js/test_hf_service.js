@@ -694,4 +694,5 @@ test_hf_service.main = function()
     //SEARCH ENGINE
     test_utils.run(test_hf_service.search_string_pattern_users,'test_hf_service.search_string_pattern_users');
     test_utils.run(test_hf_service.search_string_pattern, 'test_hf_service.search_string_pattern');
+    test_utils.run(test_hf_service.start_discussion_with_peer, 'test_hf_service.start_discussion_with_peer');
 }
