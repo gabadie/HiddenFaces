@@ -5,7 +5,7 @@ body
     color: #61513C;
 }
 
-div, span, table, tr, td, ul, li
+div, span, table, tr, td
 {
     cursor: default;
     padding: 0;

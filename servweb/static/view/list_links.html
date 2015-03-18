@@ -1,0 +1,55 @@
+{{#hf_cell}}
+    <div class="hf_padding">
+        {{#if title}}
+            <div class="hf_title">
+                <span>{{title}}</span>
+                {{#if is_admin}}
+                    {{#if_eq is_admin true}}
+                  <!--      <div class="form-group" style="float:right;font-size:12px;">
+                            <input type="search" placeholder="add member" list="hf_searched_member" onchange="return hf_control.search_member(this.value);"/>
+                            <datalist id="hf_searched_member"></datalist>
+                        </div> -->
+                    {{/if_eq}}
+                {{/if}}
+
+                {{#if_eq title "All groups"}}
+                     <button class="btn btn-default btn-sm" onclick="return hf_control.view('/groups');" style="float:right; margin-right:10px;">Create group</button>
+                {{/if_eq}}
+            </div>
+        {{/if}}
+
+        {{#each chunks}}
+            {{#if_eq __meta.type "/user/public_chunk"}}
+                <div class="hf_list_item">
+                    {{{hf_user_link this picture=true}}}
+                    <div style="float:right;">
+                        {{#if ../discussion_view}}
+                        {{else}}
+                            {{{hf_start_discussion this}}}
+                        {{/if}}
+                        {{#if ../circle_hash}}
+                            {{{hf_add_contact_to_circle this ../../circle_hash}}}
+                        {{else}}
+                            {{{hf_user_add_contact this}}}
+                        {{/if}}
+                    </div>
+                </div>
+            {{/if_eq}}
+
+            {{#if_eq __meta.type "/group/public_chunk"}}
+                {{{hf_group_link this}}}
+            {{/if_eq}}
+
+            {{#if_eq __meta.type "/group/shared_chunk"}}
+                {{{hf_group_link this}}}
+            {{/if_eq}}
+
+            {{#if_eq __meta.type "/group/private_chunk"}}
+                {{{hf_group_link this}}}
+            {{/if_eq}}
+
+        {{else}}
+            <div class="hf_empty">{{empty}}</div>
+        {{/each}}
+    </div>
+{{/hf_cell}}
