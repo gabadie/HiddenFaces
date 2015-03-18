@@ -136,7 +136,6 @@ hf_service.create_discussion = function(discussion_name, callback)
  */
 hf_service.create_discussion_with_peers = function(discussion_name, peers_hashes, callback)
 {
-    assert(peers_hashes.length > 0);
 
     hf_service.create_discussion(discussion_name, function(discussion_hash){
         assert(hf_service.is_discussion_hash(discussion_hash));
@@ -146,8 +145,6 @@ hf_service.create_discussion_with_peers = function(discussion_name, peers_hashes
                 if(success){
                     callback(discussion_hash);
                 }else{
-                    console.info('cannot add peers to discussion');
-                    alert(peers_hashes);
                     hf_service.leave_discussion(discussion_hash,function(){
                         callback(null);
                     });
