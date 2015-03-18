@@ -1,0 +1,18 @@
+{{#hf_cell}}
+    <div class="hf_padding">
+        <div class="hf_title">Invite peers to the discussion.</div>
+        <form
+            onsubmit="hf_control.add_discussion_peers(this); return false;"
+            onkeypress="return event.keyCode != 13;"
+        >
+            {{{hf_input_autocomplete_list_users contacts name="new_peers"}}}
+            <input type="hidden" name="discussion_hash" value="{{discussion.hash}}" />
+            <input
+                type="submit"
+                style="margin: 5px 0 0 auto; display: block;"
+                class="btn btn-primary"
+                value="Invite to discussion"
+            />
+        </form>
+    </div>
+{{/hf_cell}}
