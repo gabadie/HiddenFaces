@@ -133,7 +133,16 @@ Handlebars.registerHelper('if_eq', function(a, b, opts) {
         return opts.inverse(this);
 });
 
-Handlebars.registerHelper('hf_group_link', function(group)
+Handlebars.registerHelper('hf_group_link', function(group){
+    var out = '<a class="hf_group_link" ';
+    out += 'onclick="return hf_control.view(\'/group/' + group['__meta']['group_hash'] + '\');">';
+    out += group['group']['name'];
+    out += '</a> ';
+
+    return out;
+});
+
+Handlebars.registerHelper('hf_group_sumary', function(group)
 {
     var group_hash = group['__meta']['group_hash'];
     var group_visibility = group['group']['public'];
@@ -164,10 +173,10 @@ Handlebars.registerHelper('hf_group_link', function(group)
         }
     }
 
-    var out = '<div> <a class="hf_user_link" ';
-    out += 'onclick="return hf_control.view(\'/group/'+group_hash+'\');">';
+    var out = '<div><a class="hf_group_link"';
+    out += ' onclick="return hf_control.view(\'/group/'+group_hash+'\');">';
     out += group['group']['name'];
-    out += '</a> ';
+    out += '</a>';
 
     var waiting_sub = hf_service.waiting_accept_subcribe(group);
 

@@ -65,7 +65,8 @@
     border: none;
 }
 
-.hf_layout_cell .hf_user_link
+.hf_layout_cell .hf_user_link,
+.hf_layout_cell .hf_group_link
 {
     font-weight: bolder;
 }
