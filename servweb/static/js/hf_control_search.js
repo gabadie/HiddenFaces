@@ -17,6 +17,11 @@ hf_control.search_result = function(domElem)
 {
     var form_json = hf.inputs_to_json(domElem);
 
+    if (form_json['search_query'] == '')
+    {
+        return;
+    }
+
     hf_control.view('/search/' + form_json['search_query']);
 }
 
