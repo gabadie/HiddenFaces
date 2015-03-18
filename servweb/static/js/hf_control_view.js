@@ -343,7 +343,7 @@ hf_control.group_contacts = function(ctx, group_hash)
 
             var template_context = {
                 'contacts': users,
-                'title' : 'Group\'s contacts'
+                'title' : 'Group\'s members'
             };
 
             var html = hf_ui.template(
