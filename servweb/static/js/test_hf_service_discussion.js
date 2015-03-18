@@ -133,6 +133,12 @@ test_hf_service.add_peers_to_discussion = function() {
         test_utils.assert(success == true,'Cannot add user_hash1 to discussion');
     });
 
+    var found_hash = hf_service.get_discussion_with_peer(user_hash1);
+    test_utils.assert(found_hash == discussion_hash,'Discussion hash not matching');
+
+    var found_hash = hf_service.get_discussion_with_peer(user_hash3);
+    test_utils.assert(found_hash == null,'Discussion hash found unexpectly');
+
     hf_service.disconnect();
 
     hf_service.login_user(user_profile1);
@@ -160,7 +166,7 @@ test_hf_service.add_peers_to_discussion = function() {
     hf_service.list_peers(discussion_hash,function(peers_list){
         test_utils.assert(Object.keys(peers_list).length == 4, "Nb of peers is " + Object.keys(peers_list).length + " instead of 4");
     });
-    test_utils.assert_success(9);
+    test_utils.assert_success(11);
 }
 
 test_hf_service.peers_conversation = function() {
@@ -314,4 +320,50 @@ test_hf_service.leave_discussion = function() {
         test_utils.assert(Object.keys(peers_list).length == 3, "Nb of peers is " + Object.keys(peers_list).length + " instead of 3");
     });
     test_utils.assert_success(9);
+}
+
+test_hf_service.start_discussion_with_peer = function() {
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+    var user_profile2 = test_hf_service.john_smith_profile(2);
+    var user_profile3 = test_hf_service.john_smith_profile(3);
+
+    var user_hash0 = hf_service.create_user(user_profile0);
+    var user_hash1 = hf_service.create_user(user_profile1);
+    var user_hash2 = hf_service.create_user(user_profile2);
+    var user_hash3 = hf_service.create_user(user_profile3);
+
+    hf_service.login_user(user_profile0);
+
+    var original_hash = null;
+    hf_service.start_discussion_with_peer(user_hash1,function(resolved_discussion){
+        test_utils.assert(resolved_discussion != null, 'Cannot start new discussion');
+        test_utils.assert(resolved_discussion["peers"].length == 2, "Nb of peers is " + resolved_discussion["peers"].length + " instead of 2");
+        original_hash = resolved_discussion["hash"];
+        hf_service.start_discussion_with_peer(user_hash1,function(resolved_discussion2){
+            test_utils.assert(original_hash == resolved_discussion2["hash"], 'Cannot access previous discussion with user1');
+        });
+    });
+    test_utils.assert(original_hash != null);
+
+    hf_service.disconnect();
+
+    hf_service.login_user(user_profile1);
+    hf_service.pull_fresh_user_notifications(function(success){
+        test_utils.assert(success == true, 'Cannot execute automatic notifications');
+    });
+
+    hf_service.start_discussion_with_peer(user_hash0,function(resolved_discussion){
+        test_utils.assert(resolved_discussion['hash'] == original_hash, 'cannot access previous discussion with user0');
+    });
+
+    hf_service.add_peers_to_discussion(original_hash, [user_hash2,user_hash3], function(success){
+        test_utils.assert(success == true,'Cannot add users to discussion 0');
+    });
+
+    hf_service.start_discussion_with_peer(user_hash0,function(resolved_discussion){
+        test_utils.assert(resolved_discussion['hash'] != original_hash, 'could access previous discussion with user0 even if other users were added');
+    });
+
+    test_utils.assert_success(8);
 }
