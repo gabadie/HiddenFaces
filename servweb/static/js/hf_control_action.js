@@ -97,6 +97,17 @@ hf_control.create_new_discussion = function(domElem)
     });
 }
 
+hf_control.start_discussion_with_peer = function(user_hash)
+{
+    hf_service.start_discussion_with_peer(user_hash, function(resolved_discussion){
+        if(resolved_discussion['hash'] !== undefined){
+            hf_control.view('/discussion/' + resolved_discussion["hash"]);
+        }else{
+            alert('Cannot start discussion');
+        }
+    });
+}
+
 
 // --------------------------------------------------------------------- LOG IN/OUT
 
@@ -484,6 +495,45 @@ hf_control.subcribe = function(dom)
 
 hf_control.create_group = function(dom)
 {
+    var info = hf_control.get_group_infos(dom);
+    if (!info){
+        return false;
+    }
+
+    hf_service.create_group(info['group_name'], info['group_description'], info['group_group_public'], info['group_thread_public'], function(success)
+    {
+        assert(success != null);
+        hf_control.refresh_view();
+    });
+}
+
+hf_control.approuve_group_user = function(user_hash)
+{
+    var group_hash = hf_control.current_view_url().split("/")[2];
+    console.log(group_hash);
+    hf_service.add_user_to_group(user_hash, group_hash, function(success){
+        // assert(success);
+        // hf_control.refresh_view();
+    });
+}
+
+hf_control.save_edit_group_profile = function(dom)
+{
+    var info = hf_control.get_group_infos(dom);
+    if(!info)
+    {
+        return false;
+    }
+
+    hf_service.change_group_profile(hf_control.current_view_url().split("/")[2], info, function(success){
+        assert(success);
+        hf_control.refresh_view();
+    }) ;
+}
+
+hf_control.get_group_infos = function(dom)
+{
+    var out = {};
     var arrs = hf.inputs_to_json(dom);
 
     var group_name = arrs['name'].trim();
@@ -501,9 +551,10 @@ hf_control.create_group = function(dom)
     if(group_vis)
         thread_vis = true;
 
-    hf_service.create_group(group_name, description, group_vis, thread_vis, function(success)
-    {
-        assert(success != null);
-        hf_control.refresh_view();
-    });
+    out['group_name'] = group_name;
+    out['group_description'] = description;
+    out['group_group_public'] = group_vis;
+    out['group_thread_public'] = thread_vis;
+
+    return out;
 }

@@ -240,6 +240,7 @@ hf_control.discussion_peers = function(ctx, discussion_hash)
 
     hf_service.get_discussion(discussion_hash, function(discussion){
         var template_context = {
+            'discussion_view': true,
             'contacts': discussion['peers'],
             'title': 'Discussion\'s peers'
         };
@@ -406,7 +407,7 @@ hf_control.signed_in.route('/group', function(ctx){
         if (current_url_arrs[3] === 'contacts'){
             hf_control.group_contacts(ctx, group_hash);
         } else if (current_url_arrs[3] == 'notifications'){
-            //hf_control.group_notifications(ctx, group_hash);
+            hf_control.group_notifications(ctx, group_hash);
         } else {
             hf_control.group_settings(ctx, group_hash);
         }
@@ -420,7 +421,6 @@ hf_control.signed_in.route('/group', function(ctx){
 hf_control.group_settings = function(ctx, group_hash)
 {
     hf_service.get_group_public_chunk(group_hash, function(group){
-        console.log(group);
         hf_ui.apply_template(
             'form/edit_group.html',
             {
@@ -852,7 +852,6 @@ hf_control.refresh_left_column = function()
     });
 
     hf_service.list_groups(function(groups_list){
-        console.info(groups_list.length);
         var template_context = {
             'title': 'Groups',
             'title_view_path': '/groups',
