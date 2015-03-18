@@ -144,6 +144,7 @@
     width: 100%;
 }
 
+.hf_layout_cell .hf_form_autocomplete .hf_selected_list,
 .hf_layout_cell .hf_form_autocomplete .hf_list_circles
 {
     padding: 10px;
