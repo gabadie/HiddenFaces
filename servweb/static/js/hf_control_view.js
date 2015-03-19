@@ -242,7 +242,7 @@ hf_control.discussion_peers = function(ctx, discussion_hash)
         var template_context = {
             'discussion_view': true,
             'chunks': discussion['peers'],
-            'title': 'Discussion\'s peers',
+            'title': 'Discussion\'s peers.',
             'empty': 'YOU SHOULD NOT SEE THIS MESSAGE.'
         };
 
@@ -296,7 +296,7 @@ hf_control.signed_in.route('/notifications', function(ctx){
     domElem.innerHTML = hf_ui.template(
         "header/notification_header.html",
         {
-            'title': 'Your notifications'
+            'title': 'Your notifications.'
         }
     );
 
@@ -319,7 +319,7 @@ hf_control.signed_in.route('/contacts', function(ctx) {
     hf_service.list_contacts(function(list_contacts) {
         var params = {
             'chunks': list_contacts,
-            'title': 'Your contacts',
+            'title': 'Your contacts.',
             'empty': 'You don\'t have any contacts yet'
         };
 
@@ -339,7 +339,7 @@ hf_control.signed_in.route('/global/users', function (ctx) {
         hf_service.get_users_public_chunks(users_hashes, function(users_public_chunks) {
             var template_context = {
                 'chunks': hf.values(users_public_chunks),
-                'title' : 'All users',
+                'title' : 'All users.',
                 'empty': 'YOU SHOULD NOT SEE THIS MESSAGE.'
             };
 
@@ -360,21 +360,16 @@ hf_control.signed_in.route('/groups', function(ctx)
     hf_service.list_groups(function(groups){
         var template = {
             'chunks': groups,
-            'title': "My groups",
-            'empty': 'You have not subcribed to any groups.'
+            'title': "Your groups.",
+            'empty': 'You have not subcribed to any groups.',
+            'view': 'groups'
         };
 
-        var header_html = hf_ui.template(
-            'form/create_new_group.html',
-            null
-        );
-
-        var list_group_html = hf_ui.template(
+        document.getElementById('hf_page_main_content').innerHTML = hf_ui.template(
             'list_links.html',
             template
         );
 
-        document.getElementById('hf_page_main_content').innerHTML = header_html + list_group_html;
         ctx.callback();
     });
 });
@@ -384,8 +379,9 @@ hf_control.signed_in.route('/global/groups', function(ctx){
         hf_service.get_group_public_chunks(groups_hashes, function(groups){
             var template = {
                 'chunks': groups,
-                'title': 'All groups',
-                'empty': 'There is no groups on this server.'
+                'title': 'All groups.',
+                'empty': 'There is no groups on this server.',
+                'view': 'groups'
             };
 
             var list_group_html = hf_ui.template(
@@ -403,19 +399,33 @@ hf_control.signed_in.route('/group', function(ctx){
     var current_url_arrs = hf_control.current_view_url().split("/");
     var group_hash = current_url_arrs[2];
 
-    if (current_url_arrs.length > 3){
-        if (current_url_arrs[3] === 'contacts'){
-            hf_control.group_contacts(ctx, group_hash);
-        } else if (current_url_arrs[3] == 'notifications'){
-            hf_control.group_notifications(ctx, group_hash);
-        } else {
-            hf_control.group_settings(ctx, group_hash);
-        }
-    }
-    else
+    if (!hf.is_hash(group_hash))
     {
-        hf_control.group_thread(ctx, group_hash);
+        if (group_hash == 'create')
+        {
+            return hf_control.group_create(ctx);
+        }
+
+        return hf_control.view('/groups');
     }
+    else if (current_url_arrs.length == 3)
+    {
+        return hf_control.group_thread(ctx, group_hash);
+    }
+    else if (current_url_arrs[3] === 'contacts')
+    {
+        return hf_control.group_contacts(ctx, group_hash);
+    }
+    else if (current_url_arrs[3] == 'notifications')
+    {
+        return hf_control.group_notifications(ctx, group_hash);
+    }
+    else if (current_url_arrs[3] == 'settings')
+    {
+        return hf_control.group_settings(ctx, group_hash);
+    }
+
+    return hf_control.view('/group/' + group_hash);
 });
 
 hf_control.group_settings = function(ctx, group_hash)
@@ -452,7 +462,7 @@ hf_control.group_notifications = function(ctx, group_hash)
             var notfi_header = hf_ui.template(
                 "header/notification_header.html",
                 {
-                    'title': 'Your group\'s notifications'
+                    'title': 'Your group\'s notifications.'
                 }
             );
             var template_context = {
@@ -483,7 +493,7 @@ hf_control.group_contacts = function(ctx, group_hash)
             var is_admin = hf_service.is_group_admin(group_hash);
             var template_context = {
                 'chunks': users,
-                'title' : 'Group\'s members',
+                'title' : 'Group\'s members.',
                 'is_admin': is_admin,
                 'empty': 'YOU SHOULD NOT SEE THIS MESSAGE.'
             };
@@ -513,25 +523,23 @@ hf_control.group_thread = function(ctx, group_hash)
 
         if(waiting_sub == 1 || public_chunk['group']['public'])
         {
-            hf_control.view_new_group_post(group_hash, function(new_post_html)
-            {
-                domElem.innerHTML += new_post_html;
-                var chunks_names = [];
-                try
-                {
-                    chunks_names.push(public_chunk['thread']['name']);
-                }
-                catch(err){
-                }
-                finally
-                {
-                    hf_control.view_threads(chunks_names, function(posts_html){
-                        domElem.innerHTML += posts_html;
-                    });
+            domElem.innerHTML += hf_ui.template('form/new_post.html', {});
 
-                    ctx.callback();
-                }
-            });
+            var chunks_names = [];
+            try
+            {
+                chunks_names.push(public_chunk['thread']['name']);
+            }
+            catch(err){
+            }
+            finally
+            {
+                hf_control.view_threads(chunks_names, function(posts_html){
+                    domElem.innerHTML += posts_html;
+                });
+
+                ctx.callback();
+            }
         }
         else
         {
@@ -559,6 +567,14 @@ hf_control.group_thread = function(ctx, group_hash)
         }
     });
 }
+
+hf_control.group_create = function(ctx)
+{
+    var domElem = document.getElementById('hf_page_main_content');
+
+    domElem.innerHTML = hf_ui.template('form/create_new_group.html');
+}
+
 
 // ------------------------------------------------------ MESSAGES' VIEWS
 hf_control.signed_in.route('/send_message', function(ctx){
@@ -755,14 +771,6 @@ hf_control.view_new_post = function(current_circle_hash, callback)
             callback(html);
         }
 
-    });
-}
-
-hf_control.view_new_group_post = function(group_hash, callback)
-{
-    hf_service.get_group_public_chunk(group_hash, function(public_chunk){
-        var html = hf_ui.template('form/new_group_post.html', null);
-        callback(html);
     });
 }
 

@@ -12,8 +12,14 @@
                     {{/if_eq}}
                 {{/if}}
 
-                {{#if_eq title "All groups"}}
-                     <button class="btn btn-default btn-sm" onclick="return hf_control.view('/groups');" style="float:right; margin-right:10px;">Create group</button>
+                {{#if_eq view "groups"}}
+                    <button
+                        class="btn btn-default"
+                        onclick="return hf_control.view('/group/create');"
+                        style="float:right; margin-right:10px;"
+                    >
+                        Create group
+                    </button>
                 {{/if_eq}}
             </div>
         {{/if}}
@@ -28,7 +34,7 @@
                         {{else}}
                             {{{hf_user_add_contact this}}}
                         {{/if}}
-                        {{#if ../discussion_view}}
+                        {{#if ../../discussion_view}}
                         {{else}}
                             {{{hf_start_discussion this}}}
                         {{/if}}
@@ -37,15 +43,21 @@
             {{/if_eq}}
 
             {{#if_eq __meta.type "/group/public_chunk"}}
-                {{{hf_group_link this}}}
+                <div class="hf_list_item">
+                    {{{hf_group_sumary this}}}
+                </div>
             {{/if_eq}}
 
             {{#if_eq __meta.type "/group/shared_chunk"}}
-                {{{hf_group_link this}}}
+                <div class="hf_list_item">
+                    {{{hf_group_sumary this}}}
+                </div>
             {{/if_eq}}
 
             {{#if_eq __meta.type "/group/private_chunk"}}
-                {{{hf_group_link this}}}
+                <div class="hf_list_item">
+                    {{{hf_group_sumary this}}}
+                </div>
             {{/if_eq}}
 
         {{else}}

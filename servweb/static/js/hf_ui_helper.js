@@ -90,10 +90,10 @@ Handlebars.registerHelper('hf_add_contact_to_circle', function(contact, circle_h
     if (hf_service.is_contact_into_circle(contact['__meta']['user_hash'], circle_hash))
         return '';
 
-    var out = '<div style="float:right;"><button ';
-    out += 'class="btn btn-default" style="float:right;" ';
-    out += 'onclick="return hf_control.add_contact_to_circle(\''+contact['__meta']['user_hash']+ '\',\'' + circle_hash+'\');"';
-    out += '>Add to circle </button></div>';
+    var out = '<button ';
+    out += ' class="btn btn-default"';
+    out += ' onclick="return hf_control.add_contact_to_circle(\''+contact['__meta']['user_hash']+ '\',\'' + circle_hash+'\');"';
+    out += '>Add to circle</button>';
 
     return out;
 });
@@ -133,7 +133,16 @@ Handlebars.registerHelper('if_eq', function(a, b, opts) {
         return opts.inverse(this);
 });
 
-Handlebars.registerHelper('hf_group_link', function(group)
+Handlebars.registerHelper('hf_group_link', function(group){
+    var out = '<a class="hf_group_link" ';
+    out += 'onclick="return hf_control.view(\'/group/' + group['__meta']['group_hash'] + '\');">';
+    out += group['group']['name'];
+    out += '</a> ';
+
+    return out;
+});
+
+Handlebars.registerHelper('hf_group_sumary', function(group)
 {
     var group_hash = group['__meta']['group_hash'];
     var group_visibility = group['group']['public'];
@@ -164,11 +173,10 @@ Handlebars.registerHelper('hf_group_link', function(group)
         }
     }
 
-    var out = '<div class="hf_list_item ">';
-    out += '<div> <a class="hf_user_link" ';
-    out += 'onclick="return hf_control.view(\'/group/'+group_hash+'\');">';
+    var out = '<div><a class="hf_group_link"';
+    out += ' onclick="return hf_control.view(\'/group/'+group_hash+'\');">';
     out += group['group']['name'];
-    out += '</a> ';
+    out += '</a>';
 
     var waiting_sub = hf_service.waiting_accept_subcribe(group);
 
@@ -186,7 +194,7 @@ Handlebars.registerHelper('hf_group_link', function(group)
 
     out += '</div><div class="hf_description"><p>';
     out += group_visibility_prefix + "</br>" + group['group']['description'];
-    out += '</p></div></div>' ;
+    out += '</p></div>' ;
     return out;
 });
 
