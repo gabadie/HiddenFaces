@@ -562,7 +562,6 @@ hf_service.add_user_to_group = function(user_hash, group_hash, callback)
     {
         if (!is_user_hash)
         {
-            alert('user_hash is not good');
             callback(false);
             return;
         }

@@ -27,7 +27,7 @@ hf_control.search_result = function(domElem)
 
 hf_control.signed_in.route('/search/', function(ctx){
     var domElem = document.getElementById('hf_page_main_content');
-    var search_query = hf_control.current_view_url().substring(8);
+    var search_query = decodeURI(hf_control.current_view_url().substring(8));
 
     hf_service.search_string_pattern(search_query, function(matching_chunks){
         var template_context = {
