@@ -23,14 +23,14 @@
                 <div class="hf_list_item">
                     {{{hf_user_link this picture=true}}}
                     <div style="float:right;">
-                        {{#if ../discussion_view}}
-                        {{else}}
-                            {{{hf_start_discussion this}}}
-                        {{/if}}
                         {{#if ../circle_hash}}
                             {{{hf_add_contact_to_circle this ../../circle_hash}}}
                         {{else}}
                             {{{hf_user_add_contact this}}}
+                        {{/if}}
+                        {{#if ../discussion_view}}
+                        {{else}}
+                            {{{hf_start_discussion this}}}
                         {{/if}}
                     </div>
                 </div>
