@@ -413,3 +413,12 @@ hf.linkify = function(inputText)
 
     return replacedText;
 }
+
+/*
+ * Capitalizes the first letter of a string
+ * @param <string>: the string to capitalize
+ * @returns the capitalized string
+ */
+hf.capitalize = function(string){
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+}
