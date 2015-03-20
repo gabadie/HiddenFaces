@@ -564,7 +564,6 @@ hf_service.add_user_to_group = function(user_hash, group_hash, callback)
     {
         if (!is_user_hash)
         {
-            alert('user_hash is not good');
             callback(false);
             return;
         }
@@ -988,7 +987,9 @@ hf_service.delete_group_notification = function(group_hash, notification_hash, c
                 {
                     if (success)
                     {
-                        hf_service.save_group_chunks(group_private_chunk);
+                        hf_service.save_group_chunks(group_private_chunk, function(success){
+                            callback(success);
+                        });
                     }
                     else
                     {

@@ -80,7 +80,7 @@ Handlebars.registerHelper('hf_start_discussion', function(user_public_chunk){
 
     out += ' class="btn btn-default"'
     out += ' onclick="return hf_control.start_discussion_with_peer(\'' + user_hash + '\');"';
-    out += '>Start Discussion</button>';
+    out += '>Discuss</button>';
 
     return out;
 });

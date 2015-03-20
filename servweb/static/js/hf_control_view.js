@@ -437,7 +437,7 @@ hf_control.group_settings = function(ctx, group_hash)
             );
 
         var edit_view = hf_ui.template(
-            'form/create_new_group.html',
+            'form/group.html',
             {
                 'title': 'Edit group\'s profile',
                 'group':group
@@ -573,7 +573,7 @@ hf_control.group_create = function(ctx)
 {
     var domElem = document.getElementById('hf_page_main_content');
 
-    domElem.innerHTML = hf_ui.template('form/create_new_group.html', {"title": "Create new group"});
+    domElem.innerHTML = hf_ui.template('form/group.html', {"title": "Create new group"});
 }
 
 

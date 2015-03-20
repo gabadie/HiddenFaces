@@ -520,7 +520,7 @@ hf_control.create_group = function(dom)
     }) ;
 }
 
-hf_control.approuve_group_user = function(user_hash)
+hf_control.approve_group_user = function(user_hash)
 {
     var group_hash = hf_control.current_view_url().split("/")[2];
     assert(hf_service.is_group_admin(group_hash));
