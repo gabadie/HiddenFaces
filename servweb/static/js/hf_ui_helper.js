@@ -201,7 +201,9 @@ Handlebars.registerHelper('hf_group_sumary', function(group)
 Handlebars.registerHelper('hf_group_header', function(group)
 {
     // Span for title
-    var out = '<div class="hf_title">Group: '+ group['group']['name'];
+    var out = '';
+    out += '<div class="hf_title">Group: '+ group['group']['name'];
+
     var group_hash = group['__meta']['group_hash'];
 
     var waiting_sub = hf_service.waiting_accept_subcribe(group);
@@ -282,5 +284,9 @@ Handlebars.registerHelper('hf_linkify', function(text_to_linkify){
 });
 
 Handlebars.registerHelper('hf_checked', function(isChecked){
-    return isChecked?"checked":"";
+    return isChecked ? "checked":"";
+});
+
+Handlebars.registerHelper('hf_checkbox_disabled', function(is_public){
+    return is_public != null ? "disabled":"";
 });

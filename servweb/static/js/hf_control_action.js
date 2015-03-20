@@ -500,11 +500,24 @@ hf_control.create_group = function(dom)
         return false;
     }
 
-    hf_service.create_group(info['group_name'], info['group_description'], info['group_group_public'], info['group_thread_public'], function(success)
-    {
-        assert(success);
-        hf_control.refresh_view();
-    });
+    hf.input_to_uri(hf.form_input(dom, 'picture'), function(uri){
+
+        if (uri)
+        {
+            info['group_picture'] = uri;
+        }
+
+       hf_service.create_group(info['group_name'],
+                               info['group_description'],
+                               info['group_group_public'],
+                               info['group_thread_public'],
+                               info['group_picture'],
+                               function(success)
+       {
+            assert(success);
+             hf_control.refresh_view();
+        });
+    }) ;
 }
 
 hf_control.approuve_group_user = function(user_hash)
@@ -545,10 +558,18 @@ hf_control.save_edit_group_profile = function(dom)
         return false;
     }
 
-    hf_service.change_group_profile(hf_control.current_view_url().split("/")[2], info, function(success){
-        assert(success);
-        hf_control.refresh_view();
-    }) ;
+    hf.input_to_uri(hf.form_input(dom, 'picture'), function(uri){
+
+        if (uri)
+        {
+            info['group_picture'] = uri;
+        }
+
+        hf_service.change_group_profile(hf_control.current_view_url().split("/")[2], info, function(success){
+            assert(success);
+            hf_control.refresh_view();
+        }) ;
+    });
 }
 
 hf_control.get_group_infos = function(dom)
@@ -575,6 +596,7 @@ hf_control.get_group_infos = function(dom)
     out['group_description'] = description;
     out['group_group_public'] = group_vis;
     out['group_thread_public'] = thread_vis;
+    out['group_picture'] = arrs['picture'];
 
     return out;
 }

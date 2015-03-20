@@ -271,6 +271,7 @@ test_hf_populate.create_groups = function()
             group_info['name'],
             group_info['description'],
             i < test_hf_populate.group_count / 4, i < test_hf_populate.group_count / 2,
+            '',
             function(group_hash){
                 test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
                 test_utils.assert(hf_service.is_group_admin(group_hash));

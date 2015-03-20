@@ -94,7 +94,7 @@ hf_service.waiting_accept_subcribe = function(group)
  *
  *      @param <group_hash>: is the group's hash
  */
-hf_service.create_group = function(group_name, description, public_group, public_thread, callback)
+hf_service.create_group = function(group_name, description, public_group, public_thread, group_picture, callback)
 {
     assert(hf_service.is_connected());
     assert(typeof group_name == "string");
@@ -143,7 +143,8 @@ hf_service.create_group = function(group_name, description, public_group, public
                 'admin' : admin_hash,
                 'public' : public_group,
                 'name' : group_name,
-                'description' : description
+                'description' : description,
+                'picture': group_picture
             },
             'thread': {
                 'public': public_thread,
@@ -253,7 +254,8 @@ hf_service.export_group_public_chunk = function(group_private_chunk)
         'group': {
             'public' : group_private_chunk['group']['public'],
             'name' : group_private_chunk['group']['name'],
-            'description' : group_private_chunk['group']['description']
+            'description' : group_private_chunk['group']['description'],
+            'picture': group_private_chunk['group']['picture']
         }
     };
     if(group_private_chunk['group']['public']){
@@ -945,6 +947,7 @@ hf_service.list_group_notifications = function(group_hash, callback)
                                 'group_description'
                                 'group_group_public'
                                 'group_thread_public'
+                                'group_group_picture'
  *
  */
 hf_service.change_group_profile = function(group_hash, json_modification, callback)
@@ -954,6 +957,7 @@ hf_service.change_group_profile = function(group_hash, json_modification, callba
         private_chunk['group']['description'] = json_modification['group_description'];
         private_chunk['group']['public'] = json_modification['group_group_public'];
         private_chunk['thread']['public'] = json_modification['group_thread_public'];
+        private_chunk['group']['picture'] = json_modification['group_picture'];
 
         hf_service.save_group_chunks(private_chunk, function(success){
             callback(success);
