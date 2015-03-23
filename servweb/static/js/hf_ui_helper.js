@@ -85,19 +85,6 @@ Handlebars.registerHelper('hf_start_discussion', function(user_public_chunk){
     return out;
 });
 
-Handlebars.registerHelper('hf_add_contact_to_circle', function(contact, circle_hash){
-
-    if (hf_service.is_contact_into_circle(contact['__meta']['user_hash'], circle_hash))
-        return '';
-
-    var out = '<button ';
-    out += ' class="btn btn-default"';
-    out += ' onclick="return hf_control.add_contact_to_circle(\''+contact['__meta']['user_hash']+ '\',\'' + circle_hash+'\');"';
-    out += '>Add to circle</button>';
-
-    return out;
-});
-
 Handlebars.registerHelper('hf_chunk', function(chunk, options){
     var template_name = chunk['__meta']['type'].substring(1) + '.html';
 
