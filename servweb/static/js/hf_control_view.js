@@ -134,14 +134,15 @@ hf_control.circle_contacts = function(ctx, circle_hash)
     {
         domElem.innerHTML = hf_ui.template('header/circle_header.html', circle);
 
-        hf_service.list_contacts(function(list_contacts)
+        hf_service.list_circle_contacts(circle_hash, function(list_contacts)
         {
             var params = {
                 'circle_hash': circle_hash,
-                'chunks': hf_control.sort_users_chunks(list_contacts),
+                'chunks': hf_control.sort_users_chunks(hf.values(list_contacts)),
                 'title': 'Your contacts.',
                 'empty': 'You don\'t have any contacts yet'
             };
+
             domElem.innerHTML += hf_ui.template('form/add_users.html',
                 {
                     'title': 'Add contacts to this circle.',
@@ -149,7 +150,9 @@ hf_control.circle_contacts = function(ctx, circle_hash)
                     'button_value': 'Add to circle',
                     'users': list_contacts,
                     'dest_hash': circle_hash
-                });
+                }
+            );
+
             domElem.innerHTML += hf_ui.template('list_links.html',params);
 
             ctx.callback();
