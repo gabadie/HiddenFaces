@@ -49,14 +49,14 @@ hf_control.add_discussion_peers = function(domElem)
 {
     var form_json = hf.inputs_to_json(domElem);
 
-    if (form_json['new_peers'] == '')
+    if (form_json['users_list'] == '')
     {
         return;
     }
 
-    form_json['new_peers'] = form_json['new_peers'].split('\n');
+    form_json['users_list'] = form_json['users_list'].split('\n');
 
-    hf_service.add_peers_to_discussion(form_json['discussion_hash'], form_json['new_peers'], function(success){
+    hf_service.add_peers_to_discussion(form_json['dest_hash'], form_json['users_list'], function(success){
         assert(success, 'failed to add peers');
 
         hf_control.refresh_view();

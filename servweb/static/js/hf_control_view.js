@@ -126,23 +126,22 @@ hf_control.circle_posts = function(ctx, circle_hash)
 
 hf_control.circle_contacts = function(ctx, circle_hash)
 {
+    var domElem = document.getElementById('hf_page_main_content');
+
     hf_service.get_circle(circle_hash, function(circle)
     {
+        domElem.innerHTML = hf_ui.template('header/circle_header.html', circle);
+
         hf_service.list_contacts(function(list_contacts)
         {
             var params = {
                 'circle_hash': circle_hash,
-                'chunks': list_contacts,
+                'chunks': hf_control.sort_users_chunks(list_contacts),
                 'title': 'Your contacts.',
                 'empty': 'You don\'t have any contacts yet'
             };
 
-            var circle_header_html = hf_ui.template('header/circle_header.html', circle);
-            var list_contacts = hf_ui.template('list_links.html',params);
-
-            document.getElementById('hf_page_main_content').innerHTML = (
-                circle_header_html + list_contacts
-            );
+            domElem.innerHTML += hf_ui.template('list_links.html',params);
 
             ctx.callback();
         });
@@ -217,7 +216,9 @@ hf_control.discussion_thread = function(ctx, discussion_hash)
             domElem.innerHTML = (
                 hf_ui.template(
                     'header/discussion_header.html',
-                    discussion
+                    {
+                        'discussion': discussion
+                    }
                 ) +
                 hf_ui.template(
                     'form/append_post_to_discussion.html',
@@ -241,7 +242,7 @@ hf_control.discussion_peers = function(ctx, discussion_hash)
     hf_service.get_discussion(discussion_hash, function(discussion){
         var template_context = {
             'discussion_view': true,
-            'chunks': discussion['peers'],
+            'chunks': hf_control.sort_users_chunks(discussion['peers']),
             'title': 'Discussion\'s peers.',
             'empty': 'YOU SHOULD NOT SEE THIS MESSAGE.'
         };
@@ -249,7 +250,10 @@ hf_control.discussion_peers = function(ctx, discussion_hash)
         domElem.innerHTML = (
             hf_ui.template(
                 'header/discussion_header.html',
-                discussion
+                {
+                    'discussion': discussion,
+                    'peers': true
+                }
             ) +
             hf_ui.template(
                 'list_links.html',
@@ -259,10 +263,13 @@ hf_control.discussion_peers = function(ctx, discussion_hash)
 
         hf_service.list_contacts(function(contacts_list){
             domElem.innerHTML += hf_ui.template(
-                'form/add_discussion_peers.html',
+                'form/add_users.html',
                 {
-                    'contacts': contacts_list,
-                    'discussion': discussion
+                    'title': 'Invite peers to the discussion.',
+                    'js_callback_name': 'add_discussion_peers',
+                    'button_value': 'Invite to discussion',
+                    'users': contacts_list,
+                    'dest_hash': discussion.hash
                 }
             );
 
@@ -318,7 +325,7 @@ hf_control.signed_in.route('/notifications', function(ctx){
 hf_control.signed_in.route('/contacts', function(ctx) {
     hf_service.list_contacts(function(list_contacts) {
         var params = {
-            'chunks': list_contacts,
+            'chunks': hf_control.sort_users_chunks(list_contacts),
             'title': 'Your contacts.',
             'empty': 'You don\'t have any contacts yet'
         };
@@ -338,7 +345,7 @@ hf_control.signed_in.route('/global/users', function (ctx) {
     hf_service.global_list('/global/users_list', function(users_hashes){
         hf_service.get_users_public_chunks(users_hashes, function(users_public_chunks) {
             var template_context = {
-                'chunks': hf.values(users_public_chunks),
+                'chunks': hf_control.sort_users_chunks(hf.values(users_public_chunks)),
                 'title' : 'All users.',
                 'empty': 'YOU SHOULD NOT SEE THIS MESSAGE.'
             };
@@ -642,23 +649,26 @@ hf_control.signed_in.route('/edit_login_infos', function(ctx){
 hf_control.signed_in.route('/profile', function(ctx){
     var domElem = document.getElementById('hf_page_main_content');
     var private_chunk = hf_service.user_private_chunk;
-    var html = (
-        hf_ui.template(
-            'header/user_profile.html',
-            private_chunk
-        ) +
-        hf_ui.markdown_cell(private_chunk['profile']['public_markdown'])
-    );
 
-    domElem.innerHTML = html;
 
-    hf_service.list_circles_names(function(circles_names){
-        hf_control.view_threads(circles_names, function(posts_html){
-            domElem.innerHTML += posts_html;
+    hf_control.view_new_post(null, function(new_post_html){
+        domElem.innerHTML = (
+            hf_ui.template(
+                'header/user_profile.html',
+                private_chunk
+            ) +
+            hf_ui.markdown_cell(private_chunk['profile']['public_markdown']) +
+            new_post_html
+        );;
+
+        hf_service.list_circles_names(function(circles_names){
+            hf_control.view_threads(circles_names, function(posts_html){
+                domElem.innerHTML += posts_html;
+            });
         });
-    });
 
-    ctx.callback();
+        ctx.callback();
+    });
 });
 
 hf_control.signed_in.route('/profile/', function(ctx){
@@ -829,6 +839,16 @@ hf_control.view_threads = function(threads_names, callback, is_comment_enable)
             }
         });
     }
+}
+
+hf_control.sort_users_chunks = function(users_chunks)
+{
+    return users_chunks.sort(function(a, b){
+        return (
+            hf.strcmp(a['profile']['first_name'], b['profile']['first_name']) +
+            hf.strcmp(a['profile']['last_name'], b['profile']['last_name']) * 2
+        );
+    });
 }
 
 

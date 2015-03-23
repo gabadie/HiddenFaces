@@ -1,0 +1,18 @@
+{{#hf_cell}}
+    <div class="hf_padding">
+        <div class="hf_title">{{title}}</div>
+        <form
+            onsubmit="hf_control.{{js_callback_name}}(this); return false;"
+            onkeypress="return event.keyCode != 13;"
+        >
+            {{{hf_input_autocomplete_list_users users name="users_list"}}}
+            <input type="hidden" name="dest_hash" value="{{dest_hash}}" />
+            <input
+                type="submit"
+                style="margin: 5px 0 0 auto; display: block;"
+                class="btn btn-primary"
+                value="{{button_value}}"
+            />
+        </form>
+    </div>
+{{/hf_cell}}
