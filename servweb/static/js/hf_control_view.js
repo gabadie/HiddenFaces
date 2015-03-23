@@ -179,6 +179,8 @@ hf_control.signed_in.route('/discussions', function(ctx){
                 'name': discussions_map[discussion_hash]
             });
         }
+        discussions_infos = hf_control.sort_discussions(discussions_infos);
+
 
         domElem.innerHTML = hf_ui.template(
             "list_discussions.html",
@@ -890,6 +892,15 @@ hf_control.sort_groups_chunks = function(groups_chunks)
     return groups_chunks.sort(function(a, b){
         return (
             hf.strcmp(a['group']['name'].toLowerCase(), b['group']['name'].toLowerCase())
+        );
+    });
+}
+
+hf_control.sort_discussions = function(discussions_infos)
+{
+    return discussions_infos.sort(function(a,b){
+        return (
+            hf.strcmp(a['name'].toLowerCase(), b['name'].toLowerCase())
         );
     });
 }
