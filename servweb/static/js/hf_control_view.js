@@ -853,8 +853,14 @@ hf_control.sort_users_chunks = function(users_chunks)
 {
     return users_chunks.sort(function(a, b){
         return (
-            hf.strcmp(a['profile']['first_name'], b['profile']['first_name']) +
-            hf.strcmp(a['profile']['last_name'], b['profile']['last_name']) * 2
+            hf.strcmp(
+                a['profile']['first_name'].toLowerCase(),
+                b['profile']['first_name'].toLowerCase()
+            ) +
+            hf.strcmp(
+                a['profile']['last_name'].toLowerCase(),
+                b['profile']['last_name'].toLowerCase()
+            ) * 2
         );
     });
 }
@@ -863,7 +869,7 @@ hf_control.sort_groups_chunks = function(groups_chunks)
 {
     return groups_chunks.sort(function(a, b){
         return (
-            hf.strcmp(a['group']['name'], b['group']['name'])
+            hf.strcmp(a['group']['name'].toLowerCase(), b['group']['name'].toLowerCase())
         );
     });
 }
