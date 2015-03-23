@@ -1,15 +1,25 @@
 {{#hf_cell}}
     <div class="hf_padding">
         <div class="hf_title">
-            Discussion: {{name}}
+            Discussion: {{discussion.name}}
 
-            <button
-                class="btn btn-default"
-                style="float:right;"
-                onclick="return hf_control.view('/discussion/{{hash}}/peers');"
-            >
+            {{#if peers}}
+                <button
+                    class="btn btn-default"
+                    style="float:right;"
+                    onclick="return hf_control.view('/discussion/{{discussion.hash}}');"
+                >
+                Back
+                </button>
+            {{else}}
+                <button
+                    class="btn btn-default"
+                    style="float:right;"
+                    onclick="return hf_control.view('/discussion/{{discussion.hash}}/peers');"
+                >
                 Show peers
-            </button>
+                </button>
+            {{/if}}
         </div>
     </div>
 {{/hf_cell}}

@@ -216,7 +216,9 @@ hf_control.discussion_thread = function(ctx, discussion_hash)
             domElem.innerHTML = (
                 hf_ui.template(
                     'header/discussion_header.html',
-                    discussion
+                    {
+                        'discussion': discussion
+                    }
                 ) +
                 hf_ui.template(
                     'form/append_post_to_discussion.html',
@@ -248,7 +250,10 @@ hf_control.discussion_peers = function(ctx, discussion_hash)
         domElem.innerHTML = (
             hf_ui.template(
                 'header/discussion_header.html',
-                discussion
+                {
+                    'discussion': discussion,
+                    'peers': true
+                }
             ) +
             hf_ui.template(
                 'list_links.html',
