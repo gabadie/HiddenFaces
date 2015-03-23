@@ -206,7 +206,6 @@ hf_service.create_group = function(group_name, description, public_group, public
             transaction.commit(function(json_message){
                 if (json_message['status'] != 'ok')
                 {
-                    alert('create group has failed');
                     if(callback)
                         callback(null);
                 }else {
@@ -619,8 +618,6 @@ hf_service.add_contacts_to_group = function(list_users_hash, group_hash, callbac
     for(var i = 0; i < list_users_hash.length; i++)
     {
         hf_service.add_user_to_group(list_users_hash[i], group_hash, function(success){
-            if(!success)
-                callback(false);
             added_users++;
             if(added_users == list_users_hash.length)
                 callback(true);

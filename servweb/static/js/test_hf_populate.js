@@ -29,12 +29,10 @@ test_hf_populate.rand_user_id = function()
 }
 
 test_hf_populate.group_picture_links = [
-    'http://interfacelift.com/wallpaper/Df6699fd/03365_villefranchesurmertwilightsunset_1366x768.jpg',
-    'http://interfacelift.com/wallpaper/Db156860/03299_tucsonsupermoon_2560x1080.jpg',
-    'http://interfacelift.com/wallpaper/Dfb0bad6/03844_sunsetatkullaberg_2560x1080.jpg',
-    'http://interfacelift.com/wallpaper/Df3e174a/03531_underthevolcano_2560x1080.jpg',
-    'http://interfacelift.com/wallpaper/Df3e174a/03757_bessieres_2560x1080.jpg',
-    'http://interfacelift.com/wallpaper/D12fd6e8/03857_manhattansunset_2560x1080.jpg'
+    'http://images6.alphacoders.com/303/303836.jpg',
+    'https://lh6.ggpht.com/_AmycuyWddtkVMXER5z4A_lbkHPAK-k6v-EOuuZaIaxqg2-a-t9eQeuNkAjM4F-6ggE=h900',
+    'http://fc04.deviantart.net/fs71/i/2010/136/9/e/Autumn_Wallpaper_by_emats.jpg',
+    'http://webneel.com/wallpaper/sites/default/files/images/04-2013/11-beach-sea-photography.jpg'
 ];
 
 test_hf_populate.profile_picture_links = [
