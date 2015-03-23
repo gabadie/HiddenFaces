@@ -4,8 +4,8 @@
 /*
  * @param <circle_name>: circle's name
  * @param <callback>: the function called once the response has arrived
- *      @param <success>: true or false
- *      function my_callback(success)
+ *      @param <circle_hash>: the hash of the circle, null if failed
+ *      function my_callback(circle_hash)
  */
 hf_service.create_circle = function(circle_name, callback)
 {
@@ -34,7 +34,11 @@ hf_service.create_circle = function(circle_name, callback)
         hf_service.store_key(user_private_chunk, thread_chunk_name, thread_chunk_key);
 
         hf_service.save_user_chunks(function(success){
-            callback(success)
+            if(success == true){
+                callback(thread_chunk_name);
+            }else{
+                callback(null);
+            }
         });
 
         circle_hash = thread_chunk_name;
