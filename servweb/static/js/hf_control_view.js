@@ -130,7 +130,11 @@ hf_control.circle_contacts = function(ctx, circle_hash)
 
     hf_service.get_circle(circle_hash, function(circle)
     {
-        domElem.innerHTML = hf_ui.template('header/circle_header.html', circle);
+        domElem.innerHTML = hf_ui.template('header/circle_header.html',
+            {
+                'circle': circle,
+                'back': true
+            });
 
         hf_service.list_contacts(function(list_contacts)
         {
@@ -259,7 +263,7 @@ hf_control.discussion_peers = function(ctx, discussion_hash)
                 'header/discussion_header.html',
                 {
                     'discussion': discussion,
-                    'peers': true
+                    'peers' : true
                 }
             ) +
             hf_ui.template(
