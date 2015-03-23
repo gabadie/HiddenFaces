@@ -126,8 +126,12 @@ hf_control.circle_posts = function(ctx, circle_hash)
 
 hf_control.circle_contacts = function(ctx, circle_hash)
 {
+    var domElem = document.getElementById('hf_page_main_content');
+
     hf_service.get_circle(circle_hash, function(circle)
     {
+        domElem.innerHTML = hf_ui.template('header/circle_header.html', circle);
+
         hf_service.list_contacts(function(list_contacts)
         {
             var params = {
@@ -137,12 +141,7 @@ hf_control.circle_contacts = function(ctx, circle_hash)
                 'empty': 'You don\'t have any contacts yet'
             };
 
-            var circle_header_html = hf_ui.template('header/circle_header.html', circle);
-            var list_contacts = hf_ui.template('list_links.html',params);
-
-            document.getElementById('hf_page_main_content').innerHTML = (
-                circle_header_html + list_contacts
-            );
+            domElem.innerHTML += hf_ui.template('list_links.html',params);
 
             ctx.callback();
         });
@@ -259,10 +258,13 @@ hf_control.discussion_peers = function(ctx, discussion_hash)
 
         hf_service.list_contacts(function(contacts_list){
             domElem.innerHTML += hf_ui.template(
-                'form/add_discussion_peers.html',
+                'form/add_users.html',
                 {
-                    'contacts': contacts_list,
-                    'discussion': discussion
+                    'title': 'Invite peers to the discussion.',
+                    'js_callback_name': 'add_discussion_peers',
+                    'button_value': 'Invite to discussion',
+                    'users': contacts_list,
+                    'dest_hash': discussion.hash
                 }
             );
 
