@@ -509,9 +509,11 @@ hf_control.group_notifications = function(ctx, group_hash)
 
 hf_control.group_contacts = function(ctx, group_hash)
 {
+    var domElem = document.getElementById('hf_page_main_content');
+
     hf_service.get_group_public_chunk(group_hash, function(group)
     {
-        var header_html = hf_ui.template(
+        domElem.innerHTML = hf_ui.template(
             'header/group_header.html',
             group
         );
@@ -532,22 +534,32 @@ hf_control.group_contacts = function(ctx, group_hash)
                 template_context
             );
 
-            hf_service.global_list('/global/users_list', function(users_hashes){
-                hf_service.get_users_public_chunks(users_hashes, function(users_list) {
+            if (hf_service.is_group_admin(group_hash))
+            {
+                hf_service.global_list('/global/users_list', function(users_hashes){
+                    hf_service.get_users_public_chunks(users_hashes, function(users_list) {
 
-                    var invite_html =  hf_ui.template(
-                        'form/add_users.html',
-                        {
-                            'title': 'Invite new member to the group.',
-                            'js_callback_name': 'add_contact_to_group',
-                            'button_value': 'Invite to group',
-                            'users': hf.values(users_list),
-                            'dest_hash': group_hash
-                        });
-                    document.getElementById('hf_page_main_content').innerHTML = header_html + invite_html + html;
-                    ctx.callback();
+                        var invite_html =  hf_ui.template(
+                            'form/add_users.html',
+                            {
+                                'title': 'Invite new member to the group.',
+                                'js_callback_name': 'add_contact_to_group',
+                                'button_value': 'Invite to group',
+                                'users': hf.values(users_list),
+                                'dest_hash': group_hash
+                            });
+
+                        domElem.innerHTML += invite_html + html;
+                        ctx.callback();
+                    });
                 });
-            });
+            }
+            else
+            {
+                domElem.innerHTML += html;
+
+                ctx.callback();
+            }
         });
     });
 }
