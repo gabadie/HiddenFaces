@@ -9,15 +9,18 @@
                 />
             {{/if}}
             Profile: {{profile.first_name}} {{profile.last_name}}
-            {{#if_eq __meta.type "/user/private_chunk"}}
-                <button
-                    class="btn btn-primary"
-                    style="float:right;"
-                    onclick="return hf_control.view('/edit_profile');"
-                >
-                    Edit profile
-                </button>
-            {{/if_eq}}
+            <div style="float:right;">
+                {{#if_eq __meta.type "/user/private_chunk"}}
+                    <button
+                        class="btn btn-primary"
+                        onclick="return hf_control.view('/edit_profile');"
+                    >
+                        Edit profile
+                    </button>
+                {{else}}
+                    {{{hf_start_discussion this}}}
+                {{/if_eq}}
+            </div>
         </div>
     </div>
 {{/hf_cell}}
