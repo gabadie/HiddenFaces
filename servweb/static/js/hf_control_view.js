@@ -108,6 +108,8 @@ hf_control.circle_posts = function(ctx, circle_hash)
     var domElem = document.getElementById('hf_page_main_content');
 
     hf_service.get_circle(circle_hash, function(circle){
+
+        circle['back'] = false;
         var circle_header_html = hf_ui.template('header/circle_header.html', circle);
 
         domElem.innerHTML = circle_header_html;
@@ -132,30 +134,32 @@ hf_control.circle_contacts = function(ctx, circle_hash)
 
     hf_service.get_circle(circle_hash, function(circle)
     {
-        domElem.innerHTML = hf_ui.template('header/circle_header.html', circle);
+        circle['back'] = true;
+        domElem.innerHTML = hf_ui.template('header/circle_header.html',circle);
 
-        hf_service.list_circle_contacts(circle_hash, function(list_contacts)
+        hf_service.list_circle_contacts(circle_hash, function(list_contacts_circle)
         {
-            var params = {
-                'circle_hash': circle_hash,
-                'chunks': hf_control.sort_users_chunks(hf.values(list_contacts)),
-                'title': 'Circle\'s contacts.',
-                'empty': 'You have not added any contacts in this circle yet.'
-            };
+            hf_service.list_contacts(function(contacts_list){
+                domElem.innerHTML += hf_ui.template('form/add_users.html',
+                    {
+                        'title': 'Add contacts to this circle.',
+                        'js_callback_name': 'add_contacts_to_circle',
+                        'button_value': 'Add to circle',
+                        'users': contacts_list,
+                        'dest_hash': circle_hash
+                    }
+                );
+                var params = {
+                    'circle_hash': circle_hash,
+                    'chunks': hf_control.sort_users_chunks(hf.values(list_contacts_circle)),
+                    'title': 'Circle\'s contacts.',
+                    'empty': 'You have not added any contacts in this circle yet.'
+                };
 
-            domElem.innerHTML += hf_ui.template('form/add_users.html',
-                {
-                    'title': 'Add contacts to this circle.',
-                    'js_callback_name': 'add_contacts_to_circle',
-                    'button_value': 'Add to circle',
-                    'users': list_contacts,
-                    'dest_hash': circle_hash
-                }
-            );
+                domElem.innerHTML += hf_ui.template('list_links.html',params);
 
-            domElem.innerHTML += hf_ui.template('list_links.html',params);
-
-            ctx.callback();
+                ctx.callback();
+            });
         });
     });
 }
@@ -264,7 +268,7 @@ hf_control.discussion_peers = function(ctx, discussion_hash)
                 'header/discussion_header.html',
                 {
                     'discussion': discussion,
-                    'peers': true
+                    'peers' : true
                 }
             ) +
             hf_ui.template(

@@ -581,25 +581,25 @@ hf_service.add_user_to_group = function(user_hash, group_hash, callback)
                     //add user to group
                     group_json['users'].push(user_hash);
 
+                    var shared_chunk_infos = null;
+
                     if(!group_json['group']['public']){
                         //send notification to user
-                        var shared_chunk_infos = {
+                        shared_chunk_infos = {
                             'name': group_json['shared_chunk']['name'],
                             'type': '/group/shared_chunk',
                             'symetric_key': group_json['shared_chunk']['key']
                         };
-
-                        hf_service.save_group_chunks(group_json,function(success){
-                            if(success){
-                                hf_service.send_group_infos_to_user(user_hash, group_hash, shared_chunk_infos,callback);
-                            }else{
-                                alert('cannot save group chunks');
-                                callback(false);
-                            }
-                        });
-                    }else{
-                        hf_service.save_group_chunks(group_json,callback);
                     }
+
+                    hf_service.save_group_chunks(group_json,function(success){
+                        if(success){
+                            hf_service.send_group_infos_to_user(user_hash, group_hash, shared_chunk_infos,callback);
+                        }else{
+                            alert('cannot save group chunks');
+                            callback(false);
+                        }
+                    });
                 }else{
                     alert('group json is not good');
                     callback(false);
@@ -840,18 +840,20 @@ hf_service.define_notification('/notification/group_shared_chunk_infos', {
     automation: function(notification_json)
     {
         assert(hf_service.is_connected());
-        assert(notification_json['chunks'] !== undefined);
+
+        var shared_chunk_infos = notification_json['chunks'];
+
+        assert(shared_chunk_infos !== undefined);
         assert(notification_json['__meta']['author_user_hash'] !== undefined);
 
         var group_hash = notification_json['__meta']['author_user_hash'];
 
-        if (!hf_service.already_subscribed(group_hash))
+        if (shared_chunk_infos == null || !hf_service.already_subscribed(group_hash))
         {
             return 'continue';
         }
 
         var user_private_chunk = hf_service.user_private_chunk;
-        var shared_chunk_infos = notification_json['chunks'];
         var user_groups_list = user_private_chunk['groups']['subscribed_to'];
 
         if (shared_chunk_infos['type'] == '/group/shared_chunk')
@@ -897,14 +899,6 @@ hf_service.send_group_infos_to_user = function(user_hash, group_hash, shared_chu
     assert(hf.is_hash(user_hash));
     assert(hf.is_hash(group_hash));
     assert(hf.is_function(callback));
-
-    assert('name' in shared_chunk_infos);
-    assert('type' in shared_chunk_infos);
-    assert('symetric_key' in shared_chunk_infos);
-
-    assert(hf.is_hash(shared_chunk_infos['name']));
-    assert(shared_chunk_infos['type'] == '/group/shared_chunk');
-    assert(hf_com.is_AES_key(shared_chunk_infos['symetric_key']));
 
     hf_service.get_group_private_chunk(group_hash, function(group_private_chunk){
         assert(hf_service.already_user(user_hash, group_private_chunk));
