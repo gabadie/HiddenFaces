@@ -349,17 +349,19 @@ hf_service.list_peers = function(discussion_hash,callback)
     }
 
     for(var i = 0; i < peers.length; i++) {
-        hf_service.get_user_public_chunk(peers[i], function(public_chunk) {
-            if (public_chunk)
-            {
-                content[peers[i]] = public_chunk;
-            }
+        (function(i){
+            hf_service.get_user_public_chunk(peers[i], function(public_chunk) {
+                if (public_chunk)
+                {
+                    content[peers[i]] = public_chunk;
+                }
 
-            iteration--;
-            if (iteration === 0) {
-                callback(content);
-            }
-        });
+                iteration--;
+                if (iteration === 0) {
+                    callback(content);
+                }
+            });
+        })(i);
     }
 }
 
