@@ -660,6 +660,7 @@ test_hf_service.main = function()
     test_utils.run(test_hf_service.list_circles, 'test_hf_service.list_circles');
     test_utils.run(test_hf_service.list_circles_names, 'test_hf_service.list_circles_names');
     test_utils.run(test_hf_service.list_circle_threads_names, 'test_hf_service.list_circle_threads_names');
+    test_utils.run(test_hf_service.add_contacts_to_circle, 'test_hf_service.add_contacts_to_circle');
 
     //GROUPS
     test_utils.run(test_hf_service.create_group,'test_hf_service.create_group');

@@ -101,6 +101,47 @@ hf_service.add_contact_to_circle = function(contact_user_hash, circle_hash, call
 }
 
 /*
+ * @param <contacts_hashes>: list contacts' user hashes
+ * @param <circle_hash>: circle's hash
+ * @param <callback>: the function called once the response has arrived
+ *      @param <success>: true
+ *      function my_callback(success)
+ */
+hf_service.add_contacts_to_circle = function(contacts_hashes, circle_hash, callback)
+{
+    var iteration = contacts_hashes.length;
+
+    if(iteration === 0){
+        callback(true);
+    }
+
+    for (var i = 0; i < contacts_hashes.length; i++)
+    {
+        assert(hf_service.is_contact(contacts_hashes[i]));
+
+        if(!hf_service.is_contact_into_circle(contacts_hashes[i],circle_hash)){
+
+            hf_service.add_contact_to_circle(contacts_hashes[i], circle_hash, function(success){
+                if(success == false){
+                    console.info('Cannot add contact to circle');
+                }
+
+                iteration--;
+                if(iteration === 0){
+                    callback(true);
+                }
+            });
+
+        }else{
+            iteration--;
+            if(iteration === 0){
+                callback(true);
+            }
+        }
+    }
+}
+
+/*
  * @param <contact_user_hash>: contact's user hash
  * @param <circle_hash>: circle's hash
  *
