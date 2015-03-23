@@ -165,6 +165,44 @@ hf_service.is_contact_into_circle = function(contact_user_hash, circle_hash)
 }
 
 /*
+ * Gets the map hash-public_chunk of circle's contacts
+ * @param <circle_hash>: the hash of the specified circle
+ * @param <callback>: the function called once the response has arrived
+ *      @param <public_chunks>: the contacts' hash-public chunk
+ *      function my_callback(public_chunks)
+ */
+hf_service.list_circle_contacts = function(circle_hash,callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf_service.is_circle_hash(circle_hash));
+    assert(hf.is_function(callback));
+
+    var circle_contacts = hf_service.user_private_chunk['circles'][circle_hash]['contacts'];
+    var content = {};
+
+    var iteration = circle_contacts.length;
+
+    if (iteration === 0) {
+        callback(content);
+        return;
+    }
+
+    for(var i = 0; i < circle_contacts.length; i++) {
+        hf_service.get_user_public_chunk(circle_contacts[i], function(public_chunk) {
+            if (public_chunk)
+            {
+                content[circle_contacts[i]] = public_chunk;
+            }
+
+            iteration--;
+            if (iteration === 0) {
+                callback(content);
+            }
+        });
+    }
+}
+
+/*
  * @param <circle_hash>: circle's hash
  * @param <callback>: the function called once the response has arrived
  *      @param <circle>: resolved circle
