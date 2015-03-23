@@ -614,30 +614,27 @@ hf_control.group_create = function(ctx)
 }
 
 // ------------------------------------------------------ MESSAGES' VIEWS
-hf_control.signed_in.route('/send_message', function(ctx){
-    var template_context = {
-        'user_hash': ''
-    };
-
-    hf_ui.apply_template(
-        'form/send_message.html',
-        template_context,
-        document.getElementById('hf_page_main_content')
-    );
-
-    ctx.callback();
-});
-
 hf_control.signed_in.route('/send_message/', function(ctx){
+    var domElem = document.getElementById('hf_page_main_content');
 
     var viewUrl = hf_control.current_view_url();
     var user_hash = viewUrl.split("/")[2];
+   hf_service.get_user_public_chunk(user_hash, function(public_chunk) {
+        if (!public_chunk)
+        {
+            return hf_control.view('/');
+        }
+        var message_html = hf_ui.template('form/send_message.html',
+        {'user_hash': user_hash}
+        );
 
-    hf_ui.apply_template(
-        'form/send_message.html',
-        {'user_hash': user_hash},
-        document.getElementById('hf_page_main_content')
-    );
+        domElem.innerHTML = hf_ui.template(
+            'header/user_profile.html',
+            public_chunk
+        ) + message_html;
+
+    });
+
 
     ctx.callback();
 });
@@ -688,7 +685,7 @@ hf_control.signed_in.route('/profile', function(ctx){
             ) +
             hf_ui.markdown_cell(private_chunk['profile']['public_markdown']) +
             new_post_html
-        );;
+        );
 
         hf_service.list_circles_names(function(circles_names){
             hf_control.view_threads(circles_names, function(posts_html){
