@@ -220,7 +220,7 @@ hf_ui.menu_group = function(group)
     var is_admin = hf_service.is_group_admin(group_hash);
 
     var out = '';
-    out += '<div class="hf_group_menu">';
+    out += '<div class="hf_menu">';
 
     if((hf_service.waiting_accept_subcribe(group) == 1 || group['group']['public']) && hf_control.current_view_url().split("/").length > 3)
     {
