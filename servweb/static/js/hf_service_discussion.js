@@ -386,20 +386,22 @@ hf_service.list_discussions = function(callback)
         var discussion_name = hf_service.user_private_chunk['discussions'][discussion_hash]['name'];
 
         if(discussion_name == null){
-            hf_service.list_peers(discussion_hash,function(public_chunks_map){
+            (function(discussion_hash){
+                hf_service.list_peers(discussion_hash,function(public_chunks_map){
 
-                var peers_hashes = Object.keys(public_chunks_map);
+                    var peers_hashes = Object.keys(public_chunks_map);
 
-                discussion_name = hf_service.resolve_discussion_name(public_chunks_map);
+                    discussion_name = hf_service.resolve_discussion_name(public_chunks_map);
 
-                discussion_map[discussion_hash] = discussion_name;
+                    discussion_map[discussion_hash] = discussion_name;
 
-                iteration--;
-                if(iteration === 0){
-                    callback(discussion_map);
-                }
+                    iteration--;
+                    if(iteration === 0){
+                        callback(discussion_map);
+                    }
 
-            });
+                });
+            })(discussion_hash);
         }else{
             discussion_map[discussion_hash] = discussion_name;
 
