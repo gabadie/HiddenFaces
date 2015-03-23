@@ -978,7 +978,8 @@ hf_service.change_group_profile = function(group_hash, json_modification, callba
         private_chunk['group']['description'] = json_modification['group_description'];
         private_chunk['group']['public'] = json_modification['group_group_public'];
         private_chunk['thread']['public'] = json_modification['group_thread_public'];
-        private_chunk['group']['picture'] = json_modification['group_picture'];
+        if(json_modification['group_picture'] != '')
+            private_chunk['group']['picture'] = json_modification['group_picture'];
 
         hf_service.save_group_chunks(private_chunk, function(success){
             callback(success);
