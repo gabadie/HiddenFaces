@@ -496,26 +496,32 @@ hf_control.subcribe = function(dom)
 hf_control.create_group = function(dom)
 {
     var info = hf_control.get_group_infos(dom);
+
     if (!info){
         return false;
     }
 
     hf.input_to_uri(hf.form_input(dom, 'picture'), function(uri){
-
         if (uri)
         {
             info['group_picture'] = uri;
         }
 
-       hf_service.create_group(info['group_name'],
+        hf_service.create_group(info['group_name'],
                                info['group_description'],
                                info['group_group_public'],
                                info['group_thread_public'],
                                info['group_picture'],
-                               function(success)
-       {
-            assert(success);
-            hf_control.refresh_view();
+                               function(group_hash)
+        {
+            if (group_hash == null)
+            {
+                return alert('group creation failed');
+            }
+
+            assert(hf.is_hash(group_hash));
+
+            hf_control.view('/group/' + group_hash + '/members');
         });
     }) ;
 }
