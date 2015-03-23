@@ -28,12 +28,21 @@ test_hf_populate.rand_user_id = function()
     return test_hf_populate.rand() % test_hf_populate.profile_count;
 }
 
+test_hf_populate.group_picture_links = [
+    'http://interfacelift.com/wallpaper/Df6699fd/03365_villefranchesurmertwilightsunset_1366x768.jpg',
+    'http://interfacelift.com/wallpaper/Db156860/03299_tucsonsupermoon_2560x1080.jpg',
+    'http://interfacelift.com/wallpaper/Dfb0bad6/03844_sunsetatkullaberg_2560x1080.jpg',
+    'http://interfacelift.com/wallpaper/Df3e174a/03531_underthevolcano_2560x1080.jpg',
+    'http://interfacelift.com/wallpaper/Df3e174a/03757_bessieres_2560x1080.jpg',
+    'http://interfacelift.com/wallpaper/D12fd6e8/03857_manhattansunset_2560x1080.jpg'
+];
+
 test_hf_populate.profile_picture_links = [
     'http://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Rabbit_in_montana.jpg/270px-Rabbit_in_montana.jpg',
     'http://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Kitten_in_Rizal_Park%2C_Manila.jpg/160px-Kitten_in_Rizal_Park%2C_Manila.jpg',
     'http://upload.wikimedia.org/wikipedia/commons/thumb/9/94/My_dog.jpg/320px-My_dog.jpg',
     'http://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Goldfish3.jpg/224px-Goldfish3.jpg'
-]
+];
 
 test_hf_populate.create_users = function()
 {
@@ -267,11 +276,14 @@ test_hf_populate.create_groups = function()
 
         var group_info = test_hf_service.group_examples(i);
 
+        var picture_id = test_hf_populate.rand() % test_hf_populate.group_picture_links.length;
+
         hf_service.create_group(
             group_info['name'],
             group_info['description'],
-            i < test_hf_populate.group_count / 4, i < test_hf_populate.group_count / 2,
-            '',
+            i < test_hf_populate.group_count / 4,
+            i < test_hf_populate.group_count / 2,
+            test_hf_populate.group_picture_links[picture_id],
             function(group_hash){
                 test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
                 test_utils.assert(hf_service.is_group_admin(group_hash));
