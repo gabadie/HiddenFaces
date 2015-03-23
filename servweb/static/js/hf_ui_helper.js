@@ -278,7 +278,7 @@ Handlebars.registerHelper('hf_linkify', function(text_to_linkify){
 });
 
 Handlebars.registerHelper('hf_checked', function(group, group_type){
-    var type = "public";
+    var type = "private";
     if (group != null) {
         var group_vis = group['group']['public'];
         var thread_vis = false;

@@ -573,7 +573,6 @@ hf_service.add_user_to_group = function(user_hash, group_hash, callback)
             function(group_json){
                 if(group_json){
                     if(hf_service.already_user(user_hash,group_json)){
-                        alert('already user');
                         callback(false);
                         return;
                     }
@@ -596,12 +595,10 @@ hf_service.add_user_to_group = function(user_hash, group_hash, callback)
                         if(success){
                             hf_service.send_group_infos_to_user(user_hash, group_hash, shared_chunk_infos,callback);
                         }else{
-                            alert('cannot save group chunks');
                             callback(false);
                         }
                     });
                 }else{
-                    alert('group json is not good');
                     callback(false);
                 }
             }

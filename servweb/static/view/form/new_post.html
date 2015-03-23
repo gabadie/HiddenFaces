@@ -10,6 +10,7 @@
             onsubmit="hf_control.thread_post(this);return false;"
             {{/if}}
         >
+            {{#if circles}}
             <textarea
                 class="form-control"
                 name="content"
@@ -17,6 +18,14 @@
                 onkeypress="return hf_control.enter_type(this, event)"
                 onfocus="hf_ui_generic.textarea_onfocus(this);"
             ></textarea>
+            {{else}}
+            <textarea
+                class="form-control"
+                name="content"
+                style="margin-bottom:5px;"
+                onfocus="hf_ui_generic.textarea_onfocus(this);"
+            ></textarea>
+            {{/if}}
 
             {{#if circles}}
                 <div class="hf_form_autocomplete" style="margin-bottom:5px;">
