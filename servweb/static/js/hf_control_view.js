@@ -108,6 +108,8 @@ hf_control.circle_posts = function(ctx, circle_hash)
     var domElem = document.getElementById('hf_page_main_content');
 
     hf_service.get_circle(circle_hash, function(circle){
+
+        circle['back'] = false;
         var circle_header_html = hf_ui.template('header/circle_header.html', circle);
 
         domElem.innerHTML = circle_header_html;
