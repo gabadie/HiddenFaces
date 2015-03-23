@@ -514,26 +514,32 @@ hf_control.subcribe = function(dom)
 hf_control.create_group = function(dom)
 {
     var info = hf_control.get_group_infos(dom);
+
     if (!info){
         return false;
     }
 
     hf.input_to_uri(hf.form_input(dom, 'picture'), function(uri){
-
         if (uri)
         {
             info['group_picture'] = uri;
         }
 
-       hf_service.create_group(info['group_name'],
+        hf_service.create_group(info['group_name'],
                                info['group_description'],
                                info['group_group_public'],
                                info['group_thread_public'],
                                info['group_picture'],
-                               function(success)
-       {
-            assert(success);
-             hf_control.refresh_view();
+                               function(group_hash)
+        {
+            if (group_hash == null)
+            {
+                return alert('group creation failed');
+            }
+
+            assert(hf.is_hash(group_hash));
+
+            hf_control.view('/group/' + group_hash + '/members');
         });
     }) ;
 }
@@ -598,23 +604,35 @@ hf_control.get_group_infos = function(dom)
     var group_name = arrs['name'].trim();
     var description = arrs['description'].trim();
 
-    if(group_name == '')
-    {
-        alert('group must have a name');
-        return false;
-    }
+    var group = dom['group-type'].value;
 
     var form_elements = document.getElementById('hf_create_new_group').elements;
-    var group_vis = form_elements['group-visilibity'].checked;
-    var thread_vis = form_elements['thread-visilibity'].checked;
-    if(group_vis)
+    var group_vis = true;
+    var thread_vis = true;
+
+    if (group == "public")
+    {
+        group_vis = true;
         thread_vis = true;
+    } else if (group == "protected"){
+        group_vis = false;
+        thread_vis = true;
+    } else {
+        group_vis = false;
+        thread_vis = false;
+    }
 
     out['group_name'] = group_name;
     out['group_description'] = description;
     out['group_group_public'] = group_vis;
     out['group_thread_public'] = thread_vis;
     out['group_picture'] = arrs['picture'];
+
+    if(group_name == '')
+    {
+        alert('group must have a name');
+        return false;
+    }
 
     return out;
 }
