@@ -39,7 +39,7 @@ test_hf_service.create_group = function()
     hf_service.create_group(
         group_info['name'],
         group_info['description'],
-        false, false,
+        false, false,"",
         function(group_hash){
             test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
             test_utils.assert(hf_service.is_group_admin(group_hash));
@@ -65,7 +65,7 @@ test_hf_service.add_user_to_group = function() {
     hf_service.create_group(
         group_info['name'],
         group_info['description'],
-        false, false,
+        false, false,"",
         function(group_hash){
             test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
             test_utils.assert(hf_service.is_group_admin(group_hash),'The current user has not be set as group admin');
@@ -115,7 +115,7 @@ test_hf_service.subscribe_to_group = function(){
     hf_service.create_group(
         group_info['name'],
         group_info['description'],
-        false, false,
+        false, false,"",
         function(group_hash){
             test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
             hf_service.subscribe_to_group(group_hash, subscription_message, function(success){
@@ -185,7 +185,7 @@ test_hf_service.list_group_notifications = function(){
     hf_service.create_group(
         group_info['name'],
         group_info['description'],
-        false, false,
+        false, false,"",
         function(group_hash){
             test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
 
@@ -228,7 +228,7 @@ test_hf_service.group_notifications = function(){
     hf_service.create_group(
         group_info['name'],
         group_info['description'],
-        false, false,
+        false, false,"",
         function(group_hash){
             test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
             hf_service.disconnect();
