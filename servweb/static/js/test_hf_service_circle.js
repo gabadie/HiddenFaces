@@ -69,7 +69,15 @@ test_hf_service.add_contacts_to_circle = function()
     });
 
     hf_service.add_contacts_to_circle([user_hash1,user_hash2], circle_hash, function(success) {
-        test_utils.assert(success == true, 'hf_service.add_contacts_to_circle() has failed');
+        test_utils.assert(success == true, 'hf_service.add_contacts_to_circle([user_hash1,user_hash2]) has failed');
+    });
+
+    hf_service.add_contacts_to_circle([user_hash1,user_hash2], circle_hash, function(success) {
+        test_utils.assert(success == true, 'hf_service.add_contacts_to_circle([user_hash1,user_hash2]) has failed');
+    });
+
+    hf_service.add_contacts_to_circle([], circle_hash, function(success) {
+        test_utils.assert(success == true, 'hf_service.add_contacts_to_circle([]) has failed');
     });
 
     test_utils.assert(
@@ -82,7 +90,7 @@ test_hf_service.add_contacts_to_circle = function()
         'user 2 should be a contact of user 0'
     );
 
-    test_utils.assert_success(4);
+    test_utils.assert_success(6);
 }
 
 test_hf_service.is_contact_into_circle = function()

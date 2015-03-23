@@ -109,6 +109,7 @@ hf_service.add_contact_to_circle = function(contact_user_hash, circle_hash, call
  */
 hf_service.add_contacts_to_circle = function(contacts_hashes, circle_hash, callback)
 {
+    assert(contacts_hashes instanceof Array);
     var iteration = contacts_hashes.length;
 
     if(iteration === 0){
