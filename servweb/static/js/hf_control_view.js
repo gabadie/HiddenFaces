@@ -497,10 +497,9 @@ hf_control.group_contacts = function(ctx, group_hash)
         );
 
         hf_service.list_users(group_hash, function(users) {
-
             var is_admin = hf_service.is_group_admin(group_hash);
             var template_context = {
-                'chunks': users,
+                'chunks': hf_control.sort_users_chunks(hf.values(users)),
                 'title' : 'Group\'s members.',
                 'is_admin': is_admin,
                 'empty': 'YOU SHOULD NOT SEE THIS MESSAGE.'
