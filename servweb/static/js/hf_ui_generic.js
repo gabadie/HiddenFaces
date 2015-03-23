@@ -194,3 +194,21 @@ Handlebars.registerHelper('hf_input_autocomplete_list_users', function(user_publ
 
     return hf_ui_generic.input_autocomplete_list(params);
 });
+
+
+// ------------------------------------------------------------- resize textarea
+
+hf_ui_generic.textarea_onfocus = function(domElem)
+{
+    domElem.addEventListener('input', function(){
+        hf_ui_generic.textarea_resize(domElem);
+    });
+
+    hf_ui_generic.textarea_resize(domElem);
+}
+
+hf_ui_generic.textarea_resize = function(domElem)
+{
+    domElem.style.height = 'auto';
+    domElem.style.height = (domElem.scrollHeight  + domElem.offsetHeight - domElem.clientHeight) + 'px';
+}

@@ -5,7 +5,13 @@
         <form onsubmit="hf_control.edit_login_infos(this); return false;">
             <div class="content">
                 <label> Email</label>
-                <input type="text" class="form-control" name="email" value="{{email}}"/>
+                <input
+                    type="text"
+                    class="form-control"
+                    name="email"
+                    value="{{email}}"
+                    autocomplete="off"
+                />
             </div>
             <div class="content">
                 <label> Password </label>

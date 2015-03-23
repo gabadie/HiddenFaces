@@ -365,7 +365,7 @@ hf_control.create_post = function(postDom)
 
     if (circles_hash.length == 0)
     {
-        alert('you must select a group');
+        alert('you must select a circle');
         return;
     }
 
