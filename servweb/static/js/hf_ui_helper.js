@@ -201,7 +201,7 @@ Handlebars.registerHelper('hf_group_header', function(group)
     if(waiting_sub == -1)
         out+= hf_ui.send_message_dialog(group);
 
-    out +=  '</div><div style="font-size:12px;">'
+    out +=  '</div><div style="font-size:12px;" class="hf_text">'
             + group['group']['description']
             +' </div>';
 

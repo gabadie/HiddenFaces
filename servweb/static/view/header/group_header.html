@@ -1,12 +1,16 @@
 {{#hf_cell}}
-    <div class="hf_padding">
-            {{#if group.picture}}
-                <img
-                    class="hf_img"
-                    style="max-width: 120px; max-height: 120px; margin-right: 20px; float:left;"
-                    src="{{group.picture}}"
-                />
-            {{/if}}
+    {{#if group.picture}}
+        <div
+            class="hf_padding hf_group_header"
+            style="
+                width: 100%;
+                background: url({{group.picture}}) center no-repeat;
+                background-size: 100% auto;
+            "
+        >
+    {{else}}
+        <div class="hf_padding">
+    {{/if}}
         {{{hf_group_header this}}}
     </div>
 {{/hf_cell}}

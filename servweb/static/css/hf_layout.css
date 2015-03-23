@@ -282,6 +282,21 @@
 }
 
 /* ------------------------------------------------------------ GROUP */
+
+.hf_layout_cell .hf_group_header .hf_title,
+.hf_layout_cell .hf_group_header .hf_text
+{
+    text-shadow:
+        0 0 2px #FFFFFF,
+        0 0 2px #FFFFFF,
+        0 0 2px #FFFFFF,
+        0 0 2px #FFFFFF,
+        0 0 2px #FFFFFF,
+        0 0 2px #FFFFFF,
+        0 0 6px #FFFFFF,
+        0 0 12px #FFFFFF;
+}
+
 .hf_layout_cell .hf_group_public_private:after
 {
     content: 'protected';
