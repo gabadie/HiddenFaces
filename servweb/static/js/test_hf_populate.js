@@ -71,11 +71,11 @@ test_hf_populate.create_users = function()
 
         hf_service.user_private_chunk['profile']['picture'] = test_hf_populate.profile_picture_links[picture_id];
 
-        hf_service.create_circle('Family', function(success){
-            test_utils.assert(success == true, 'failed to create profile ' + i + '\'s family circle');
+        hf_service.create_circle('Family', function(circle_hash){
+            test_utils.assert(hf_service.is_circle_hash(circle_hash), 'failed to create profile ' + i + '\'s family circle');
         });
-        hf_service.create_circle('Friends', function(success){
-            test_utils.assert(success == true, 'failed to create profile ' + i + '\'s friends circle');
+        hf_service.create_circle('Friends', function(circle_hash){
+            test_utils.assert(hf_service.is_circle_hash(circle_hash), 'failed to create profile ' + i + '\'s friends circle');
         });
         hf_service.list_circles(function(circles_list){
             test_utils.assert(

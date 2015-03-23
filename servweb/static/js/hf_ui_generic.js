@@ -155,7 +155,8 @@ hf_ui_generic.input_autocomplete_list_keypress = function(event, inputDom)
 hf_ui_generic.input_autocomplete_list_delete = function(dom)
 {
     var spanParent = dom.parentNode;
-    var divParent = spanParent.parentNode;
+    var selectedlistDom = spanParent.parentNode;
+    var orifinalInputDom = selectedlistDom.nextSibling;
 
     var removed_key = spanParent.firstChild.value;
     var selected_keys = orifinalInputDom.value.split('\n');
@@ -167,7 +168,7 @@ hf_ui_generic.input_autocomplete_list_delete = function(dom)
     selected_keys.splice(index, 1);
 
     orifinalInputDom.value = selected_keys.join('\n');
-    divParent.removeChild(spanParent);
+    selectedlistDom.removeChild(spanParent);
 }
 
 
