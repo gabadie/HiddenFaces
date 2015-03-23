@@ -139,8 +139,8 @@ hf_control.circle_contacts = function(ctx, circle_hash)
             var params = {
                 'circle_hash': circle_hash,
                 'chunks': hf_control.sort_users_chunks(hf.values(list_contacts)),
-                'title': 'Your contacts.',
-                'empty': 'You don\'t have any contacts yet'
+                'title': 'Circle\'s contacts.',
+                'empty': 'You have not added any contacts in this circle yet.'
             };
 
             domElem.innerHTML += hf_ui.template('form/add_users.html',
