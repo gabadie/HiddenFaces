@@ -2,6 +2,7 @@
     <div class="hf_padding">
         <div class="hf_title">Send message.</div>
         <form onsubmit="hf_control.send_message(this); return false;">
+
             {{#if_eq user_hash ''}}
                 <input
                     type="text"
@@ -11,10 +12,11 @@
                 />
             {{else}}
                 <input
-                    type="text"
+                    type="hidden"
                     class="form-control"
                     value="{{user_hash}}"
                     name="destination"
+
                     readonly
                 />
             {{/if_eq}}
