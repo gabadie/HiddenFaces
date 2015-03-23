@@ -136,7 +136,7 @@ hf_control.circle_contacts = function(ctx, circle_hash)
         {
             var params = {
                 'circle_hash': circle_hash,
-                'chunks': list_contacts,
+                'chunks': hf_control.sort_users_chunks(list_contacts),
                 'title': 'Your contacts.',
                 'empty': 'You don\'t have any contacts yet'
             };
@@ -240,7 +240,7 @@ hf_control.discussion_peers = function(ctx, discussion_hash)
     hf_service.get_discussion(discussion_hash, function(discussion){
         var template_context = {
             'discussion_view': true,
-            'chunks': discussion['peers'],
+            'chunks': hf_control.sort_users_chunks(discussion['peers']),
             'title': 'Discussion\'s peers.',
             'empty': 'YOU SHOULD NOT SEE THIS MESSAGE.'
         };
@@ -320,7 +320,7 @@ hf_control.signed_in.route('/notifications', function(ctx){
 hf_control.signed_in.route('/contacts', function(ctx) {
     hf_service.list_contacts(function(list_contacts) {
         var params = {
-            'chunks': list_contacts,
+            'chunks': hf_control.sort_users_chunks(list_contacts),
             'title': 'Your contacts.',
             'empty': 'You don\'t have any contacts yet'
         };
@@ -340,7 +340,7 @@ hf_control.signed_in.route('/global/users', function (ctx) {
     hf_service.global_list('/global/users_list', function(users_hashes){
         hf_service.get_users_public_chunks(users_hashes, function(users_public_chunks) {
             var template_context = {
-                'chunks': hf.values(users_public_chunks),
+                'chunks': hf_control.sort_users_chunks(hf.values(users_public_chunks)),
                 'title' : 'All users.',
                 'empty': 'YOU SHOULD NOT SEE THIS MESSAGE.'
             };
@@ -834,6 +834,16 @@ hf_control.view_threads = function(threads_names, callback, is_comment_enable)
             }
         });
     }
+}
+
+hf_control.sort_users_chunks = function(users_chunks)
+{
+    return users_chunks.sort(function(a, b){
+        return (
+            hf.strcmp(a['profile']['first_name'], b['profile']['first_name']) +
+            hf.strcmp(a['profile']['last_name'], b['profile']['last_name']) * 2
+        );
+    });
 }
 
 
