@@ -298,10 +298,10 @@ hf_control.create_circle = function(domElem)
             return;
         }
 
-    hf_service.create_circle(user_circle['name'], function(success){
-        assert(success);
+    hf_service.create_circle(user_circle['name'], function(circle_hash){
+        assert(circle_hash !== null);
 
-        hf_control.refresh_view();
+        hf_control.view('/circle/' + circle_hash + '/contacts');
     });
 }
 
