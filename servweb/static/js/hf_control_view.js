@@ -66,6 +66,8 @@ hf_control.signed_in.route('/circles', function(ctx){
             'circles': []
         };
 
+        circles_list = hf_control.sort_circles(circles_list);
+
         for(var i = 0; i < circles_list.length; i++)
         {
             var cell = {
@@ -874,6 +876,15 @@ hf_control.sort_groups_chunks = function(groups_chunks)
     });
 }
 
+hf_control.sort_circles = function(circles)
+{
+    return circles.sort(function(a, b){
+        return (
+            hf.strcmp(a['name'].toLowerCase(), b['name'].toLowerCase())
+        );
+    });
+}
+
 
 // ------------------------------------------------------ LEFT MENU
 
@@ -893,6 +904,8 @@ hf_control.refresh_left_column = function()
             'title_view_path': '/circles',
             'cells': []
         };
+
+        circles_list = hf_control.sort_circles(circles_list);
 
         for (var i = 0; i < circles_list.length; i++)
         {
