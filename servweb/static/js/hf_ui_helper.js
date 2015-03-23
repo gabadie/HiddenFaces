@@ -239,7 +239,7 @@ hf_ui.menu_group = function(group_hash)
     out += '<div class="hf_group_menu">';
 
     out += '<button class = "btn btn-default btn-sm"';
-    out += 'onclick="return hf_control.view(\'/group/'+group_hash+'/contacts'+ '\')";>';
+    out += 'onclick="return hf_control.view(\'/group/'+group_hash+'/members'+ '\')";>';
     out += 'Show members</button>';
 
     if(is_admin)

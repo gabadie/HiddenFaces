@@ -419,7 +419,7 @@ hf_control.signed_in.route('/group', function(ctx){
     {
         return hf_control.group_thread(ctx, group_hash);
     }
-    else if (current_url_arrs[3] === 'contacts')
+    else if (current_url_arrs[3] === 'members')
     {
         return hf_control.group_contacts(ctx, group_hash);
     }
