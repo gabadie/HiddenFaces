@@ -305,6 +305,24 @@ hf_control.create_circle = function(domElem)
     });
 }
 
+hf_control.add_contacts_to_circle = function(domElem)
+{
+    var form_json = hf.inputs_to_json(domElem);
+
+    if (form_json['users_list'] == '')
+    {
+        return;
+    }
+
+    form_json['users_list'] = form_json['users_list'].split('\n');
+
+    hf_service.add_contacts_to_circle(form_json['users_list'],form_json['dest_hash'], function(success){
+        assert(success, 'failed to add peers');
+
+        hf_control.refresh_view();
+    });
+}
+
 // ------------------------------------------------------------------- Post a comment
 hf_control.create_comment = function(commentDom)
 {

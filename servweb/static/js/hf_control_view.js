@@ -140,7 +140,14 @@ hf_control.circle_contacts = function(ctx, circle_hash)
                 'title': 'Your contacts.',
                 'empty': 'You don\'t have any contacts yet'
             };
-
+            domElem.innerHTML += hf_ui.template('form/add_users.html',
+                {
+                    'title': 'Add contacts to this circle.',
+                    'js_callback_name': 'add_contacts_to_circle',
+                    'button_value': 'Add to circle',
+                    'users': list_contacts,
+                    'dest_hash': circle_hash
+                });
             domElem.innerHTML += hf_ui.template('list_links.html',params);
 
             ctx.callback();
