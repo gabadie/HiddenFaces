@@ -539,7 +539,7 @@ hf_control.group_contacts = function(ctx, group_hash)
                             'title': 'Invite new member to the group.',
                             'js_callback_name': 'add_contact_to_group',
                             'button_value': 'Invite to group',
-                            'users': users_list,
+                            'users': hf.values(users_list),
                             'dest_hash': group_hash
                         });
                     document.getElementById('hf_page_main_content').innerHTML = header_html + invite_html + html;
