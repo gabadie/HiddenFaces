@@ -160,7 +160,7 @@ Handlebars.registerHelper('hf_group_sumary', function(group)
             var thread_visibility = group['thread']['public'];
             if(thread_visibility == true)
             {
-                group_visibility_prefix = '<em>protected group, you can post and comment</em>';
+                group_visibility_prefix = '<em>protected group, you can view but cannot post and comment</em>';
             }
             else
             {
@@ -210,6 +210,11 @@ Handlebars.registerHelper('hf_group_header', function(group)
 
     if (waiting_sub == 0)
         out += '<p class="btn btn-sm" style="float:right;">Waiting for reponse</p>';
+
+    if(waiting_sub == 1 || group['group']['public'])
+    {
+        out += '<button class="btn btn-sm" style="float:right;" onclick="return hf_control.view(\'/group/'+group_hash+ '\');">Back to thread</button>'
+    }
 
     if(waiting_sub == -1)
         out+= hf_ui.send_message_dialog(group);
@@ -283,8 +288,29 @@ Handlebars.registerHelper('hf_linkify', function(text_to_linkify){
     return hf.linkify(text_to_linkify);
 });
 
-Handlebars.registerHelper('hf_checked', function(isChecked){
-    return isChecked ? "checked":"";
+Handlebars.registerHelper('hf_checked', function(group, group_type){
+    var type = "public";
+    if (group != null) {
+        var group_vis = group['group']['public'];
+        var thread_vis = false;
+
+        try {
+            thread_vis = group['thread']['public'];
+        }
+        catch (err) {
+        }
+
+        if (group_vis)
+        {
+            type = "public";
+        }
+        else if (thread_vis){
+            type = "protected";
+        } else {
+            type = "private";
+        }
+    }
+    return group_type == type ? "checked":"";
 });
 
 Handlebars.registerHelper('hf_checkbox_disabled', function(is_public){

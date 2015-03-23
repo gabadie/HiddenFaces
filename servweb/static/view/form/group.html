@@ -28,23 +28,16 @@
                             name="description"
                         >{{group.group.description}}</textarea>
                     </div>
-                    <div class="hf_group_radio" style="margin-top:5px">
-                        <div style="float:left;">
-                            Group's visibility:
+                    <div class="hf_group_radio" style="margin-left:5px;">
+                         <div style="float:left;">
+                            Choose your group's type:
                         </div>
-                        <div class="checkbox" style="float:right">
+                         <div class="radio" style="float:right">
                             <div >
-                                <label><input type="checkbox" name="group-visilibity" value="true" {{{hf_checked group.group.public}}} {{{hf_checkbox_disabled group.group.public}}}>Public</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="hf_group_radio">
-                        <div style="float:left;">
-                            Thread's visibility:
-                        </div>
-                        <div class="checkbox" style="float:right">
-                            <div >
-                                <label><input type="checkbox" name="thread-visilibity" value="true" {{{hf_checked group.thread.public}}} {{{hf_checkbox_disabled group.thread.public}}}>Public</label>
+                                <label title="public group, you can post and comment"><input type="radio" name="group-type" value="public" {{{hf_checked group "public"}}} {{{hf_checkbox_disabled group.group.public}}}>Public</label></br>
+                                <label title="protected group, you can view but cannot post and comment"><input type="radio" name="group-type" value="protected" {{{hf_checked group "protected"}}} {{{hf_checkbox_disabled group.group.public}}}>Protected</label></br>
+                                <label title="private group, you just can view, subcribe to post and comment"><input type="radio" name="group-type" value="private" {{{hf_checked group "private"}}} {{{hf_checkbox_disabled group.group.public}}}>Private</label>
+
                             </div>
                         </div>
                     </div>

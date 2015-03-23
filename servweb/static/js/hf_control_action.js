@@ -515,7 +515,7 @@ hf_control.create_group = function(dom)
                                function(success)
        {
             assert(success);
-             hf_control.refresh_view();
+            hf_control.refresh_view();
         });
     }) ;
 }
@@ -580,23 +580,35 @@ hf_control.get_group_infos = function(dom)
     var group_name = arrs['name'].trim();
     var description = arrs['description'].trim();
 
-    if(group_name == '')
-    {
-        alert('group must have a name');
-        return false;
-    }
+    var group = dom['group-type'].value;
 
     var form_elements = document.getElementById('hf_create_new_group').elements;
-    var group_vis = form_elements['group-visilibity'].checked;
-    var thread_vis = form_elements['thread-visilibity'].checked;
-    if(group_vis)
+    var group_vis = true;
+    var thread_vis = true;
+
+    if (group == "public")
+    {
+        group_vis = true;
         thread_vis = true;
+    } else if (group == "protected"){
+        group_vis = false;
+        thread_vis = true;
+    } else {
+        group_vis = false;
+        thread_vis = false;
+    }
 
     out['group_name'] = group_name;
     out['group_description'] = description;
     out['group_group_public'] = group_vis;
     out['group_thread_public'] = thread_vis;
     out['group_picture'] = arrs['picture'];
+
+    if(group_name == '')
+    {
+        alert('group must have a name');
+        return false;
+    }
 
     return out;
 }
