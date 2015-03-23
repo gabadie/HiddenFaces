@@ -260,7 +260,7 @@ test_hf_service.list_discussions = function() {
         test_utils.assert(Object.keys(discussion_map).length == 2, 'the nb of discussions is ' + Object.keys(discussion_map).length + ' instead of 2');
         test_utils.assert(discussion_map[discussion_hash0] == test_hf_service.discussion_names[0],'wrong name for discussion 0');
         test_utils.assert(discussion_map[discussion_hash1] != null, "name for discussion 1 not computed");
-        test_utils.assert(discussion_map[discussion_hash1] == (user_profile1['first_name'] + ' ' + user_profile1['last_name'] + ', (+1)'),
+        test_utils.assert(discussion_map[discussion_hash1] == (hf.capitalize(user_profile1['first_name']) + ' ' + hf.capitalize(user_profile1['last_name']) + ', (+1)'),
             "wrong name for discussion 1");
     });
     hf_service.disconnect();
@@ -272,7 +272,7 @@ test_hf_service.list_discussions = function() {
     hf_service.list_discussions(function(discussion_map){
         test_utils.assert(Object.keys(discussion_map).length == 2, 'the nb of discussions is ' + Object.keys(discussion_map).length + ' instead of 2');
         test_utils.assert(discussion_map[discussion_hash1] != null, "name for discussion 1 not computed");
-        test_utils.assert(discussion_map[discussion_hash1] == (user_profile0['first_name'] + ' ' + user_profile0['last_name'] + ', (+1)'),
+        test_utils.assert(discussion_map[discussion_hash1] == (hf.capitalize(user_profile0['first_name']) + ' ' + hf.capitalize(user_profile0['last_name']) + ', (+1)'),
             "wrong name for discussion 1");
     });
 

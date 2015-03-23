@@ -134,10 +134,10 @@ Handlebars.registerHelper('if_eq', function(a, b, opts) {
 });
 
 Handlebars.registerHelper('hf_group_link', function(group){
-    var out = '<a class="hf_group_link" ';
+    var out = 'The <a class="hf_group_link" ';
     out += 'onclick="return hf_control.view(\'/group/' + group['__meta']['group_hash'] + '\');">';
     out += group['group']['name'];
-    out += '</a> ';
+    out += '</a> group invited you to subscribe';
 
     return out;
 });

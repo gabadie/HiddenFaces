@@ -47,7 +47,7 @@ hf_service.resolve_discussion_name = function(peers_public_chunks_map)
     var discussion_name = 'Unnamed discussion';
     for(hash in peers_public_chunks_map){
         if(hash != hf_service.user_hash()){
-            discussion_name = peers_public_chunks_map[hash]['profile']['first_name'] + ' ' + peers_public_chunks_map[hash]['profile']['last_name'];
+            discussion_name = hf.capitalize(peers_public_chunks_map[hash]['profile']['first_name']) + ' ' + hf.capitalize(peers_public_chunks_map[hash]['profile']['last_name']);
             break;
         }
     }
@@ -235,7 +235,7 @@ hf_service.add_peers_to_discussion = function(discussion_hash, peers_hashes, cal
                                     hf_service.get_users_public_chunks(peers_hashes,function(public_chunks_map){
 
                                         for(hash in public_chunks_map){
-                                            message += public_chunks_map[hash]['profile']['first_name'] + ' ';
+                                            message += hf.capitalize(public_chunks_map[hash]['profile']['first_name']) + ' ';
                                         }
 
                                         message += 'to the discussion';

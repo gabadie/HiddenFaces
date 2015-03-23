@@ -29,8 +29,8 @@
                 <div class="hf_list_item">
                     {{{hf_user_link this picture=true}}}
                     <div style="float:right;">
-                        {{#if ../circle_hash}}
-                            {{{hf_add_contact_to_circle this ../../circle_hash}}}
+                        {{#if ../../circle_hash}}
+                            {{{hf_add_contact_to_circle this ../../../circle_hash}}}
                         {{else}}
                             {{{hf_user_add_contact this}}}
                         {{/if}}
