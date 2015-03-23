@@ -39,7 +39,11 @@
     </div>
     {{#if_eq is_comment_enable true}}
     <form onsubmit="hf_control.create_comment(this);return false;" name = "comment" style="padding: 3px;">
-        <textarea class="form-control" name="content"></textarea>
+        <textarea
+            class="form-control"
+            name="content"
+            onfocus="hf_ui_generic.textarea_onfocus(this);"
+        ></textarea>
         <input type="hidden" name="chunk_name" value="{{__meta.chunk_name}}" />
         <input type="hidden" name="symetric_key" value="{{symetric_key}}" />
         <input type="hidden" name="chunk_key"  />
