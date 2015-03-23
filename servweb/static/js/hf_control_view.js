@@ -644,23 +644,26 @@ hf_control.signed_in.route('/edit_login_infos', function(ctx){
 hf_control.signed_in.route('/profile', function(ctx){
     var domElem = document.getElementById('hf_page_main_content');
     var private_chunk = hf_service.user_private_chunk;
-    var html = (
-        hf_ui.template(
-            'header/user_profile.html',
-            private_chunk
-        ) +
-        hf_ui.markdown_cell(private_chunk['profile']['public_markdown'])
-    );
 
-    domElem.innerHTML = html;
 
-    hf_service.list_circles_names(function(circles_names){
-        hf_control.view_threads(circles_names, function(posts_html){
-            domElem.innerHTML += posts_html;
+    hf_control.view_new_post(null, function(new_post_html){
+        domElem.innerHTML = (
+            hf_ui.template(
+                'header/user_profile.html',
+                private_chunk
+            ) +
+            hf_ui.markdown_cell(private_chunk['profile']['public_markdown']) +
+            new_post_html
+        );;
+
+        hf_service.list_circles_names(function(circles_names){
+            hf_control.view_threads(circles_names, function(posts_html){
+                domElem.innerHTML += posts_html;
+            });
         });
-    });
 
-    ctx.callback();
+        ctx.callback();
+    });
 });
 
 hf_control.signed_in.route('/profile/', function(ctx){
