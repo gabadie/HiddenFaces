@@ -213,7 +213,7 @@ Handlebars.registerHelper('hf_group_header', function(group)
 
     if(waiting_sub == 1 || group['group']['public'])
     {
-        out += '<button class="btn btn-sm" style="float:right;" onclick="return hf_control.view(\'/group/'+group_hash+ '\');">Back to thread</button>'
+        out += '<button class="btn btn-sm btn-default" style="float:right;" onclick="return hf_control.view(\'/group/'+group_hash+ '\');">Back to thread</button>'
     }
 
     if(waiting_sub == -1)

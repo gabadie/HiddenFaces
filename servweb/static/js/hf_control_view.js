@@ -38,8 +38,8 @@ hf_control.signed_out.route('/signup/', function(){
 // ------------------------------------------------------------------------ HOME
 
 hf_control.signed_in.route('/', function(ctx){
-    var domElem = document.getElementById('hf_page_main_content');
 
+    domElem = document.getElementById('hf_page_main_content');
     hf_control.view_new_post(null, function(new_post_html){
         domElem.innerHTML = new_post_html;
 
@@ -503,6 +503,7 @@ hf_control.group_contacts = function(ctx, group_hash)
                 'chunks': users,
                 'title' : 'Group\'s members.',
                 'is_admin': is_admin,
+                'group_hash': group_hash,
                 'empty': 'YOU SHOULD NOT SEE THIS MESSAGE.'
             };
 
@@ -511,7 +512,20 @@ hf_control.group_contacts = function(ctx, group_hash)
                 'list_links.html',
                 template_context
             );
-            document.getElementById('hf_page_main_content').innerHTML = header_html + html;
+
+            hf_service.list_contacts(function(contacts_list){
+                var invite_html =  hf_ui.template(
+                    'form/add_users.html',
+                    {
+                        'title': 'Invite friend to the group.',
+                        'js_callback_name': 'add_contact_to_group',
+                        'button_value': 'Invite to group',
+                        'users': contacts_list,
+                        'dest_hash': group_hash
+                    });
+                document.getElementById('hf_page_main_content').innerHTML = header_html + invite_html + html;
+            });
+
 
             ctx.callback();
         });
@@ -582,7 +596,6 @@ hf_control.group_create = function(ctx)
 
     domElem.innerHTML = hf_ui.template('form/group.html', {"title": "Create new group"});
 }
-
 
 // ------------------------------------------------------ MESSAGES' VIEWS
 hf_control.signed_in.route('/send_message', function(ctx){
