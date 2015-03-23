@@ -609,6 +609,28 @@ hf_service.add_user_to_group = function(user_hash, group_hash, callback)
     });
 }
 
+/* Adds list users to the specified group if the current user is the group's admin
+ * @param <user_hash>: contact's users hash
+ * @param <callback>: the function called once the response has arrived
+ *      @param <success>: true or false
+ *      function my_callback(success)
+ */
+
+hf_service.add_contacts_to_group = function(list_users_hash, group_hash, callback)
+{
+    var added_users = 0;
+    for(var i = 0; i < list_users_hash.length; i++)
+    {
+        hf_service.add_user_to_group(list_users_hash[i], group_hash, function(success){
+            if(!success)
+                callback(false);
+            added_users++;
+            if(added_users == list_users_hash.length)
+                callback(true);
+        });
+    }
+}
+
 /*
  * Lists groups' public or shared or private chunk the user has subscribes to
  * @param <callback>: the function called once the response has arrived

@@ -38,8 +38,8 @@ hf_control.signed_out.route('/signup/', function(){
 // ------------------------------------------------------------------------ HOME
 
 hf_control.signed_in.route('/', function(ctx){
-    var domElem = document.getElementById('hf_page_main_content');
 
+    domElem = document.getElementById('hf_page_main_content');
     hf_control.view_new_post(null, function(new_post_html){
         domElem.innerHTML = new_post_html;
 
@@ -65,6 +65,8 @@ hf_control.signed_in.route('/circles', function(ctx){
         var template_context = {
             'circles': []
         };
+
+        circles_list = hf_control.sort_circles(circles_list);
 
         for(var i = 0; i < circles_list.length; i++)
         {
@@ -133,14 +135,15 @@ hf_control.circle_contacts = function(ctx, circle_hash)
         circle['back'] = true;
         domElem.innerHTML = hf_ui.template('header/circle_header.html',circle);
 
-        hf_service.list_contacts(function(list_contacts)
+        hf_service.list_circle_contacts(circle_hash, function(list_contacts)
         {
             var params = {
                 'circle_hash': circle_hash,
-                'chunks': hf_control.sort_users_chunks(list_contacts),
-                'title': 'Your contacts.',
-                'empty': 'You don\'t have any contacts yet'
+                'chunks': hf_control.sort_users_chunks(hf.values(list_contacts)),
+                'title': 'Circle\'s contacts.',
+                'empty': 'You have not added any contacts in this circle yet.'
             };
+
             domElem.innerHTML += hf_ui.template('form/add_users.html',
                 {
                     'title': 'Add contacts to this circle.',
@@ -148,7 +151,9 @@ hf_control.circle_contacts = function(ctx, circle_hash)
                     'button_value': 'Add to circle',
                     'users': list_contacts,
                     'dest_hash': circle_hash
-                });
+                }
+            );
+
             domElem.innerHTML += hf_ui.template('list_links.html',params);
 
             ctx.callback();
@@ -506,23 +511,40 @@ hf_control.group_contacts = function(ctx, group_hash)
             group
         );
 
-        hf_service.list_users(group_hash, function(users) {
-            var is_admin = hf_service.is_group_admin(group_hash);
-            var template_context = {
-                'chunks': hf_control.sort_users_chunks(hf.values(users)),
-                'title' : 'Group\'s members.',
-                'is_admin': is_admin,
-                'empty': 'YOU SHOULD NOT SEE THIS MESSAGE.'
-            };
+        hf_service.global_list('/global/users_list', function(users_hashes){
+            hf_service.get_users_public_chunks(users_hashes, function(users) {
+
+                var is_admin = hf_service.is_group_admin(group_hash);
+                var template_context = {
+                    'chunks': hf_control.sort_users_chunks(hf.values(users)),
+                    'title' : 'Group\'s members.',
+                    'is_admin': is_admin,
+                    'group_hash': group_hash,
+                    'empty': 'YOU SHOULD NOT SEE THIS MESSAGE.'
+                };
 
 
-            var html = hf_ui.template(
-                'list_links.html',
-                template_context
-            );
-            document.getElementById('hf_page_main_content').innerHTML = header_html + html;
+                var html = hf_ui.template(
+                    'list_links.html',
+                    template_context
+                );
 
-            ctx.callback();
+                hf_service.list_contacts(function(contacts_list){
+                    var invite_html =  hf_ui.template(
+                        'form/add_users.html',
+                        {
+                            'title': 'Invite new member to the group.',
+                            'js_callback_name': 'add_contact_to_group',
+                            'button_value': 'Invite to group',
+                            'users': contacts_list,
+                            'dest_hash': group_hash
+                        });
+                    document.getElementById('hf_page_main_content').innerHTML = header_html + invite_html + html;
+                });
+
+
+                ctx.callback();
+            });
         });
     });
 }
@@ -591,7 +613,6 @@ hf_control.group_create = function(ctx)
 
     domElem.innerHTML = hf_ui.template('form/group.html', {"title": "Create new group"});
 }
-
 
 // ------------------------------------------------------ MESSAGES' VIEWS
 hf_control.signed_in.route('/send_message', function(ctx){
@@ -854,8 +875,14 @@ hf_control.sort_users_chunks = function(users_chunks)
 {
     return users_chunks.sort(function(a, b){
         return (
-            hf.strcmp(a['profile']['first_name'], b['profile']['first_name']) +
-            hf.strcmp(a['profile']['last_name'], b['profile']['last_name']) * 2
+            hf.strcmp(
+                a['profile']['first_name'].toLowerCase(),
+                b['profile']['first_name'].toLowerCase()
+            ) +
+            hf.strcmp(
+                a['profile']['last_name'].toLowerCase(),
+                b['profile']['last_name'].toLowerCase()
+            ) * 2
         );
     });
 }
@@ -864,7 +891,16 @@ hf_control.sort_groups_chunks = function(groups_chunks)
 {
     return groups_chunks.sort(function(a, b){
         return (
-            hf.strcmp(a['group']['name'], b['group']['name'])
+            hf.strcmp(a['group']['name'].toLowerCase(), b['group']['name'].toLowerCase())
+        );
+    });
+}
+
+hf_control.sort_circles = function(circles)
+{
+    return circles.sort(function(a, b){
+        return (
+            hf.strcmp(a['name'].toLowerCase(), b['name'].toLowerCase())
         );
     });
 }
@@ -888,6 +924,8 @@ hf_control.refresh_left_column = function()
             'title_view_path': '/circles',
             'cells': []
         };
+
+        circles_list = hf_control.sort_circles(circles_list);
 
         for (var i = 0; i < circles_list.length; i++)
         {

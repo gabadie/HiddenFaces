@@ -85,19 +85,6 @@ Handlebars.registerHelper('hf_start_discussion', function(user_public_chunk){
     return out;
 });
 
-Handlebars.registerHelper('hf_add_contact_to_circle', function(contact, circle_hash){
-
-    if (hf_service.is_contact_into_circle(contact['__meta']['user_hash'], circle_hash))
-        return '';
-
-    var out = '<button ';
-    out += ' class="btn btn-default"';
-    out += ' onclick="return hf_control.add_contact_to_circle(\''+contact['__meta']['user_hash']+ '\',\'' + circle_hash+'\');"';
-    out += '>Add to circle</button>';
-
-    return out;
-});
-
 Handlebars.registerHelper('hf_chunk', function(chunk, options){
     var template_name = chunk['__meta']['type'].substring(1) + '.html';
 
@@ -211,11 +198,6 @@ Handlebars.registerHelper('hf_group_header', function(group)
     if (waiting_sub == 0)
         out += '<p class="btn btn-sm" style="float:right;">Waiting for reponse</p>';
 
-    if(waiting_sub == 1 || group['group']['public'])
-    {
-        out += '<button class="btn btn-sm" style="float:right;" onclick="return hf_control.view(\'/group/'+group_hash+ '\');">Back to thread</button>'
-    }
-
     if(waiting_sub == -1)
         out+= hf_ui.send_message_dialog(group);
 
@@ -226,17 +208,24 @@ Handlebars.registerHelper('hf_group_header', function(group)
     // menu group for public member
     if (waiting_sub == 1 || group['group']['public'])
     {
-        out += hf_ui.menu_group(group_hash);
+        out += hf_ui.menu_group(group);
     }
 
     return out;
 });
 
-hf_ui.menu_group = function(group_hash)
+hf_ui.menu_group = function(group)
 {
+    var group_hash = group['__meta']['group_hash'];
     var is_admin = hf_service.is_group_admin(group_hash);
+
     var out = '';
     out += '<div class="hf_group_menu">';
+
+    if((hf_service.waiting_accept_subcribe(group) == 1 || group['group']['public']) && hf_control.current_view_url().split("/").length > 3)
+    {
+        out += '<button class="btn btn-sm btn-default" style="float:left;" onclick="return hf_control.view(\'/group/'+group_hash+ '\');">Back to thread</button>'
+    }
 
     out += '<button class = "btn btn-default btn-sm"';
     out += 'onclick="return hf_control.view(\'/group/'+group_hash+'/members'+ '\')";>';

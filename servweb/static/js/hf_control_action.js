@@ -365,7 +365,7 @@ hf_control.create_post = function(postDom)
 
     if (circles_hash.length == 0)
     {
-        alert('you must select a group');
+        alert('you must select a circle');
         return;
     }
 
@@ -463,6 +463,23 @@ hf_control.enter_type = function(dom, event)
 }
 
 // ------------------------------------------------------------------------ POST TO GROUP
+
+hf_control.add_contact_to_group = function(dom)
+{
+    var form_json = hf.inputs_to_json(dom);
+
+    if (form_json['users_list'] == '')
+    {
+        return;
+    }
+
+    form_json['users_list'] = form_json['users_list'].split('\n');
+
+    hf_service.add_contacts_to_group(form_json['users_list'], form_json['dest_hash'], function(success){
+        assert(success, 'failed to add users');
+        hf_control.refresh_view();
+    });
+}
 
 hf_control.thread_post = function(dom)
 {

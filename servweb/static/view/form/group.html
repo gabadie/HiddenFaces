@@ -17,6 +17,7 @@
                             type="text"
                             class="form-control"
                             placeholder="group name..."
+                            autocomplete="off"
                             name="name"
                             value="{{group.group.name}}"
                         />
@@ -26,6 +27,7 @@
                             class="form-control"
                             placeholder="group's description"
                             name="description"
+                            onfocus="hf_ui_generic.textarea_onfocus(this);"
                         >{{group.group.description}}</textarea>
                     </div>
                     <div class="hf_group_radio" style="margin-left:5px;">
