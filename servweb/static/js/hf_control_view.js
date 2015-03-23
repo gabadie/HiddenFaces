@@ -372,6 +372,8 @@ hf_control.signed_in.route('/groups', function(ctx)
             'view': 'groups'
         };
 
+        groups = hf_control.sort_groups_chunks(groups);
+
         document.getElementById('hf_page_main_content').innerHTML = hf_ui.template(
             'list_links.html',
             template
@@ -385,7 +387,7 @@ hf_control.signed_in.route('/global/groups', function(ctx){
     hf_service.global_list('/global/groups_list', function(groups_hashes){
         hf_service.get_group_public_chunks(groups_hashes, function(groups){
             var template = {
-                'chunks': groups,
+                'chunks': hf_control.sort_groups_chunks(groups),
                 'title': 'All groups.',
                 'empty': 'There is no groups on this server.',
                 'view': 'groups'
@@ -850,6 +852,15 @@ hf_control.sort_users_chunks = function(users_chunks)
     });
 }
 
+hf_control.sort_groups_chunks = function(groups_chunks)
+{
+    return groups_chunks.sort(function(a, b){
+        return (
+            hf.strcmp(a['group']['name'], b['group']['name'])
+        );
+    });
+}
+
 
 // ------------------------------------------------------ LEFT MENU
 
@@ -892,6 +903,8 @@ hf_control.refresh_left_column = function()
             'title_view_path': '/groups',
             'cells': []
         };
+
+        groups_list = hf_control.sort_groups_chunks(groups_list);
 
         for (var i = 0; i < groups_list.length; i++)
         {
