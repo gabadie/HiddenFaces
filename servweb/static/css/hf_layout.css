@@ -44,6 +44,11 @@
     width: 100%;
 }
 
+.hf_layout_cell form table input[type=radio]
+{
+    width: auto;
+}
+
 .hf_layout_cell .hf_empty
 {
     width: 100%;
@@ -201,6 +206,10 @@
     margin: 10px 0 10px 0;
 }
 
+/* --------------------------------------------------------------------- FORM */
+
+
+
 
 /* -------------------------------------------------------------------- POSTS */
 .hf_layout_cell .hf_post .hf_author
@@ -305,15 +314,6 @@
 .hf_layout_cell .hf_group_private:after
 {
     content: 'private';
-}
-
-.hf_layout_cell .hf_group_radio
-{
-    display:inline-block;
-    width:100%;
-    border-bottom-style: solid;
-    border-bottom-width: 1px;
-    border-bottom-color: white;
 }
 
 .hf_layout_cell .hf_group_header .hf_menu

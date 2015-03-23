@@ -8,60 +8,89 @@
             {{else}}
                 <form onsubmit="hf_control.create_group(this);return false;" class="form-group" id="hf_create_new_group" style="display:inline-block;">
             {{/if}}
-                <div style="width: 140px; display:inline-block; float:left;">
-                    {{{hf_input_image "picture" group.group.picture}}}
-                </div>
-                <div style="float:left; margin-left:20px; width: 71%;">
-                    <div>
-                        <input
-                            type="text"
-                            class="form-control"
-                            placeholder="group name..."
-                            autocomplete="off"
-                            name="name"
-                            value="{{group.group.name}}"
-                        />
-                    </div>
-                    <div style="margin-top:5px">
-                        <textarea
-                            class="form-control"
-                            placeholder="group's description"
-                            name="description"
-                            onfocus="hf_ui_generic.textarea_onfocus(this);"
-                        >{{group.group.description}}</textarea>
-                    </div>
-                    <div class="hf_group_radio" style="margin-left:5px;">
-                         <div style="float:left;">
-                            Choose your group's type:
-                        </div>
-                         <div class="radio" style="float:right">
-                            <div >
-                                <label title="public group, you can post and comment"><input type="radio" name="group-type" value="public" {{{hf_checked group "public"}}} {{{hf_checkbox_disabled group.group.public}}}>Public</label></br>
-                                <label title="protected group, you can view but cannot post and comment"><input type="radio" name="group-type" value="protected" {{{hf_checked group "protected"}}} {{{hf_checkbox_disabled group.group.public}}}>Protected</label></br>
-                                <label title="private group, you just can view, subcribe to post and comment"><input type="radio" name="group-type" value="private" {{{hf_checked group "private"}}} {{{hf_checkbox_disabled group.group.public}}}>Private</label>
-
+                <table>
+                    <tr>
+                        <td valign="top" width="140px" style="padding-right: 20px;">
+                            {{{hf_input_image "picture" group.group.picture}}}
+                        </td>
+                        <td>
+                            <div>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="group name..."
+                                    autocomplete="off"
+                                    name="name"
+                                    value="{{group.group.name}}"
+                                />
                             </div>
-                        </div>
-                    </div>
-                    {{#if group}}
-                        <div style="text-align:right; margin-top:5px;">
-                            <input
-                                type="submit"
-                                class="btn btn-default btn-sm"
-                                name="submit"
-                                value="Save"
-                            />
-                        </div>
-                    {{else}}
-                        <div style="text-align:right; margin-top:5px;">
-                            <input
-                                type="submit"
-                                class="btn btn-default btn-sm"
-                                name="submit"
-                                value="Create"
-                            />
-                        </div>
-                    {{/if}}
+
+                            <div style="margin-top:5px">
+                                <textarea
+                                    class="form-control"
+                                    placeholder="group's description"
+                                    name="description"
+                                    onfocus="hf_ui_generic.textarea_onfocus(this);"
+                                >{{group.group.description}}</textarea>
+                            </div>
+
+                            <div style="margin:20px 0;">
+                                <div>
+                                    Choose your group's type:
+                                </div>
+                                <div class="radio">
+                                    <label
+                                        title="public group, you can post and comment"
+                                    >
+                                        <input
+                                            type="radio"
+                                            name="group-type"
+                                            value="public"
+                                            {{{hf_checked group "public"}}}
+                                            {{{hf_checkbox_disabled group.group.public}}}
+                                        />
+                                        Public
+                                    </label>
+                                </div>
+                                <div class="radio">
+                                    <label
+                                        title="protected group, you can view but cannot post and comment"
+                                    >
+                                        <input
+                                            type="radio"
+                                            name="group-type"
+                                            value="protected"
+                                            {{{hf_checked group "protected"}}}
+                                            {{{hf_checkbox_disabled group.group.public}}}
+                                        />
+                                        Protected
+                                    </label>
+                                </div>
+                                <div class="radio">
+                                    <label
+                                        title="private group, you just can view, subcribe to post and comment"
+                                    >
+                                        <input
+                                            type="radio"
+                                            name="group-type"
+                                            value="private"
+                                            {{{hf_checked group "private"}}}
+                                            {{{hf_checkbox_disabled group.group.public}}}
+                                        />
+                                        Private
+                                    </label>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                <div style="text-align:right;">
+                    <input
+                        type="submit"
+                        class="btn btn-primary"
+                        name="submit"
+                        value="Save"
+                    />
                 </div>
             </form>
         </div>
