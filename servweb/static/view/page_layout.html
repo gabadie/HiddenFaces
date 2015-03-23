@@ -19,7 +19,6 @@
                     <a onclick="return hf_control.view('/notifications');">Notifications</a>
                     <a onclick="return hf_control.view('/contacts');">Contacts</a>
                     <a onclick="return hf_control.view('/discussions');">Discussions</a>
-                    <a onclick="return hf_control.view('/send_message');">Send message</a>
                 </div>
             </li>
         </ul>
@@ -28,6 +27,7 @@
             onsubmit="hf_control.search_result(this); return false;"
         >
             <input
+                id="hf_search_query"
                 type="text"
                 class="form-control"
                 placeholder="Search..."

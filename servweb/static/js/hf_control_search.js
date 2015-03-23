@@ -31,7 +31,8 @@ hf_control.signed_in.route('/search/', function(ctx){
 
     hf_service.search_string_pattern(search_query, function(matching_chunks){
         var template_context = {
-            'title': 'Search results.',
+            'title': 'Search results of "'+search_query+'"',
+            'search_query': search_query,
             'empty': 'No results found.',
             'chunks': matching_chunks
         };
@@ -41,4 +42,5 @@ hf_control.signed_in.route('/search/', function(ctx){
             template_context
         );
     });
+    document.getElementById('hf_search_query').value = search_query;
 });
