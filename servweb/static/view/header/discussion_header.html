@@ -1,12 +1,13 @@
 {{#hf_cell}}
     <div class="hf_padding">
-        <div class="hf_title">Circle: {{name}}
+        <div class="hf_title">
+            Discussion: {{discussion.name}}
 
-            {{#if back}}
+            {{#if peers}}
                 <button
                     class="btn btn-default"
                     style="float:right;"
-                    onclick="return hf_control.view('/circle/{{thread_chunk_name}}');"
+                    onclick="return hf_control.view('/discussion/{{discussion.hash}}');"
                 >
                 Back
                 </button>
@@ -14,10 +15,10 @@
                 <button
                     class="btn btn-default"
                     style="float:right;"
-                    onclick="return hf_control.view('/circle/{{thread_chunk_name}}/contacts');"
+                    onclick="return hf_control.view('/discussion/{{discussion.hash}}/peers');"
                 >
-                Show contacts
-            </button>
+                Show peers
+                </button>
             {{/if}}
         </div>
     </div>

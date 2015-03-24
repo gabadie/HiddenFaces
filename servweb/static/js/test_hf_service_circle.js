@@ -6,12 +6,12 @@ test_hf_service.create_circle = function()
     hf_service.create_user(user_profile0);
     hf_service.login_user(user_profile0);
 
-    hf_service.create_circle('INSA Lyon', function(success) {
-        test_utils.assert(success == true, 'hf_service.create_circle() 1 has failed');
+    hf_service.create_circle('INSA Lyon', function(circle_hash) {
+        test_utils.assert(hf_service.is_circle_hash(circle_hash), 'hf_service.create_circle() 1 has failed');
     });
 
-    hf_service.create_circle('IF Promoyion 2015', function(success) {
-        test_utils.assert(success == true, 'hf_service.create_circle() 2 has failed');
+    hf_service.create_circle('IF Promoyion 2015', function(circle_hash) {
+        test_utils.assert(hf_service.is_circle_hash(circle_hash), 'hf_service.create_circle() 2 has failed');
     });
 
     test_utils.assert_success(2);
@@ -31,8 +31,8 @@ test_hf_service.add_contact_to_circle = function()
     hf_service.add_contact(user_hash1);
     hf_service.add_contact(user_hash2);
 
-    var circle_hash = hf_service.create_circle('INSA Lyon', function(success) {
-        test_utils.assert(success == true, 'hf_service.create_circle() has failed');
+    var circle_hash = hf_service.create_circle('INSA Lyon', function(circle_hash) {
+        test_utils.assert(hf_service.is_circle_hash(circle_hash), 'hf_service.create_circle() has failed');
     });
 
     hf_service.add_contact_to_circle(user_hash1, circle_hash, function(success) {
@@ -50,6 +50,49 @@ test_hf_service.add_contact_to_circle = function()
     test_utils.assert_success(4);
 }
 
+test_hf_service.add_contacts_to_circle = function()
+{
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+    var user_profile2 = test_hf_service.john_smith_profile(2);
+
+    var user_hash0 = hf_service.create_user(user_profile0);
+    var user_hash1 = hf_service.create_user(user_profile1);
+    var user_hash2 = hf_service.create_user(user_profile2);
+
+    hf_service.login_user(user_profile0);
+    hf_service.add_contact(user_hash1);
+    hf_service.add_contact(user_hash2);
+
+    var circle_hash = hf_service.create_circle('INSA Lyon', function(circle_hash) {
+        test_utils.assert(hf_service.is_circle_hash(circle_hash), 'hf_service.create_circle() has failed');
+    });
+
+    hf_service.add_contacts_to_circle([user_hash1,user_hash2], circle_hash, function(success) {
+        test_utils.assert(success == true, 'hf_service.add_contacts_to_circle([user_hash1,user_hash2]) has failed');
+    });
+
+    hf_service.add_contacts_to_circle([user_hash1,user_hash2], circle_hash, function(success) {
+        test_utils.assert(success == true, 'hf_service.add_contacts_to_circle([user_hash1,user_hash2]) has failed');
+    });
+
+    hf_service.add_contacts_to_circle([], circle_hash, function(success) {
+        test_utils.assert(success == true, 'hf_service.add_contacts_to_circle([]) has failed');
+    });
+
+    test_utils.assert(
+        hf_service.is_contact_into_circle(user_hash1, circle_hash) == true,
+        'user 1 should be a contact of user 0'
+    );
+
+    test_utils.assert(
+        hf_service.is_contact_into_circle(user_hash2, circle_hash) == true,
+        'user 2 should be a contact of user 0'
+    );
+
+    test_utils.assert_success(6);
+}
+
 test_hf_service.is_contact_into_circle = function()
 {
     var user_profile0 = test_hf_service.john_smith_profile(0);
@@ -64,8 +107,8 @@ test_hf_service.is_contact_into_circle = function()
     hf_service.add_contact(user_hash1);
     hf_service.add_contact(user_hash2);
 
-    var circle_hash = hf_service.create_circle('Friends', function(success) {
-        test_utils.assert(success == true, 'hf_service.create_circle() has failed');
+    var circle_hash = hf_service.create_circle('Friends', function(circle_hash) {
+        test_utils.assert(hf_service.is_circle_hash(circle_hash), 'hf_service.create_circle() has failed');
     });
 
     test_utils.assert(
@@ -104,16 +147,16 @@ test_hf_service.list_circles = function()
         test_utils.assert(circles_list.length == 0, 'circles list should not have any circle');
     });
 
-    hf_service.create_circle('INSA Lyon', function(success) {
-        test_utils.assert(success == true, 'hf_service.create_circle() 1 has failed');
+    hf_service.create_circle('INSA Lyon', function(circle_hash) {
+        test_utils.assert(hf_service.is_circle_hash(circle_hash), 'hf_service.create_circle() 1 has failed');
     });
 
     hf_service.list_circles(function(circles_list){
         test_utils.assert(circles_list.length == 1, 'circles list should have 1 circle');
     });
 
-    hf_service.create_circle('IF Promoyion 2015', function(success) {
-        test_utils.assert(success == true, 'hf_service.create_circle() 2 has failed');
+    hf_service.create_circle('IF Promoyion 2015', function(circle_hash) {
+        test_utils.assert(hf_service.is_circle_hash(circle_hash), 'hf_service.create_circle() 2 has failed');
     });
 
     hf_service.list_circles(function(circles_list){
@@ -140,12 +183,16 @@ test_hf_service.list_circles_names = function()
         test_utils.assert(circles_names.length == 0, 'should not have any circles names');
     });
 
-    hf_service.create_circle('Friends', test_utils.callbackSuccess);
+    hf_service.create_circle('Friends', function(circle_hash) {
+        test_utils.assert(hf_service.is_circle_hash(circle_hash), 'hf_service.create_circle() 1 has failed');
+    });
     hf_service.list_circles_names(function(circles_names){
         test_utils.assert(circles_names.length == 1, 'should not have one circle name');
     });
 
-    hf_service.create_circle('Family', test_utils.callbackSuccess);
+    hf_service.create_circle('Family', function(circle_hash) {
+        test_utils.assert(hf_service.is_circle_hash(circle_hash), 'hf_service.create_circle() 2 has failed');
+    });
     hf_service.list_circles_names(function(circles_names){
         test_utils.assert(circles_names.length == 2, 'should not have two circles names');
     });
@@ -164,7 +211,9 @@ test_hf_service.list_circle_threads_names = function()
     hf_service.login_user(user_profile0);
     hf_service.add_contact(user_hash1);
 
-    var circle_hash0 = hf_service.create_circle('Friends', test_utils.callbackSuccess);
+    var circle_hash0 = hf_service.create_circle('Friends', function(circle_hash) {
+        test_utils.assert(hf_service.is_circle_hash(circle_hash), 'hf_service.create_circle() 1 has failed');
+    });
 
     hf_service.list_circle_threads_names(circle_hash0, function(threads_names){
         test_utils.assert(threads_names.length == 1, 'should have only one thread name');
@@ -181,8 +230,12 @@ test_hf_service.list_circle_threads_names = function()
 
     // user 1
     hf_service.login_user(user_profile1);
-    var circle_hash1 = hf_service.create_circle('Friends', test_utils.callbackSuccess);
-    var circle_hash2 = hf_service.create_circle('Family', test_utils.callbackSuccess);
+    var circle_hash1 = hf_service.create_circle('Friends', function(circle_hash) {
+        test_utils.assert(hf_service.is_circle_hash(circle_hash), 'hf_service.create_circle() 1 has failed');
+    });
+    var circle_hash2 = hf_service.create_circle('Family', function(circle_hash) {
+        test_utils.assert(hf_service.is_circle_hash(circle_hash), 'hf_service.create_circle() 2 has failed');
+    });
     hf_service.add_contact(user_hash0, test_utils.callbackSuccess);
     hf_service.add_contact_to_circle(user_hash0, circle_hash1, test_utils.callbackSuccess);
     hf_service.add_contact_to_circle(user_hash0, circle_hash2, test_utils.callbackSuccess);
@@ -198,4 +251,34 @@ test_hf_service.list_circle_threads_names = function()
     });
 
     test_utils.assert_success(15);
+}
+
+test_hf_service.list_circle_contacts = function()
+{
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+    var user_profile2 = test_hf_service.john_smith_profile(2);
+
+    var user_hash0 = hf_service.create_user(user_profile0);
+    var user_hash1 = hf_service.create_user(user_profile1);
+    var user_hash2 = hf_service.create_user(user_profile2);
+
+    hf_service.login_user(user_profile0);
+    hf_service.add_contact(user_hash1);
+    hf_service.add_contact(user_hash2);
+
+    var circle_hash = hf_service.create_circle('INSA Lyon', function(circle_hash) {
+        test_utils.assert(hf_service.is_circle_hash(circle_hash), 'hf_service.create_circle() has failed');
+    });
+
+    hf_service.add_contacts_to_circle([user_hash1,user_hash2], circle_hash, function(success) {
+        test_utils.assert(success == true, 'hf_service.add_contacts_to_circle([user_hash1,user_hash2]) has failed');
+    });
+
+    hf_service.list_circle_contacts(circle_hash, function(contacts_map){
+        test_utils.assert(user_hash1 in contacts_map, 'Cannot find user_hash1 in circle contacts');
+        test_utils.assert(user_hash2 in contacts_map, 'Cannot find user_hash2 in circle contacts');
+    });
+
+    test_utils.assert_success(4);
 }

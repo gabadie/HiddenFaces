@@ -1,0 +1,27 @@
+{{#hf_cell}}
+    <div class="hf_padding">
+        <form
+            onsubmit="hf_control.append_post_to_discussion(this); return false;"
+            style="padding: 3px;"
+        >
+            <input type="hidden" name="discussion_hash" value="{{hash}}" />
+
+            <textarea
+                class="form-control"
+                name="content"
+                style="margin-bottom:5px;"
+                onfocus="hf_ui_generic.textarea_onfocus(this);"
+            ></textarea>
+
+            <div style="text-align: right;">
+                <input
+                    style="padding: 5px 30px 5px 30px;"
+                    type="submit"
+                    class="btn btn-primary"
+                    name="submit"
+                    value="Post"
+                />
+            </div>
+        </form>
+    </div>
+{{/hf_cell}}

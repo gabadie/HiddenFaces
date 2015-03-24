@@ -158,7 +158,7 @@ hf_service.push_notification = function(public_repository_chunk, notification_js
             if (json_message['status'] != 'ok')
             {
                 allert(
-                    'hf_service.push_user_notification(' +
+                    'hf_service.push_notification(' +
                     user_hash + ', ' +
                     JSON.stringify(notification_json) +
                     ') failed'
@@ -214,13 +214,14 @@ hf_service.delete_notification = function(repository_chunk, notification_hash, c
 /*
  * Processes notifications automations on given notification json.
  *
+ * @param <repository_chunk> : the repository containing the notifications
  * @param <notifications_json>: the notifications to process
  * @param <callback>: the function called once done
  *      @param <continued_notifications_json>: the notifications that made it
  *          throught
  *      function my_callback(continued_notifications_json)
  */
-hf_service.process_notifications = function(notifications_json, callback)
+hf_service.process_notifications = function(repository_chunk,notifications_json, callback)
 {
     assert(hf.is_function(callback));
 
@@ -239,7 +240,7 @@ hf_service.process_notifications = function(notifications_json, callback)
         {
             assert(hf.is_function(notificationAutomation));
 
-            status = notificationAutomation(notification_json);
+            status = notificationAutomation(notification_json,repository_chunk);
 
             assert(typeof status == 'string');
 
@@ -358,7 +359,7 @@ hf_service.pull_fresh_notifications = function(repository_chunk, callback)
  *      notification repository
  * @param <callback>: the function called once done
  *      @param <notifications_list>: the resolved notifications list or null
- *      function my_callback(notifications_list)
+ *      function my_callback(notifications_list, modified_repository)
  */
 hf_service.list_notifications = function(repository_chunk, callback)
 {
@@ -372,7 +373,7 @@ hf_service.list_notifications = function(repository_chunk, callback)
              * hf_service.pull_fresh_notifications() failed so we fail
              * hf_service.list_notifications().
              */
-            callback(null);
+            callback(null, false);
             return;
         }
 
@@ -400,7 +401,7 @@ hf_service.list_notifications = function(repository_chunk, callback)
 
                     if (callbacks_remaining == 0)
                     {
-                        callback(notifications);
+                        callback(notifications, notifications_count > 0);
                     }
                 }
             );
@@ -408,7 +409,7 @@ hf_service.list_notifications = function(repository_chunk, callback)
 
         if (notifications_json.length == 0)
         {
-            callback(notifications);
+            callback(notifications, notifications_count > 0);
         }
     });
 }
@@ -431,7 +432,7 @@ hf_service.refresh_notifications = function(repository_chunk, callback)
 
     var notifications_json = repository_chunk['notifications'];
 
-    hf_service.process_notifications(notifications_json, function(survived_notifications_json){
+    hf_service.process_notifications(repository_chunk,notifications_json, function(survived_notifications_json){
         assert(survived_notifications_json.length <= notifications_json.length);
 
         repository_chunk['notifications'] = survived_notifications_json;
@@ -544,27 +545,90 @@ hf_service.list_user_notifications = function(callback)
 {
     assert(hf.is_function(callback));
 
-    hf_service.list_notifications(hf_service.user_private_chunk, function(notifications_list){
+    hf_service.list_notifications(hf_service.user_private_chunk, function(notifications_list, modified_repository){
         if (notifications_list == null)
         {
-            alert('hf_service.list_user_notifications() failed');
+            callback(null);
             return;
         }
 
-        notifications_list.sort(function(notification_a, notification_b){
-            if (notification_a['__meta']['date'] > notification_b['__meta']['date'])
+        var todo = function(success){
+            if (!success)
             {
-                return -1;
-            }
-            else if (notification_a['__meta']['date'] < notification_b['__meta']['date'])
-            {
-                return 1;
+                callback(null);
+                return;
             }
 
-            return 0;
-        });
+            notifications_list.sort(function(notification_a, notification_b){
+                if (notification_a['__meta']['date'] > notification_b['__meta']['date'])
+                {
+                    return -1;
+                }
+                else if (notification_a['__meta']['date'] < notification_b['__meta']['date'])
+                {
+                    return 1;
+                }
 
-        callback(notifications_list)
+                return 0;
+            });
+
+            callback(notifications_list);
+        }
+
+        if (!modified_repository)
+        {
+            todo(true);
+            return;
+        }
+
+        hf_service.save_user_chunks(todo);
+    });
+}
+
+hf_service.list_group_notifications = function(group_hash, callback)
+{
+    assert(hf.is_function(callback));
+    assert(hf_service.is_group_admin(group_hash));
+
+    hf_service.get_group_private_chunk(group_hash, function(private_chunk_group){
+        hf_service.list_notifications(private_chunk_group, function(notifications_list, modified_repository){
+        if (notifications_list == null)
+        {
+            callback(null);
+            return;
+        }
+
+        var todo = function(success){
+            if (!success)
+            {
+                callback(null);
+                return;
+            }
+
+            notifications_list.sort(function(notification_a, notification_b){
+                if (notification_a['__meta']['date'] > notification_b['__meta']['date'])
+                {
+                    return -1;
+                }
+                else if (notification_a['__meta']['date'] < notification_b['__meta']['date'])
+                {
+                    return 1;
+                }
+
+                return 0;
+            });
+
+            callback(notifications_list);
+        }
+
+        if (!modified_repository)
+        {
+            todo(true);
+            return;
+        }
+
+        hf_service.save_user_chunks(todo);
+    });
     });
 }
 

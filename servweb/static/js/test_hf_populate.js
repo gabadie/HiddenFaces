@@ -11,6 +11,8 @@ test_hf_populate.comment_count = 300;
 test_hf_populate.group_count = 12;
 test_hf_populate.subscription_count = 10;
 test_hf_populate.users_group_count = 10;
+test_hf_populate.discussion_count = 40;
+test_hf_populate.discussion_peer_count = 6;
 
 
 test_hf_populate.seed = 0;
@@ -25,6 +27,20 @@ test_hf_populate.rand_user_id = function()
 {
     return test_hf_populate.rand() % test_hf_populate.profile_count;
 }
+
+test_hf_populate.group_picture_links = [
+    'http://images6.alphacoders.com/303/303836.jpg',
+    'https://lh6.ggpht.com/_AmycuyWddtkVMXER5z4A_lbkHPAK-k6v-EOuuZaIaxqg2-a-t9eQeuNkAjM4F-6ggE=h900',
+    'http://fc04.deviantart.net/fs71/i/2010/136/9/e/Autumn_Wallpaper_by_emats.jpg',
+    'http://webneel.com/wallpaper/sites/default/files/images/04-2013/11-beach-sea-photography.jpg'
+];
+
+test_hf_populate.profile_picture_links = [
+    'http://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Rabbit_in_montana.jpg/270px-Rabbit_in_montana.jpg',
+    'http://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Kitten_in_Rizal_Park%2C_Manila.jpg/160px-Kitten_in_Rizal_Park%2C_Manila.jpg',
+    'http://upload.wikimedia.org/wikipedia/commons/thumb/9/94/My_dog.jpg/320px-My_dog.jpg',
+    'http://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Goldfish3.jpg/224px-Goldfish3.jpg'
+];
 
 test_hf_populate.create_users = function()
 {
@@ -52,16 +68,21 @@ test_hf_populate.create_users = function()
 
     for (var i = 0; i < test_hf_populate.profile_count; i++)
     {
+        var picture_id = test_hf_populate.rand() % test_hf_populate.profile_picture_links.length;
+
         test_hf_populate.user_hash[i] = hf_service.create_user(test_hf_populate.user_profile[i], function(user_hash){
             test_utils.assert(user_hash != null, 'failed to create profile ' + i);
         });
 
         hf_service.login_user(test_hf_populate.user_profile[i]);
-        hf_service.create_circle('Family', function(success){
-            test_utils.assert(success == true, 'failed to create profile ' + i + '\'s family circle');
+
+        hf_service.user_private_chunk['profile']['picture'] = test_hf_populate.profile_picture_links[picture_id];
+
+        hf_service.create_circle('Family', function(circle_hash){
+            test_utils.assert(hf_service.is_circle_hash(circle_hash), 'failed to create profile ' + i + '\'s family circle');
         });
-        hf_service.create_circle('Friends', function(success){
-            test_utils.assert(success == true, 'failed to create profile ' + i + '\'s friends circle');
+        hf_service.create_circle('Friends', function(circle_hash){
+            test_utils.assert(hf_service.is_circle_hash(circle_hash), 'failed to create profile ' + i + '\'s friends circle');
         });
         hf_service.list_circles(function(circles_list){
             test_utils.assert(
@@ -69,6 +90,7 @@ test_hf_populate.create_users = function()
                 'failed to list prolfile ' + i + '\' circles'
             );
         });
+
         hf_service.disconnect();
 
         test_hf_populate.user_id[test_hf_populate.user_hash[i]] = i;
@@ -92,7 +114,8 @@ test_hf_populate.send_messages = function()
 
         var message = (
             'Hi ' + test_hf_populate.user_profile[to]['first_name'] +
-            '! This is your dude ' + test_hf_populate.user_profile[from]['first_name'] + '.'
+            '! This is your dude ' + test_hf_populate.user_profile[from]['first_name'] + '.\n' +
+            'Check this out http://en.wikipedia.org/wiki/Banana !!!'
         );
 
         hf_service.login_user(test_hf_populate.user_profile[from]);
@@ -251,10 +274,14 @@ test_hf_populate.create_groups = function()
 
         var group_info = test_hf_service.group_examples(i);
 
+        var picture_id = test_hf_populate.rand() % test_hf_populate.group_picture_links.length;
+
         hf_service.create_group(
             group_info['name'],
             group_info['description'],
-            i < test_hf_populate.group_count / 4, i < test_hf_populate.group_count / 2,
+            i < test_hf_populate.group_count / 4,
+            i < test_hf_populate.group_count / 2,
+            test_hf_populate.group_picture_links[picture_id],
             function(group_hash){
                 test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
                 test_utils.assert(hf_service.is_group_admin(group_hash));
@@ -468,6 +495,57 @@ test_hf_populate.comment_posts = function()
     test_utils.assert_success(assert_count);
 }
 
+test_hf_populate.post_into_group = function()
+{
+    for (var i = 0; i < test_hf_populate.post_count; i++)
+    {
+        var user_id = test_hf_populate.rand_user_id();
+
+        hf_service.login_user(test_hf_populate.user_profile[user_id]);
+
+        var group_chunk = null;
+
+        hf_service.list_groups(function(groups_list){
+            var nb_groups = groups_list.length;
+
+            if(nb_groups > 0){
+                var group_id = test_hf_populate.rand() % nb_groups;
+                group_chunk = groups_list[group_id];
+
+                test_utils.assert(
+                    hf.is_hash(group_chunk['__meta']['group_hash']),
+                    'user ' + user_id + '\'s group hash is not a hash'
+                );
+            }
+        });
+
+        if(group_chunk != null){
+            var group_hash = group_chunk['__meta']['group_hash'];
+            var message = 'Hey guys, what\'s new about ' + group_chunk['group']['name'] + '? ' + i + ' thanx XD';
+
+            hf_service.get_thread_infos(group_hash,function(thread_info){
+                if(thread_info !== null){
+                    test_utils.assert('name' in thread_info,'thread info doesn\'t contain name field');
+                    test_utils.assert('key' in thread_info,'thread info doesn\'t contain name field');
+
+                    var thread_json = {
+                        'thread_chunk_name': thread_info['name'],
+                        'symetric_key': thread_info['key']
+                    };
+                    hf_service.create_post(message, [thread_json], function(json_message){
+                        test_utils.assert(
+                            json_message != null,
+                            'post ' + user_id + '\'s creation should success'
+                        );
+                    });
+                }
+            });
+        }
+
+        hf_service.disconnect();
+    }
+}
+
 test_hf_populate.pull_fresh_user_notifications = function()
 {
     for (var i = 0; i < test_hf_populate.profile_count; i++)
@@ -480,6 +558,43 @@ test_hf_populate.pull_fresh_user_notifications = function()
     test_utils.assert_success(test_hf_populate.profile_count);
 }
 
+test_hf_populate.create_discussions = function()
+{
+    for (var i = 0; i < test_hf_populate.discussion_count; i++)
+    {
+        var user_id = test_hf_populate.rand_user_id();
+        hf_service.login_user(test_hf_populate.user_profile[user_id]);
+
+        var peers_list = [];
+        for(var j = 0; j < test_hf_populate.discussion_peer_count; j++){
+            var peer_id;
+            do{
+                peer_id = test_hf_populate.rand_user_id();
+            }while(peer_id == user_id || (peers_list.indexOf(peer_id) >= 0));
+
+            peers_list.push(test_hf_populate.user_hash[peer_id]);
+        }
+        test_utils.assert(peers_list.length == test_hf_populate.discussion_peer_count, 'wrong number of new peers : ' + peers_list.length);
+
+        var discussion_info = test_hf_service.discussion_examples(i);
+
+        hf_service.create_discussion_with_peers(discussion_info['name'], peers_list, function(discussion_hash){
+            test_utils.assert(hf_service.is_discussion_hash(discussion_hash), 'Cannot create discussion');
+
+            hf_service.append_post_to_discussion(discussion_info['first_post'], discussion_hash, function(success){
+                test_utils.assert(success == true, 'cannot post into discussion');
+            });
+
+            hf_service.list_posts(discussion_hash,function(posts_list){
+                test_utils.assert(posts_list.length == 2, 'Nb of posts is ' + posts_list.length + ' instead of 2');
+            });
+        });
+
+        hf_service.disconnect();
+    }
+    test_utils.assert_success(4 * test_hf_populate.discussion_count);
+}
+
 
 // ------------------------------------------------- SERVICE's TESTS ENTRY POINT
 
@@ -488,6 +603,7 @@ test_hf_populate.main = function()
     test_utils.drop_database();
 
     test_utils.run(test_hf_populate.create_users, 'test_hf_populate.create_users', true);
+    test_utils.run(test_hf_populate.create_discussions, 'test_hf_populate.create_discussions', true);
     test_utils.run(test_hf_populate.send_messages, 'test_hf_populate.send_messages', true);
     test_utils.run(test_hf_populate.add_symetric_users_contacts, 'test_hf_populate.add_symetric_users_contacts', true);
     test_utils.run(test_hf_populate.add_asymetric_users_contacts, 'test_hf_populate.add_asymetric_users_contacts', true);
@@ -497,4 +613,5 @@ test_hf_populate.main = function()
     test_utils.run(test_hf_populate.post_into_circle, 'test_hf_populate.post_into_circle', true);
     test_utils.run(test_hf_populate.comment_posts,'test_hf_populate.comment_posts',true);
     test_utils.run(test_hf_populate.pull_fresh_user_notifications, 'test_hf_populate.pull_fresh_user_notifications', true);
+    test_utils.run(test_hf_populate.post_into_group, 'test_hf_populate.post_into_group', true);
 }

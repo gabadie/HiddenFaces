@@ -1,0 +1,33 @@
+{{#hf_cell}}
+    <div class="hf_padding">
+        <div class="hf_title">Create a new discussion.
+            <button
+                class="btn btn-default"
+                style="float:right;"
+                onclick="return hf_control.view('/discussions');"
+            >
+                Back
+            </button>
+        </div>
+        <form
+            onsubmit="hf_control.create_new_discussion(this); return false;"
+            onkeypress="return event.keyCode != 13;"
+        >
+            <input
+                type="text"
+                name="name"
+                class="form-control"
+                style="margin-bottom: 5px;"
+                placeholder="Discussion's name..."
+                autocomplete="off"
+            />
+            {{{hf_input_autocomplete_list_users contacts name="peers"}}}
+            <input
+                type="submit"
+                style="margin: 5px 0 0 auto; display: block;"
+                class="btn btn-primary"
+                value="Create discussion"
+            />
+        </form>
+    </div>
+{{/hf_cell}}

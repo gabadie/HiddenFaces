@@ -21,7 +21,7 @@ test_hf_service.group_examples = function(id)
 
     return {
         'name':   group_names[id],
-        'description':    'Discusion group about ' + group_names[id]
+        'description':    'Discussion group about ' + group_names[id]
     }
 }
 //-------------------------------------------------------------------------------- TESTS GROUPS
@@ -39,7 +39,7 @@ test_hf_service.create_group = function()
     hf_service.create_group(
         group_info['name'],
         group_info['description'],
-        false, false,
+        false, false,"",
         function(group_hash){
             test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
             test_utils.assert(hf_service.is_group_admin(group_hash));
@@ -65,7 +65,7 @@ test_hf_service.add_user_to_group = function() {
     hf_service.create_group(
         group_info['name'],
         group_info['description'],
-        false, false,
+        false, false,"",
         function(group_hash){
             test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
             test_utils.assert(hf_service.is_group_admin(group_hash),'The current user has not be set as group admin');
@@ -89,9 +89,13 @@ test_hf_service.add_user_to_group = function() {
             hf_service.list_users(group_hash,function(users_chunks){
                 test_utils.assert(Object.keys(users_chunks).length == 3, 'The number of group\'s users is not 3 but '+Object.keys(users_chunks).length);
             });
+
+            hf_service.list_groups(function(groups_list){
+                test_utils.assert(groups_list.length == 1);
+            });
         }
     );
-    test_utils.assert_success(8);
+    test_utils.assert_success(9);
 }
 
 test_hf_service.subscribe_to_group = function(){
@@ -111,7 +115,7 @@ test_hf_service.subscribe_to_group = function(){
     hf_service.create_group(
         group_info['name'],
         group_info['description'],
-        false, false,
+        false, false,"",
         function(group_hash){
             test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
             hf_service.subscribe_to_group(group_hash, subscription_message, function(success){
@@ -166,6 +170,49 @@ test_hf_service.subscribe_to_group = function(){
     test_utils.assert_success(10);
 }
 
+test_hf_service.list_group_notifications = function(){
+    var user_profile0 = test_hf_service.john_smith_profile(0);
+    var user_profile1 = test_hf_service.john_smith_profile(1);
+
+    var user_hash0 = hf_service.create_user(user_profile0);
+    var user_hash1 = hf_service.create_user(user_profile1);
+
+    hf_service.login_user(user_profile0);
+
+    //group creation
+    var group_info = test_hf_service.group_examples();
+    var subscription_message = 'I would like to subscribe to this group';
+    hf_service.create_group(
+        group_info['name'],
+        group_info['description'],
+        false, false,"",
+        function(group_hash){
+            test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
+
+            hf_service.list_group_notifications(group_hash, function(notifications_list){
+                test_utils.assert(notifications_list.length == 0, 'should not have notification');
+            });
+
+            hf_service.disconnect();
+
+            //users subscriptions
+            hf_service.login_user(user_profile1);
+            hf_service.subscribe_to_group(group_hash, subscription_message, test_utils.callbackSuccess);
+            hf_service.disconnect();
+
+            hf_service.login_user(user_profile0);
+            hf_service.list_group_notifications(group_hash, function(notifications_list){
+                test_utils.assert(notifications_list.length == 1, 'should have one notification');
+            });
+            hf_service.list_group_notifications(group_hash, function(notifications_list){
+                test_utils.assert(notifications_list.length == 1, 'should still have one notification');
+            });
+        }
+    );
+
+    test_utils.assert_success(5);
+}
+
 test_hf_service.group_notifications = function(){
     var user_profile0 = test_hf_service.john_smith_profile(0);
     var user_profile1 = test_hf_service.john_smith_profile(1);
@@ -181,7 +228,7 @@ test_hf_service.group_notifications = function(){
     hf_service.create_group(
         group_info['name'],
         group_info['description'],
-        false, false,
+        false, false,"",
         function(group_hash){
             test_utils.assert(hf.is_hash(group_hash),'Cannot create group');
             hf_service.disconnect();
@@ -214,7 +261,11 @@ test_hf_service.group_notifications = function(){
             hf_service.list_users(group_hash,function(users_chunks){
                 test_utils.assert(Object.keys(users_chunks).length == 2, 'The number of group\'s users is not 2 but '+Object.keys(users_chunks).length);
             });
+            hf_service.get_thread_infos(group_hash, function(thread_infos){
+                test_utils.assert(thread_infos['name'] !== undefined, 'Cannot access thread name');
+                test_utils.assert(thread_infos['key'] !== undefined, 'Cannot access thread key');
+            });
         }
     );
-    test_utils.assert_success(6);
+    test_utils.assert_success(8);
 }

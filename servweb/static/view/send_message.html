@@ -1,7 +1,7 @@
 {{#hf_cell}}
     <div class="hf_padding">
-        <div class="hf_title">Send message.</div>
-        <form onsubmit="hf_control.send_message(this); return false;">
+        <div class="hf_title">Contact invitation.</div>
+        <form onsubmit="hf_control.contact_invitation(this); return false;">
             <table width="100%">
                 <tr>
                     <td>
@@ -19,9 +19,10 @@
                             type="text"
                             class="form-control"
                             value="{{user_hash}}"
-                            name="destination"
                             readonly
-                            />
+                            >
+                            </label>
+
                         {{/if_eq}}
                     </td>
                 <tr>

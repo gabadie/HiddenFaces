@@ -20,6 +20,8 @@
 #hf_page_top_bar ul
 {
     cursor: pointer;
+    margin: 0;
+    padding: 0;
 }
 
 #hf_page_top_bar li
@@ -27,6 +29,8 @@
     position: relative;
     display: inline-block;
     list-style-type: none;
+    margin: 0;
+    padding: 0;
 }
 
 #hf_page_top_bar a
@@ -57,16 +61,54 @@
     box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.8);
 }
 
+#hf_page_top_bar li .hf_sublist a
+{
+    font-weight: normal;
+    padding: 2px 20px;
+    width: 100%;
+    white-space: nowrap;
+}
+
 #hf_page_top_bar li:hover .hf_sublist
 {
     display: block;
 }
 
-#hf_page_top_bar li:hover .hf_sublist a
+/* -------------------------------------------------------------- Page search */
+
+#hf_page_top_bar .hf_layout_page_width
 {
-    font-weight: normal;
-    padding: 2px 20px;
-    width: 100%;
+    position: relative;
+}
+
+#hf_page_top_bar #hf_search
+{
+    position: absolute;
+    right: 5px;
+    top: 0;
+    width: 300px;
+    margin-top: 3px;
+    padding: 0;
+}
+
+#hf_page_top_bar #hf_search input
+{
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+#hf_page_top_bar #hf_search input[type=text]
+{
+    height: 28px;
+}
+
+#hf_page_top_bar #hf_search input[type=submit]
+{
+    width: 100px;
+    top: 0px;
+    right: 0px;
+    position: absolute;
+    display: none;
 }
 
 
@@ -74,7 +116,7 @@
 
 #hf_page_middle
 {
-    padding-top: 40px;
+    padding-top: 50px;
 }
 
 

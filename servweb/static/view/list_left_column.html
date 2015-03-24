@@ -10,7 +10,18 @@
     <a class="hf_list_item" onclick="return hf_control.view('{{view_path}}');">{{name}}</a>
 {{else}}
     {{#if_eq title "Circles"}}
-        <div class="hf_empty">You have no circles yet</div>
+        <div class="hf_empty">
+            You have no circles yet
+            <!--<div style="text-align: center;" padding=>
+                <input
+                    onclick="return hf_control.view('{{view_path}}');"
+                    value="Create circle"
+                    type="submit"
+                    class="btn btn-primary"
+                    name="submit"
+                />
+            </div> -->
+        </div>
     {{else}}
         <div class="hf_empty">You have no groups yet</div>
     {{/if_eq}}

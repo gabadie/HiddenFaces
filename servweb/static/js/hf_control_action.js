@@ -21,25 +21,91 @@ hf_control.add_contact_to_circle = function(contact_user_hash, circle_hash)
 // -------------------------------------------------------------------- SEND MESSAGE
 hf_control.send_message = function(domElem)
 {
-   var invitation_infos = hf.inputs_to_json(domElem);
+    var invitation_infos = hf.inputs_to_json(domElem);
 
-   if(invitation_infos['destination'] == '')
-   {
+    if(invitation_infos['destination'] == '')
+    {
         alert('destination required');
         return;
-   }
+    }
 
-   if (invitation_infos['message'] == '')
-   {
+    if (invitation_infos['message'] == '')
+    {
         alert('message required');
         return;
-   }
+    }
 
     hf_service.send_message(invitation_infos['destination'], invitation_infos['message'], function(success){
         assert(success);
 
-         hf_control.refresh_view();
-        });
+        hf_control.refresh_view();
+    });
+}
+
+
+// ----------------------------------------------------------------- DISCUSSIONS
+
+hf_control.add_discussion_peers = function(domElem)
+{
+    var form_json = hf.inputs_to_json(domElem);
+
+    if (form_json['users_list'] == '')
+    {
+        return;
+    }
+
+    form_json['users_list'] = form_json['users_list'].split('\n');
+
+    hf_service.add_peers_to_discussion(form_json['dest_hash'], form_json['users_list'], function(success){
+        assert(success, 'failed to add peers');
+
+        hf_control.refresh_view();
+    });
+}
+
+hf_control.append_post_to_discussion = function(domElem)
+{
+    var form_json = hf.inputs_to_json(domElem);
+
+    if (form_json['content'] == '')
+    {
+        return;
+    }
+
+    hf_service.append_post_to_discussion(form_json['content'], form_json['discussion_hash'], function(success){
+        assert(success);
+
+        hf_control.refresh_view();
+    });
+}
+
+hf_control.create_new_discussion = function(domElem)
+{
+    var form_json = hf.inputs_to_json(domElem);
+
+    form_json['peers'] = form_json['peers'].split('\n');
+
+    if (form_json['name'] == '')
+    {
+        form_json['name'] = null;
+    }
+
+    hf_service.create_discussion_with_peers(form_json['name'], form_json['peers'], function(discussion_hash){
+        assert(discussion_hash != null);
+
+        hf_control.view('/discussion/' + discussion_hash);
+    });
+}
+
+hf_control.start_discussion_with_peer = function(user_hash)
+{
+    hf_service.start_discussion_with_peer(user_hash, function(resolved_discussion){
+        if(resolved_discussion['hash'] !== undefined){
+            hf_control.view('/discussion/' + resolved_discussion["hash"]);
+        }else{
+            alert('Cannot start discussion');
+        }
+    });
 }
 
 
@@ -151,6 +217,76 @@ hf_control.signed_out.sign_up = function(domElem)
     hf_control.signed_out.view('/');
 }
 
+// --------------------------------------------------------------------- EDIT PROFILE
+
+hf_control.edit_profile = function(domElem)
+{
+    var user_profile = hf.inputs_to_json(domElem);
+
+     if (user_profile['first_name'] == '')
+    {
+        alert('first name required');
+        return;
+    }
+
+    if (user_profile['last_name'] == '')
+    {
+        alert('last name required');
+        return;
+    }
+
+    var user_private_chunk = hf_service.user_private_chunk;
+
+    user_private_chunk['profile']['first_name'] = user_profile['first_name'];
+    user_private_chunk['profile']['last_name'] = user_profile['last_name'];
+    user_private_chunk['profile']['public_markdown'] = user_profile['public_markdown'];
+
+
+    hf.input_to_uri(hf.form_input(domElem, 'picture'), function(uri){
+        if (uri)
+        {
+            user_private_chunk['profile']['picture'] = uri;
+        }
+
+        hf_service.save_user_chunks(function(success){
+            assert(success);
+            hf_control.refresh_view();
+            return hf_control.view('/profile');
+        });
+    });
+}
+
+// --------------------------------------------------------------------- EDIT LOGIN
+
+hf_control.edit_login_infos = function(domElem)
+{
+    var user_profile = hf.inputs_to_json(domElem);
+
+     if (user_profile['email'] == '')
+    {
+        alert('email required');
+        return;
+    }
+
+    if (user_profile['password'] == '')
+    {
+        alert('password required');
+        return;
+    }
+
+     if (user_profile['password'] != user_profile['confirm_password'])
+    {
+        alert('passwords are not matching');
+        return;
+    }
+
+    hf_service.change_user_login_profile(user_profile,function(success){
+        assert(success);
+        hf_control.refresh_view();
+    });
+}
+
+
 // --------------------------------------------------------------------- Circles
 
 hf_control.create_circle = function(domElem)
@@ -162,8 +298,26 @@ hf_control.create_circle = function(domElem)
             return;
         }
 
-    hf_service.create_circle(user_circle['name'], function(success){
-        assert(success);
+    hf_service.create_circle(user_circle['name'], function(circle_hash){
+        assert(circle_hash !== null);
+
+        hf_control.view('/circle/' + circle_hash + '/contacts');
+    });
+}
+
+hf_control.add_contacts_to_circle = function(domElem)
+{
+    var form_json = hf.inputs_to_json(domElem);
+
+    if (form_json['users_list'] == '')
+    {
+        return;
+    }
+
+    form_json['users_list'] = form_json['users_list'].split('\n');
+
+    hf_service.add_contacts_to_circle(form_json['users_list'],form_json['dest_hash'], function(success){
+        assert(success, 'failed to add peers');
 
         hf_control.refresh_view();
     });
@@ -211,7 +365,7 @@ hf_control.create_post = function(postDom)
 
     if (circles_hash.length == 0)
     {
-        alert('you must select a group');
+        alert('you must select a circle');
         return;
     }
 
@@ -306,4 +460,196 @@ hf_control.enter_type = function(dom, event)
         dom.value += "\n";
         return;
     }
+}
+
+// ------------------------------------------------------------------------ POST TO GROUP
+
+hf_control.add_contact_to_group = function(dom)
+{
+    var form_json = hf.inputs_to_json(dom);
+
+    if (form_json['users_list'] == '')
+    {
+        return;
+    }
+
+    form_json['users_list'] = form_json['users_list'].split('\n');
+
+    hf_service.add_contacts_to_group(form_json['users_list'], form_json['dest_hash'], function(success){
+        assert(success, 'failed to add users');
+        hf_control.refresh_view();
+    });
+}
+
+hf_control.thread_post = function(dom)
+{
+    var content_arrs = hf.inputs_to_json(dom);
+    var post_content = content_arrs['content'].trim();
+    if(!post_content)
+    {
+        alert('you must write something!');
+        return;
+    }
+
+    var group_info = hf_service.get_thread_infos(hf_control.current_view_url().split("/")[2], function(group){
+        if(group != null)
+        {
+            var thread = {
+                'thread_chunk_name': group['name'],
+                'symetric_key': group['key']
+            }
+
+            hf_service.create_post(post_content, [thread], function(success){
+                if(success)
+                {
+                    assert(success);
+                    hf_control.refresh_view();
+                }
+            });
+        }
+    });
+}
+
+hf_control.subcribe = function(dom)
+{
+    var arrs = hf.inputs_to_json(dom);
+    var content = arrs['content'].trim();
+    var group_hash = arrs['group_hash'];
+
+    if(!content)
+    {
+        alert('Your message cannot be empty!');
+        return false;
+    }
+
+    hf_service.subscribe_to_group(group_hash, content, function(success){
+        assert(success);
+        hf_control.refresh_view();
+    });
+}
+
+hf_control.create_group = function(dom)
+{
+    var info = hf_control.get_group_infos(dom);
+
+    if (!info){
+        return false;
+    }
+
+    hf.input_to_uri(hf.form_input(dom, 'picture'), function(uri){
+        if (uri)
+        {
+            info['group_picture'] = uri;
+        }
+
+        hf_service.create_group(info['group_name'],
+                               info['group_description'],
+                               info['group_group_public'],
+                               info['group_thread_public'],
+                               info['group_picture'],
+                               function(group_hash)
+        {
+            if (group_hash == null)
+            {
+                return alert('group creation failed');
+            }
+
+            assert(hf.is_hash(group_hash));
+
+            hf_control.view('/group/' + group_hash + '/members');
+        });
+    }) ;
+}
+
+hf_control.approve_group_user = function(user_hash)
+{
+    var group_hash = hf_control.current_view_url().split("/")[2];
+    assert(hf_service.is_group_admin(group_hash));
+
+    hf_service.add_user_to_group(user_hash, group_hash, function(success){
+        assert(success);
+        hf_control.refresh_view();
+    });
+}
+
+hf_control.ignore_group_user = function(notification_hash)
+{
+    var group_hash = hf_control.current_view_url().split("/")[2];
+    assert(hf_service.is_group_admin(group_hash));
+
+    hf_service.delete_group_notification(group_hash, notification_hash, function(success){
+        assert(success);
+        hf_control.refresh_view();
+    });
+}
+
+hf_control.answer_group_request = function(group_hash)
+{
+    hf_service.subscribe_to_group(group_hash, '', function(success){
+        assert(success);
+        hf_control.refresh_view();
+    });
+}
+
+hf_control.save_edit_group_profile = function(dom)
+{
+    var info = hf_control.get_group_infos(dom);
+    if(!info)
+    {
+        return false;
+    }
+
+    hf.input_to_uri(hf.form_input(dom, 'picture'), function(uri){
+
+        if (uri)
+        {
+            info['group_picture'] = uri;
+        }
+
+        hf_service.change_group_profile(hf_control.current_view_url().split("/")[2], info, function(success){
+            assert(success);
+            hf_control.refresh_view();
+        }) ;
+    });
+}
+
+hf_control.get_group_infos = function(dom)
+{
+    var out = {};
+    var arrs = hf.inputs_to_json(dom);
+
+    var group_name = arrs['name'].trim();
+    var description = arrs['description'].trim();
+
+    var group = dom['group-type'].value;
+
+    var form_elements = document.getElementById('hf_create_new_group').elements;
+    var group_vis = true;
+    var thread_vis = true;
+
+    if (group == "public")
+    {
+        group_vis = true;
+        thread_vis = true;
+    } else if (group == "protected"){
+        group_vis = false;
+        thread_vis = true;
+    } else {
+        group_vis = false;
+        thread_vis = false;
+    }
+
+    out['group_name'] = group_name;
+    out['group_description'] = description;
+    out['group_group_public'] = group_vis;
+    out['group_thread_public'] = thread_vis;
+    out['group_picture'] = arrs['picture'];
+
+    if(group_name == '')
+    {
+        alert('group must have a name');
+        return false;
+    }
+
+    return out;
 }

@@ -31,11 +31,11 @@ hf_control.current_view_url = function()
  *
  * @returns false to have the syntax: href="return hf_control.view(...)"
  */
-hf_control.view = function(viewUrl)
+hf_control.view = function(viewUrl, callback)
 {
     assert(hf_control.mainViewRouter != null);
 
-    return hf_control.mainViewRouter.view(viewUrl);
+    return hf_control.mainViewRouter.view(viewUrl, callback);
 }
 
 /*
@@ -43,8 +43,16 @@ hf_control.view = function(viewUrl)
  */
 hf_control.refresh_view = function()
 {
-    hf_control.view(hf_control.current_view_url());
-    hf_control.refresh_left_column();
+    var viewRouter = hf_control.mainViewRouter;
+
+    hf_control.mainViewRouter = null;
+
+    // snapshot the current scroll position
+    var top = window.pageYOffset;
+
+    viewRouter.view(hf_control.current_view_url(), function(){
+        window.scrollTo(0, top);
+    });
 }
 
 hf_control.ViewRouter = function(build_up_callback)
@@ -90,8 +98,17 @@ hf_control.ViewRouter = function(build_up_callback)
      *
      * @returns false to have the syntax: href="return hf_control.view(...)"
      */
-    this.view = function(viewUrl)
+    this.view = function(viewUrl, callback)
     {
+        if (callback == undefined)
+        {
+            callback = function(){};
+        }
+        else
+        {
+            assert(hf.is_function(callback));
+        }
+
         assert(hf_control.domPageContainer != null);
 
         var viewRouter = this;
@@ -124,7 +141,10 @@ hf_control.ViewRouter = function(build_up_callback)
 
             window.location.assign('./#' + viewUrl);
 
-            match_callback();
+            match_callback({
+                view_url: viewUrl,
+                callback: callback
+            });
         });
 
         return false;
@@ -135,6 +155,8 @@ hf_control.onload = function()
 {
     // set up the page content's DOM element
     hf_control.domPageContainer = document.body;
+
+    window.addEventListener("hashchange", hf_control.refresh_view, false);
 
     hf_ui.init(function(){
         var user_cookie = hf.get_cookie(hf_control.userCookieName);

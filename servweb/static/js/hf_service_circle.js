@@ -4,8 +4,8 @@
 /*
  * @param <circle_name>: circle's name
  * @param <callback>: the function called once the response has arrived
- *      @param <success>: true or false
- *      function my_callback(success)
+ *      @param <circle_hash>: the hash of the circle, null if failed
+ *      function my_callback(circle_hash)
  */
 hf_service.create_circle = function(circle_name, callback)
 {
@@ -34,7 +34,11 @@ hf_service.create_circle = function(circle_name, callback)
         hf_service.store_key(user_private_chunk, thread_chunk_name, thread_chunk_key);
 
         hf_service.save_user_chunks(function(success){
-            callback(success)
+            if(success == true){
+                callback(thread_chunk_name);
+            }else{
+                callback(null);
+            }
         });
 
         circle_hash = thread_chunk_name;
@@ -80,8 +84,7 @@ hf_service.add_contact_to_circle = function(contact_user_hash, circle_hash, call
     {
         assert(contact_infos['circles'].indexOf(circle_hash) >= 0);
 
-        if (callback)
-            callback(false);
+        callback(false);
         return;
     }
 
@@ -97,8 +100,50 @@ hf_service.add_contact_to_circle = function(contact_user_hash, circle_hash, call
             'symetric_key': hf_service.get_decryption_key(hf_service.user_private_chunk, circle_hash)
         };
 
-        hf_service.send_chunks_infos_to_contacts([contact_user_hash], [chunk_info], callback);
+        hf_service.send_contacts_infos_to_contacts([contact_user_hash], [chunk_info], callback);
     });
+}
+
+/*
+ * @param <contacts_hashes>: list contacts' user hashes
+ * @param <circle_hash>: circle's hash
+ * @param <callback>: the function called once the response has arrived
+ *      @param <success>: true
+ *      function my_callback(success)
+ */
+hf_service.add_contacts_to_circle = function(contacts_hashes, circle_hash, callback)
+{
+    assert(contacts_hashes instanceof Array);
+    var iteration = contacts_hashes.length;
+
+    if(iteration === 0){
+        callback(true);
+    }
+
+    for (var i = 0; i < contacts_hashes.length; i++)
+    {
+        assert(hf_service.is_contact(contacts_hashes[i]));
+
+        if(!hf_service.is_contact_into_circle(contacts_hashes[i],circle_hash)){
+
+            hf_service.add_contact_to_circle(contacts_hashes[i], circle_hash, function(success){
+                if(success == false){
+                    console.info('Cannot add contact to circle');
+                }
+
+                iteration--;
+                if(iteration === 0){
+                    callback(true);
+                }
+            });
+
+        }else{
+            iteration--;
+            if(iteration === 0){
+                callback(true);
+            }
+        }
+    }
 }
 
 /*
@@ -121,6 +166,44 @@ hf_service.is_contact_into_circle = function(contact_user_hash, circle_hash)
     assert((contact_infos['circles'].indexOf(circle_hash) >= 0) == result);
 
     return result;
+}
+
+/*
+ * Gets the map hash-public_chunk of circle's contacts
+ * @param <circle_hash>: the hash of the specified circle
+ * @param <callback>: the function called once the response has arrived
+ *      @param <public_chunks>: the contacts' hash-public chunk
+ *      function my_callback(public_chunks)
+ */
+hf_service.list_circle_contacts = function(circle_hash,callback)
+{
+    assert(hf_service.is_connected());
+    assert(hf_service.is_circle_hash(circle_hash));
+    assert(hf.is_function(callback));
+
+    var circle_contacts = hf_service.user_private_chunk['circles'][circle_hash]['contacts'];
+    var content = {};
+
+    var iteration = circle_contacts.length;
+
+    if (iteration === 0) {
+        callback(content);
+        return;
+    }
+
+    for(var i = 0; i < circle_contacts.length; i++) {
+        hf_service.get_user_public_chunk(circle_contacts[i], function(public_chunk) {
+            if (public_chunk)
+            {
+                content[circle_contacts[i]] = public_chunk;
+            }
+
+            iteration--;
+            if (iteration === 0) {
+                callback(content);
+            }
+        });
+    }
 }
 
 /*

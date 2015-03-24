@@ -1,0 +1,41 @@
+{{#hf_cell}}
+    <div class="hf_padding">
+        <div class="hf_title">Send message.</div>
+        <form onsubmit="hf_control.send_message(this); return false;">
+
+            {{#if_eq user_hash ''}}
+                <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Destination..."
+                    name="destination"
+                />
+            {{else}}
+                <input
+                    type="hidden"
+                    class="form-control"
+                    value="{{user_hash}}"
+                    name="destination"
+
+                    readonly
+                />
+            {{/if_eq}}
+            <textarea
+                ID="text_message"
+                type="text"
+                class="form-control"
+                style="margin-top: 5px;"
+                name="message"
+                placeholder="Enter your message..."
+                onfocus="hf_ui_generic.textarea_onfocus(this);"
+            ></textarea>
+            <input
+                type="submit"
+                class="btn btn-default"
+                style="margin-top: 5px; margin-left: auto;"
+                name="send_message"
+                value="Send"
+            />
+        </form>
+    </div>
+{{/hf_cell}}

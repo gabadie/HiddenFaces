@@ -1,7 +1,26 @@
 {{#hf_cell}}
     <div class="hf_padding">
         <div class="hf_title">
+            {{#if profile.picture}}
+                <img
+                    class="hf_img"
+                    style="max-width: 120px; max-height: 120px; margin-right: 40px;"
+                    src="{{profile.picture}}"
+                />
+            {{/if}}
             Profile: {{profile.first_name}} {{profile.last_name}}
+            <div style="float:right;">
+                {{#if_eq __meta.type "/user/private_chunk"}}
+                    <button
+                        class="btn btn-success"
+                        onclick="return hf_control.view('/edit_profile');"
+                    >
+                        Edit profile
+                    </button>
+                {{else}}
+                    {{{hf_start_discussion this}}}
+                {{/if_eq}}
+            </div>
         </div>
     </div>
 {{/hf_cell}}
