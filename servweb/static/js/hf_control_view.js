@@ -579,6 +579,8 @@ hf_control.group_thread = function(ctx, group_hash)
                 return ctx.callback();
             }
 
+            domElem.innerHTML += hf_ui.template('form/new_post.html', {});;
+
             hf_service.list_thread_posts(thread_info['name'], thread_info['key'], function(posts_list){
                 var template_context = {
                     'chunks': posts_list
