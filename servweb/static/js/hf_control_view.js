@@ -583,8 +583,13 @@ hf_control.group_thread = function(ctx, group_hash)
 
             hf_service.list_thread_posts(thread_info['name'], thread_info['key'], function(posts_list){
                 var template_context = {
-                    'chunks': posts_list
+                    'chunks': posts_list,
                 };
+
+                for(var i = 0; i < posts_list.length; i++)
+                {
+                    posts_list[i]['is_comment_enable'] = true;
+                }
 
                 domElem.innerHTML += hf_ui.template('list_chunks.html', template_context);
 
