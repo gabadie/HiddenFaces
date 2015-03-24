@@ -41,14 +41,13 @@ hf_control.signed_in.route('/', function(ctx){
 
     domElem = document.getElementById('hf_page_main_content');
     hf_control.view_new_post(null, function(new_post_html){
-        domElem.innerHTML = new_post_html;
 
         hf_service.list_circles_names(function(circles_names){
             hf_service.list_contacts_threads_names(function(contacts_threads_names){
                 var threads_names = contacts_threads_names.concat(circles_names);
 
                 hf_control.view_threads(threads_names, function(posts_html){
-                    domElem.innerHTML += posts_html;
+                    domElem.innerHTML = new_post_html + posts_html;
 
                     ctx.callback();
                 });
