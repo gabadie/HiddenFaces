@@ -87,7 +87,6 @@ Handlebars.registerHelper('hf_start_discussion', function(user_public_chunk){
 
 Handlebars.registerHelper('hf_chunk', function(chunk, options){
     var template_name = chunk['__meta']['type'].substring(1) + '.html';
-    console.log(chunk);
     if (hf_ui.templatesCaches.has(template_name))
     {
         return hf_ui.template(template_name, this);

@@ -458,8 +458,16 @@ hf_service.get_thread_infos = function(group_hash,callback)
 
     hf_service.get_group_public_chunk(group_hash, function(group_public_chunk){
         if(group_public_chunk){
+            var thread_public = false;
 
-            if(group_public_chunk['group']['public']){
+            try{
+                thread_public = group_public_chunk["thread"]['public'];
+            }
+            catch(err)
+            {
+            }
+
+            if(group_public_chunk['group']['public'] || thread_public){
                 assert(group_public_chunk['thread'] !== undefined);
                 thread_info['name'] = group_public_chunk['thread']['name'];
                 thread_info['key'] = group_public_chunk['thread']['key'];

@@ -574,12 +574,18 @@ hf_control.group_thread = function(ctx, group_hash)
         var waiting_sub = hf_service.waiting_accept_subcribe(public_chunk);
 
         hf_service.get_thread_infos(group_hash, function(thread_info){
+
             if (thread_info == null)
             {
                 return ctx.callback();
             }
 
-            domElem.innerHTML += hf_ui.template('form/new_post.html', {});;
+            var is_comment_enable = false;
+
+            if (public_chunk['group']['public'] || waiting_sub == 1) {
+                is_comment_enable = true;
+                domElem.innerHTML += hf_ui.template('form/new_post.html', {});;
+            }
 
             hf_service.list_thread_posts(thread_info['name'], thread_info['key'], function(posts_list){
                 var template_context = {
@@ -588,7 +594,7 @@ hf_control.group_thread = function(ctx, group_hash)
 
                 for(var i = 0; i < posts_list.length; i++)
                 {
-                    posts_list[i]['is_comment_enable'] = true;
+                    posts_list[i]['is_comment_enable'] = is_comment_enable;
                 }
 
                 domElem.innerHTML += hf_ui.template('list_chunks.html', template_context);
