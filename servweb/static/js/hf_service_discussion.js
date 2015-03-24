@@ -206,57 +206,59 @@ hf_service.add_peers_to_discussion = function(discussion_hash, peers_hashes, cal
     for(var i = 0; i < peers_hashes.length; i++){
 
         var peer_hash = peers_hashes[i];
-        hf_service.is_user_hash(peer_hash, function(is_user_hash){
-            iteration--;
+        (function(peer_hash){
+            hf_service.is_user_hash(peer_hash, function(is_user_hash){
+                iteration--;
 
-            if (is_user_hash && !hf_service.is_discussion_peer(discussion_hash,peer_hash)){
-                new_peers.push(peer_hash);
-                discussion['peers'].push(peer_hash);
-            }
-
-            //once all the peers have been added
-            if(iteration == 0){
-                if(new_peers.length > 0){
-                    hf_service.save_user_chunks(function(success){
-                        if(success){
-
-                            var discussion_info = {
-                                'type':             '/thread',
-                                'name':             discussion_hash,
-                                'symetric_key':     hf_service.get_decryption_key(hf_service.user_private_chunk, discussion_hash),
-                                'discussion_name':  discussion['name'],
-                                'peers':            discussion['peers']
-                            };
-
-                            hf_service.send_discussions_infos_to_peers(discussion['peers'],[discussion_info], function(success){
-                                if(success){
-                                    var message = hf_service.user_private_chunk['profile']['first_name'] + ' just added ';
-                                    //getting peers' names
-                                    hf_service.get_users_public_chunks(peers_hashes,function(public_chunks_map){
-
-                                        for(hash in public_chunks_map){
-                                            message += hf.capitalize(public_chunks_map[hash]['profile']['first_name']) + ' ';
-                                        }
-
-                                        message += 'to the discussion';
-                                        hf_service.append_post_to_discussion(message, discussion_hash,callback);
-                                    });
-                                }else{
-                                    console.info("cannot send notification to peers");
-                                    callback(false);
-                                }
-                            });
-                        }else{
-                            console.info('cannot save user chunks');
-                            callback(false);
-                        }
-                    });
-                }else{
-                    console.info('no peers to add');
-                    callback(true);
+                if (is_user_hash && !hf_service.is_discussion_peer(discussion_hash,peer_hash)){
+                    new_peers.push(peer_hash);
+                    discussion['peers'].push(peer_hash);
                 }
-            }
-        });
+
+                //once all the peers have been added
+                if(iteration == 0){
+                    if(new_peers.length > 0){
+                        hf_service.save_user_chunks(function(success){
+                            if(success){
+
+                                var discussion_info = {
+                                    'type':             '/thread',
+                                    'name':             discussion_hash,
+                                    'symetric_key':     hf_service.get_decryption_key(hf_service.user_private_chunk, discussion_hash),
+                                    'discussion_name':  discussion['name'],
+                                    'peers':            discussion['peers']
+                                };
+
+                                hf_service.send_discussions_infos_to_peers(discussion['peers'],[discussion_info], function(success){
+                                    if(success){
+                                        var message = hf_service.user_private_chunk['profile']['first_name'] + ' just added ';
+                                        //getting peers' names
+                                        hf_service.get_users_public_chunks(peers_hashes,function(public_chunks_map){
+
+                                            for(hash in public_chunks_map){
+                                                message += hf.capitalize(public_chunks_map[hash]['profile']['first_name']) + ' ';
+                                            }
+
+                                            message += 'to the discussion';
+                                            hf_service.append_post_to_discussion(message, discussion_hash,callback);
+                                        });
+                                    }else{
+                                        console.info("cannot send notification to peers");
+                                        callback(false);
+                                    }
+                                });
+                            }else{
+                                console.info('cannot save user chunks');
+                                callback(false);
+                            }
+                        });
+                    }else{
+                        console.info('no peers to add');
+                        callback(true);
+                    }
+                }
+            });
+        })(peer_hash);
     }
 
 }

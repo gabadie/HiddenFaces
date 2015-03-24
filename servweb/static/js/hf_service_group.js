@@ -466,6 +466,11 @@ hf_service.get_thread_infos = function(group_hash,callback)
                 callback(thread_info);
 
             }else{
+                if (!hf_service.already_subscribed(group_hash))
+                {
+                    return callback(null);
+                }
+
                 hf_service.get_group_shared_chunk(group_hash, function(group_shared_chunk){
 
                     if(group_shared_chunk){

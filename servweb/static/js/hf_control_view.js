@@ -569,55 +569,26 @@ hf_control.group_thread = function(ctx, group_hash)
 
     hf_service.get_group_public_chunk(group_hash, function(public_chunk)
     {
-        var header_html = hf_ui.template('header/group_header.html', public_chunk);
-        domElem.innerHTML = header_html;
+        domElem.innerHTML = hf_ui.template('header/group_header.html', public_chunk);
 
         var waiting_sub = hf_service.waiting_accept_subcribe(public_chunk);
 
-        if(waiting_sub == 1 || public_chunk['group']['public'])
-        {
-            domElem.innerHTML += hf_ui.template('form/new_post.html', {});
+        hf_service.get_thread_infos(group_hash, function(thread_info){
+            if (thread_info == null)
+            {
+                return ctx.callback();
+            }
 
-            var chunks_names = [];
-            try
-            {
-                chunks_names.push(public_chunk['thread']['name']);
-            }
-            catch(err){
-            }
-            finally
-            {
-                hf_control.view_threads(chunks_names, function(posts_html){
-                    domElem.innerHTML += posts_html;
-                });
+            hf_service.list_thread_posts(thread_info['name'], thread_info['key'], function(posts_list){
+                var template_context = {
+                    'chunks': posts_list
+                };
+
+                domElem.innerHTML += hf_ui.template('list_chunks.html', template_context);
 
                 ctx.callback();
-            }
-        }
-        else
-        {
-            try
-            {
-                if(public_chunk['thread']['public'])
-                {
-                    var chunks_names = [];
-                    try
-                    {
-                        chunks_names.push(public_chunk['thread']['name']);
-                        hf_control.view_threads(chunks_names, function(posts_html)
-                        {
-                            domElem.innerHTML += posts_html;
-                        }, false);
-                    }
-                    catch(err)
-                    {
-                    }
-                }
-            }
-            catch(err)
-            {
-            }
-        }
+            });
+        });
     });
 }
 
