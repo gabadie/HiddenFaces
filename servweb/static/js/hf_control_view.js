@@ -271,23 +271,25 @@ hf_control.discussion_peers = function(ctx, discussion_hash)
                     'discussion': discussion,
                     'peers' : true
                 }
-            ) +
-            hf_ui.template(
-                'list_links.html',
-                template_context
             )
         );
 
         hf_service.list_contacts(function(contacts_list){
-            domElem.innerHTML += hf_ui.template(
-                'form/add_users.html',
-                {
-                    'title': 'Invite peers to the discussion.',
-                    'js_callback_name': 'add_discussion_peers',
-                    'button_value': 'Invite to discussion',
-                    'users': contacts_list,
-                    'dest_hash': discussion.hash
-                }
+            domElem.innerHTML += (
+                hf_ui.template(
+                    'form/add_users.html',
+                    {
+                        'title': 'Invite peers to the discussion.',
+                        'js_callback_name': 'add_discussion_peers',
+                        'button_value': 'Invite to discussion',
+                        'users': contacts_list,
+                        'dest_hash': discussion.hash
+                    }
+                ) +
+                hf_ui.template(
+                    'list_links.html',
+                    template_context
+                )
             );
 
             ctx.callback();
