@@ -37,8 +37,7 @@ hf_control.send_message = function(domElem)
 
     hf_service.send_message(invitation_infos['destination'], invitation_infos['message'], function(success){
         assert(success);
-
-        hf_control.refresh_view();
+        return hf_control.view('/notifications');
     });
 }
 
